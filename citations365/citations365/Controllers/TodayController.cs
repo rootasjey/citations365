@@ -3,6 +3,7 @@ using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
@@ -74,7 +75,7 @@ namespace citations365.Controllers
             // If there's no internet connection
             if (!NetworkInterface.GetIsNetworkAvailable()) {
                 // Load data from IO
-                await Controller.LoadToday();
+                await LoadToday();
                 return IsDataLoaded();
             }
 
@@ -114,41 +115,24 @@ namespace citations365.Controllers
                     quote.reference = reference_match.Count > 0 ? reference_match[0].ToString() : null;
                     quote.link = quoteLink_match.Count > 0 ? quoteLink_match[0].ToString() : null;
 
-                    quote = Normalize(quote);
+                    quote = Controller.Normalize(quote);
 
                     TodayCollection.Add(quote);
                 }
 
                 if (_page == 0) { // save the first quotes to IO
-                    Controller.SaveToday();
+                    SaveToday();
                 }
                 // Test that we've got at least one piece of data
                 return IsDataLoaded();
 
             } catch (HttpRequestException hre) {
                 // The request failed, load quotes from IO
-                await Controller.LoadToday();
+                await LoadToday();
                 return IsDataLoaded();
             }            
         }
 
-        /// <summary>
-        /// Delete HTML tags from the quote props and checks values
-        /// </summary>
-        /// <param name="quote"></param>
-        /// <returns></returns>
-        private Quote Normalize(Quote quote) {
-            // Delete HTML
-            quote.author = Controller.DeleteHTMLTags(quote.author);
-            quote.content = Controller.DeleteHTMLTags(quote.content);
-            quote.reference = Controller.DeleteHTMLTags(quote.reference);
-
-            // Check values
-            if (quote.author.Contains("Vos avis")) {
-                quote.author = "Anonyme";
-            }
-            return quote;
-        }
 
         /// <summary>
         /// Delete old data and fetch new data
@@ -167,6 +151,40 @@ namespace citations365.Controllers
         /// <returns>True if data is already loaded</returns>
         public bool IsDataLoaded() {
             return TodayCollection.Count > 0;
+        }
+
+        /// <summary>
+        /// Save to IO the first quotes from the todayCollection
+        /// </summary>
+        /// <returns>True if the save succeded</returns>
+        public static async Task<bool> SaveToday() {
+            if (TodayCollection.Count < 1) {
+                return true;
+            } else {
+                try {
+                    await DataSerializer<ObservableCollection<Quote>>.SaveObjectsAsync(TodayCollection, "TodayCollection.xml");
+                    return true;
+                } catch (IsolatedStorageException exception) {
+                    return false; // error
+                }
+            }
+        }
+
+        /// <summary>
+        /// Load from IO the quotes saved before
+        /// </summary>
+        /// <returns>True if the retrieve succeded</returns>
+        public static async Task<bool> LoadToday() {
+            try {
+                ObservableCollection<Quote> collection = await DataSerializer<ObservableCollection<Quote>>.RestoreObjectsAsync("TodayCollection.xml");
+                if (collection != null) {
+                    _todayCollection = collection;
+                    return true;
+                }
+                return false;
+            } catch (IsolatedStorageException exception) {
+                return false;
+            }
         }
     }
 }

@@ -2,10 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.IO.IsolatedStorage;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace citations365.Controllers
 {
@@ -26,18 +30,25 @@ namespace citations365.Controllers
             }
         }
 
-        private UserSettings _userSettings = null;
+        private static UserSettings _userSettings = null;
+
+        public static UserSettings userSettings {
+            get {
+                if (_userSettings == null) {
+                    _userSettings = new UserSettings();
+                }
+                return _userSettings;
+            }
+            set {
+                _userSettings = value;
+            }
+        }
 
         /// <summary>
         /// Searched quotes collection
         /// </summary>
         public ObservableCollection<Quote> searchCollection { get; private set; }
-
-        /// <summary>
-        /// Favorited quotes collection
-        /// </summary>
-        public ObservableCollection<Quote> favoritesCollection { get; private set; }
-
+        
         /*
          * ************
          * CONSTRUCTOR
@@ -58,6 +69,7 @@ namespace citations365.Controllers
         * Quotes' Methods
         * ***************
         */
+        #region quotes
         /// <summary>
         /// Add a quote to the favorites quotes list if it's not already added
         /// NOTE: This function is part of the Controller Class since it's used
@@ -104,22 +116,14 @@ namespace citations365.Controllers
 
         }
 
+        #endregion quotes
+
         /// <summary>
         /// Update the application's tile with the most recent quote
         /// </summary>
         /// <param name="quote">The quote's content to update the tile with</param>
-        public void UpdateTile(Quote quote)
-        {
+        public void UpdateTile(Quote quote) {
 
-        }
-
-        /// <summary>
-        /// Return true is there's an internet connection. False elsewhere.
-        /// </summary>
-        /// <returns>True if the device is connected to internet. False if not.</returns>
-        public bool IsConnectionAvailable()
-        {
-            return false;
         }
 
         /*
@@ -127,41 +131,38 @@ namespace citations365.Controllers
          * IO Methods
          * **********
          */
+        #region IO
         /// <summary>
         /// Save user's settings (background color, background task, etc.)
         /// </summary>
         /// <returns>True if the settings has been correctly saved. False if there was an error</returns>
-        public static bool SaveSettings()
-        {
-            return false;
+        public static async Task<bool> SaveSettings() {
+            try {
+                await DataSerializer<UserSettings>.SaveObjectsAsync(userSettings, "userSettings.xml");
+                return true;
+            } catch (IsolatedStorageException exception) {
+                // error
+                return false;
+            }
         }
 
         /// <summary>
         /// Load user's settings (background color, background task, etc.)
         /// </summary>
         /// <returns>True if the settings has been correctly loaded. False if there was an error</returns>
-        public static bool LoadSettings()
-        {
-            return false;
-        }
+        public static async Task<bool> LoadSettings() {
+            try {
+                UserSettings settings = await DataSerializer<UserSettings>.RestoreObjectsAsync("userSettings.xml");
+                if (settings != null) {
+                    userSettings = settings;
+                    return true;
+                }
+                return false;
 
-        /// <summary>
-        /// Save to IO the first quotes from the todayCollection
-        /// </summary>
-        /// <returns>True if the save succeded</returns>
-        public static bool SaveToday() {
-            if (TodayController.TodayCollection.Count < 1) {
-                return true;
+            } catch (IsolatedStorageException exception) {
+                // error
+                return false;
             }
-            return false;
-        }
-
-        /// <summary>
-        /// Save to IO the favortites quotes
-        /// </summary>
-        /// <returns>True if the save succededreturns>
-        public static bool SaveFavorites() {
-            return false;
         }
 
         /// <summary>
@@ -173,27 +174,31 @@ namespace citations365.Controllers
         }
 
         /// <summary>
-        /// Load from IO the quotes saved before
-        /// </summary>
-        /// <returns>True if the retrieve succeded</returns>
-        public static async Task<bool> LoadToday() {
-            return false;
-        }
-
-        /// <summary>
-        /// Load from IO the favorites quotes list
-        /// </summary>
-        /// <returns>True if the retrieve succeded</returns>
-        public static bool LoadFavorites() {
-            return false;
-        }
-
-        /// <summary>
         /// Load from IO the authors list
         /// </summary>
         /// <returns>True if the retrieve succeded</returns>
         public static bool LoadAuthors() {
             return false;
+        }
+
+        #endregion IO
+
+        /// <summary>
+        /// Delete HTML tags from the quote props and checks values
+        /// </summary>
+        /// <param name="quote"></param>
+        /// <returns></returns>
+        public static Quote Normalize(Quote quote) {
+            // Delete HTML
+            quote.author    = DeleteHTMLTags(quote.author);
+            quote.content   = DeleteHTMLTags(quote.content);
+            quote.reference = DeleteHTMLTags(quote.reference);
+
+            // Check values
+            if (quote.author.Contains("Vos avis")) {
+                quote.author = "Anonyme";
+            }
+            return quote;
         }
 
         /// <summary>

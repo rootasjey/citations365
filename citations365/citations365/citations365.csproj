@@ -110,6 +110,8 @@
     <Compile Include="Controllers\SearchController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
     <Compile Include="Controllers\TodayController.cs" />
+    <Compile Include="Models\Author.cs" />
+    <Compile Include="Models\DataSerializer.cs" />
     <Compile Include="Models\NavMenuItem.cs" />
     <Compile Include="Models\NavMenuListView.cs" />
     <Compile Include="Models\Quote.cs" />
