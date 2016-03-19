@@ -1,19 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
 
-namespace citations365.Models
-{
-    public class Quote {
+namespace citations365.Models {
+    public class Quote : INotifyPropertyChanged {
         private string _content;
         private string _author;
         private string _authorLink;
         private string _date;
         private string _reference;
         private string _link;
+        private char _isFavorite;
 
+        /// <summary>
+        /// Favorite symbol icon
+        /// </summary>
+        public static char FavoriteIcon = '\uE00B';
+
+        /// <summary>
+        /// UnFavorite symbol icon
+        /// </summary>
+        public static char UnFavoriteIcon = '\uE006';
 
         /// <summary>
         /// Full constructor
@@ -46,7 +52,7 @@ namespace citations365.Models
 
         }
 
-        public string content {
+        public string Content {
             get {
                 return _content;
             }
@@ -57,7 +63,7 @@ namespace citations365.Models
             }
         }
 
-        public string author {
+        public string Author {
             get {
                 return _author;
             }
@@ -68,7 +74,7 @@ namespace citations365.Models
             }
         }
 
-        public string authorLink {
+        public string AuthorLink {
             get {
                 return _authorLink;
             }
@@ -79,7 +85,7 @@ namespace citations365.Models
             }
         }
 
-        public string date {
+        public string Date {
             get {
                 return _date;
             }
@@ -90,7 +96,7 @@ namespace citations365.Models
             }
         }
 
-        public string reference {
+        public string Reference {
             get {
                 return _reference;
             }
@@ -101,7 +107,7 @@ namespace citations365.Models
             }
         }
 
-        public string link {
+        public string Link {
             get {
                 return _link;
             }
@@ -109,6 +115,26 @@ namespace citations365.Models
                 if (_link != value) {
                     _link = value;
                 }
+            }
+        }
+
+        public char IsFavorite {
+            get {
+                return _isFavorite;
+            }
+            set {
+                if (_isFavorite != value) {
+                    _isFavorite = value;
+                    NotifyPropertyChanged("IsFavorite");
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged(String propertyName) {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (null != handler) {
+                handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }

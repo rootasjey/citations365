@@ -10,6 +10,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.Storage;
+using Windows.UI;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Data;
+using Windows.UI.Xaml.Media;
 
 namespace citations365.Controllers
 {
@@ -30,30 +34,19 @@ namespace citations365.Controllers
             }
         }
 
-        private static UserSettings _userSettings = null;
-
-        public static UserSettings userSettings {
-            get {
-                if (_userSettings == null) {
-                    _userSettings = new UserSettings();
-                }
-                return _userSettings;
-            }
-            set {
-                _userSettings = value;
-            }
-        }
-
         /// <summary>
         /// Searched quotes collection
         /// </summary>
         public ObservableCollection<Quote> searchCollection { get; private set; }
-        
+
         /*
          * ************
          * CONSTRUCTOR
          * ************
          */
+        /// <summary>
+        /// Initialize the controller
+        /// </summary>
         public Controller() {
 
         }
@@ -62,13 +55,7 @@ namespace citations365.Controllers
          * ********
          * METHODS
          * ********
-         */
-
-        /*
-        * ***************
-        * Quotes' Methods
-        * ***************
-        */
+         */         
         #region quotes
         /// <summary>
         /// Add a quote to the favorites quotes list if it's not already added
@@ -125,64 +112,7 @@ namespace citations365.Controllers
         public void UpdateTile(Quote quote) {
 
         }
-
-        /*
-         * **********
-         * IO Methods
-         * **********
-         */
-        #region IO
-        /// <summary>
-        /// Save user's settings (background color, background task, etc.)
-        /// </summary>
-        /// <returns>True if the settings has been correctly saved. False if there was an error</returns>
-        public static async Task<bool> SaveSettings() {
-            try {
-                await DataSerializer<UserSettings>.SaveObjectsAsync(userSettings, "userSettings.xml");
-                return true;
-            } catch (IsolatedStorageException exception) {
-                // error
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Load user's settings (background color, background task, etc.)
-        /// </summary>
-        /// <returns>True if the settings has been correctly loaded. False if there was an error</returns>
-        public static async Task<bool> LoadSettings() {
-            try {
-                UserSettings settings = await DataSerializer<UserSettings>.RestoreObjectsAsync("userSettings.xml");
-                if (settings != null) {
-                    userSettings = settings;
-                    return true;
-                }
-                return false;
-
-            } catch (IsolatedStorageException exception) {
-                // error
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Save to IO the authors list
-        /// </summary>
-        /// <returns>True if the save succeded</returns>
-        public static bool SaveAuthors() {
-            return false;
-        }
-
-        /// <summary>
-        /// Load from IO the authors list
-        /// </summary>
-        /// <returns>True if the retrieve succeded</returns>
-        public static bool LoadAuthors() {
-            return false;
-        }
-
-        #endregion IO
-
+                
         /// <summary>
         /// Delete HTML tags from the quote props and checks values
         /// </summary>
@@ -190,13 +120,15 @@ namespace citations365.Controllers
         /// <returns></returns>
         public static Quote Normalize(Quote quote) {
             // Delete HTML
-            quote.author    = DeleteHTMLTags(quote.author);
-            quote.content   = DeleteHTMLTags(quote.content);
-            quote.reference = DeleteHTMLTags(quote.reference);
+            quote.Author    = DeleteHTMLTags(quote.Author);
+            quote.Content   = DeleteHTMLTags(quote.Content);
+            quote.Reference = DeleteHTMLTags(quote.Reference);
+
+            quote.IsFavorite = FavoritesController.GetFavoriteIcon(quote.Link);
 
             // Check values
-            if (quote.author.Contains("Vos avis")) {
-                quote.author = "Anonyme";
+            if (quote.Author.Contains("Vos avis")) {
+                quote.Author = "Anonyme";
             }
             return quote;
         }
@@ -230,6 +162,27 @@ namespace citations365.Controllers
                 .Replace("  ", "");
 
             return text;
+        }
+    }
+
+    public class FavoriteColorConverter : IValueConverter {
+        public object Convert(object value, Type targetType, object parameter, string language) {
+            char codeSymbol = (char)value;
+            if (codeSymbol == Quote.FavoriteIcon) {
+                var color = new Color();
+                color.R = 246;
+                color.G = 71;
+                color.B = 71;
+                color.A = 255;
+                var redColor = new SolidColorBrush(color);
+                return redColor;
+            }
+            return Application.Current.Resources["ApplicationForegroundThemeBrush"]; ;
+
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language) {
+            throw new NotImplementedException();
         }
     }
 }

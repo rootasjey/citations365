@@ -20,16 +20,23 @@ namespace citations365.Models {
         }
 
         public static async Task<DataType> RestoreObjectsAsync(string filename) {
-            StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(filename);
+            try {
+                StorageFile file = await ApplicationData.Current.LocalFolder.GetFileAsync(filename);
 
-            var inStream = await file.OpenStreamForReadAsync();
+                var inStream = await file.OpenStreamForReadAsync();
 
-            //Deserialize the objetcs
-            DataContractSerializer serializer = new DataContractSerializer(typeof(DataType));
-            DataType data = (DataType)serializer.ReadObject(inStream);
-            inStream.Dispose();
+                //Deserialize the objetcs
+                DataContractSerializer serializer = new DataContractSerializer(typeof(DataType));
+                DataType data = (DataType)serializer.ReadObject(inStream);
+                inStream.Dispose();
 
-            return data;
+                return data;
+
+            } catch (FileNotFoundException exception) {
+                DataType data = default(DataType);
+                return data;
+            }
+            
         }
     }
 }
