@@ -19,9 +19,28 @@ namespace citations365.Controllers
          * VARIABLES
          * ***********
          */
-        private string _url = "http://evene.lefigaro.fr/citations/mot.php?mot=amour&page=";
+        /// <summary>
+        /// URL to perform the search
+        /// </summary>
+        private string _url = "http://evene.lefigaro.fr/citations/mot.php?mot=";
 
+        /// <summary>
+        /// Pagination of the search result
+        /// </summary>
         private static int _page = 1;
+
+        /// <summary>
+        /// True if we have reached the end of the pagination of results
+        /// </summary>
+        private bool _reachedEnd = false;
+
+        /// <summary>
+        /// Save search's keywords to check the next function call (getQuotes)
+        /// If _query is equal to the function's parameter, increment the _page variable
+        /// If _query has a new value, start a new search at the fist _page = 1
+        /// </summary>
+        private string _query;
+
         /*
          * ************
          * COLLECTIONS
@@ -30,15 +49,15 @@ namespace citations365.Controllers
         /// <summary>
         /// Private authors collection
         /// </summary>
-        private static ObservableCollection<Quote> _searchCollection { get; set; }
+        private static ObservableKeyedCollection _searchCollection { get; set; }
 
         /// <summary>
         /// Authors Collection
         /// </summary>
-        public static ObservableCollection<Quote> SearchCollection {
+        public static ObservableKeyedCollection SearchCollection {
             get {
                 if (_searchCollection == null) {
-                    _searchCollection = new ObservableCollection<Quote>();
+                    _searchCollection = new ObservableKeyedCollection();
                 }
                 return _searchCollection;
             }
@@ -74,23 +93,39 @@ namespace citations365.Controllers
         /// </summary>
         public async Task<bool> Reload() {
             if (IsDataLoaded()) {
-                _searchCollection.Clear();
+                SearchCollection.Clear();
             }
             return await LoadData();
         }
 
         public async Task<bool> GetQuotes(string query) {
-            if (query == null) {
+            // Checks if it's a new search
+            if (query != _query) {
+                _page = 1;
+                _reachedEnd = false;
+            }
+
+            if (_reachedEnd) {
                 return false;
             }
             if (!NetworkInterface.GetIsNetworkAvailable()) {
                 return false;
             }
 
+            // We must watch if we've reached the end of the search.
+            // If there's 0 quote added in the function call, we're at the end.
+            int quotesAdded = 0;            
+
+            // Save the last query (if it's not an empty string)
+            _query = query.Length > 0 ? query : _query;
+
+            // URL building
+            _url += query + "&page=" + _page;
+            
             HttpClient http = new HttpClient();
 
             try {
-                string responseBodyAsText = await http.GetStringAsync(_url + _page);
+                string responseBodyAsText = await http.GetStringAsync(_url);
 
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(responseBodyAsText);
@@ -114,16 +149,24 @@ namespace citations365.Controllers
                     Quote quote = new Quote();
                     quote.Content = content_match.Count > 0 ? content_match[0].ToString() : null;
 
-                    if (quote.Content == null) continue;
+                    if (quote.Content == null) continue; // check 1 (anything but a quote)
 
                     quote.Author        = author_match.Count > 0 ? author_match[0].ToString() : null;
                     quote.AuthorLink    = authorLink_match.Count > 0 ? "http://www.evene.fr" + authorLink_match[0].ToString() : null;
                     quote.Reference     = reference_match.Count > 0 ? reference_match[0].ToString() : null;
                     quote.Link          = quoteLink_match.Count > 0 ? quoteLink_match[0].ToString() : null;
 
+                    if (quote.Author == null) continue; // check 2 (section, no quote)
                     quote = Controller.Normalize(quote);
 
                     SearchCollection.Add(quote);
+                    quotesAdded++;
+                }
+
+                if (quotesAdded == 0) {
+                    // If we're here, we've reached the end of the search
+                    _reachedEnd = true;
+                    _page = 0;
                 }
 
                 _page++; // fetch the next quotes' page the next time
@@ -139,7 +182,18 @@ namespace citations365.Controllers
         /// </summary>
         /// <returns>True if data is already loaded</returns>
         public bool IsDataLoaded() {
-            return _searchCollection.Count > 0;
+            return SearchCollection.Count > 0;
+        }
+
+        /// <summary>
+        /// Update the favorite icon of a quote
+        /// </summary>
+        /// <param name="key"></param>
+        public static void SyncFavorites(string key) {
+            if (SearchCollection.Contains(key)) {
+                Quote quote = SearchCollection[key];
+                quote.IsFavorite = FavoritesController.GetFavoriteIcon(key);
+            }
         }
     }
 }

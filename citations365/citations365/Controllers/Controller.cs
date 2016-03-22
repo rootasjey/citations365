@@ -33,12 +33,7 @@ namespace citations365.Controllers
                 return _controller;
             }
         }
-
-        /// <summary>
-        /// Searched quotes collection
-        /// </summary>
-        public ObservableCollection<Quote> searchCollection { get; private set; }
-
+        
         /*
          * ************
          * CONSTRUCTOR
@@ -57,32 +52,6 @@ namespace citations365.Controllers
          * ********
          */         
         #region quotes
-        /// <summary>
-        /// Add a quote to the favorites quotes list if it's not already added
-        /// NOTE: This function is part of the Controller Class since it's used
-        /// by multiple Views.
-        /// </summary>
-        /// <param name="quote">The quote to add to the favorites list</param>
-        /// <returns>True if the quote has been correctly added. False if there was an error</returns>
-        public bool AddToFavorites(Quote quote)
-        {
-            // Test the quote's presence with its link
-            return false;
-        }
-
-        /// <summary>
-        /// Remove a quote from the favorites quotes list if it exists
-        /// NOTE: This function is part of the Controller Class since it's used
-        /// by multiple Views.
-        /// </summary>
-        /// <param name="quote">The quote to add to remove from favorites list</param>
-        /// <returns>True if the quote has been correctly removed. False if there was an error</returns>
-        public bool RemoveFromFavorites(Quote quote)
-        {
-            // Test the quote's presence with its link
-            return false;
-        }
-
 
         /// <summary>
         /// Open the Share UI with the quote's data (share on twitter, facebook, sms, ...)
@@ -163,6 +132,7 @@ namespace citations365.Controllers
 
             return text;
         }
+
     }
 
     public class FavoriteColorConverter : IValueConverter {
@@ -178,7 +148,6 @@ namespace citations365.Controllers
                 return redColor;
             }
             return Application.Current.Resources["ApplicationForegroundThemeBrush"]; ;
-
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language) {

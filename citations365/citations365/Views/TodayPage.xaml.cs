@@ -25,25 +25,29 @@ namespace citations365.Views {
             }
         }
 
+        /// <summary>
+        /// Page Constructor
+        /// </summary>
         public TodayPage() {
             this.InitializeComponent();
-            populate();
+            Populate();
         }
 
         /// <summary>
         /// Fill the page with data
         /// </summary>
-        public async void populate() {
+        public async void Populate() {
             await Tcontroller.LoadData();
+            BindCollectionToView();
+        }
 
+        private void BindCollectionToView() {
+            // Set the binding, show the list
             if (Tcontroller.IsDataLoaded()) {
-                // Set the binding, show the list
                 ListQuotes.ItemsSource = TodayController.TodayCollection;
 
-                NoContentView.Visibility    = Visibility.Collapsed;
-                ListQuotes.Visibility       = Visibility.Visible;
-            } else {
-                // Hide the list, show the empty view
+                NoContentView.Visibility = Visibility.Collapsed;
+                ListQuotes.Visibility = Visibility.Visible;
             }
         }
 
@@ -51,9 +55,18 @@ namespace citations365.Views {
             FontIcon icon = (FontIcon)sender;
             Quote quote = (Quote)icon.DataContext;
 
-            bool result = await FavoritesController.AddFavorite(quote);
-            if (result) {
-                quote.IsFavorite = Quote.FavoriteIcon;
+            if (FavoritesController.IsFavorite(quote.Link)) {
+                // Remove from favorites
+                bool result = await FavoritesController.RemoveFavorite(quote);
+                if (result) {
+                    quote.IsFavorite = Quote.UnFavoriteIcon;
+                }
+            } else {
+                // Add to favorites
+                bool result = await FavoritesController.AddFavorite(quote);
+                if (result) {
+                    quote.IsFavorite = Quote.FavoriteIcon;
+                }
             }
         }
     }

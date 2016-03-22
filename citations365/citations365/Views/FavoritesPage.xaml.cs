@@ -1,4 +1,6 @@
-﻿using System;
+﻿using citations365.Controllers;
+using citations365.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,9 +24,39 @@ namespace citations365.Views
     /// </summary>
     public sealed partial class FavoritesPage : Page
     {
-        public FavoritesPage()
-        {
+        private static FavoritesController _FController;
+        public static FavoritesController FController {
+            get {
+                if (_FController == null) {
+                    _FController = new FavoritesController();
+                }
+                return _FController;
+            }
+        }
+
+        public FavoritesPage() {
             this.InitializeComponent();
+            Populate();
+        }
+
+        private async void Populate() {
+            await FavoritesController.Initialize();
+            BindCollectionToView();
+        }
+
+        private void BindCollectionToView() {
+            if (FavoritesController.IsDataLoaded()) {
+                ListQuotes.ItemsSource = FavoritesController.FavoritesCollection;
+                NoContentView.Visibility = Visibility.Collapsed;
+                ListQuotes.Visibility = Visibility.Visible;
+            }
+        }
+
+        private async void Favorite_Tapped(object sender, TappedRoutedEventArgs e) {
+            FontIcon icon = (FontIcon)sender;
+            Quote quote = (Quote)icon.DataContext;
+
+            bool result = await FavoritesController.RemoveFavorite(quote, FavoritesController.CollectionType.favorites);
         }
     }
 }

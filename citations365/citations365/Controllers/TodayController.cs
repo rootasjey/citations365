@@ -1,21 +1,16 @@
 ﻿using citations365.Models;
 using HtmlAgilityPack;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace citations365.Controllers
-{
-    public class TodayController : INotifyPropertyChanged
+namespace citations365.Controllers {
+    public class TodayController
     {
         /*
          * **********
@@ -32,9 +27,6 @@ namespace citations365.Controllers
         /// </summary>
         private static int _page = 1;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-
         /*
          * ************
          * COLLECTIONS
@@ -43,12 +35,12 @@ namespace citations365.Controllers
         /// <summary>
         /// Today quotes collection
         /// </summary>
-        private static ObservableCollection<Quote> _todayCollection { get; set; }
+        private static ObservableKeyedCollection _todayCollection { get; set; }
 
-        public static ObservableCollection<Quote> TodayCollection {
+        public static ObservableKeyedCollection TodayCollection {
             get {
                 if (_todayCollection == null) {
-                    _todayCollection = new ObservableCollection<Quote>();
+                    _todayCollection = new ObservableKeyedCollection();
                 }
                 return _todayCollection;
             }
@@ -188,7 +180,7 @@ namespace citations365.Controllers
                 return true;
             } else {
                 try {
-                    await DataSerializer<ObservableCollection<Quote>>.SaveObjectsAsync(TodayCollection, "TodayCollection.xml");
+                    await DataSerializer<ObservableKeyedCollection>.SaveObjectsAsync(TodayCollection, "TodayCollection.xml");
                     return true;
                 } catch (IsolatedStorageException exception) {
                     return false; // error
@@ -202,7 +194,7 @@ namespace citations365.Controllers
         /// <returns>True if the retrieve succeded</returns>
         public static async Task<bool> LoadToday() {
             try {
-                ObservableCollection<Quote> collection = await DataSerializer<ObservableCollection<Quote>>.RestoreObjectsAsync("TodayCollection.xml");
+                ObservableKeyedCollection collection = await DataSerializer<ObservableKeyedCollection>.RestoreObjectsAsync("TodayCollection.xml");
                 if (collection != null) {
                     _todayCollection = collection;
                     return true;
@@ -220,13 +212,24 @@ namespace citations365.Controllers
         public async Task<bool> InitalizeFavorites() {
             return await FavoritesController.Initialize();
         }
+
+        /// <summary>
+        /// Update the favorite icon of a quote
+        /// </summary>
+        /// <param name="key"></param>
+        public static void SyncFavorites(string key) {
+            if (TodayCollection.Contains(key)) {
+                Quote quote = TodayCollection[key];
+                quote.IsFavorite = FavoritesController.GetFavoriteIcon(key);
+            }
+        }
         
         /// <summary>
         /// Notify Collection changed
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
+        private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
             if (e.NewItems != null)
                 foreach (Quote item in e.NewItems)
                     item.PropertyChanged += QuotePropertyChanged;
@@ -236,7 +239,7 @@ namespace citations365.Controllers
                     item.PropertyChanged -= QuotePropertyChanged;
         }
 
-        void QuotePropertyChanged(object sender, PropertyChangedEventArgs e) {
+        private void QuotePropertyChanged(object sender, PropertyChangedEventArgs e) {
             //if (e.PropertyName == "Content") {
             //}
         }

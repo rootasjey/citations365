@@ -1,4 +1,7 @@
 ﻿using citations365.Models;
+using System;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO.IsolatedStorage;
 using System.Threading.Tasks;
 
@@ -14,6 +17,17 @@ namespace citations365.Controllers {
         /// </summary>
         private static int _page = 0;
 
+        /// <summary>
+        /// Describes the collection's type which fired the Add/Remove method 
+        /// to update others collections
+        /// </summary>
+        public enum CollectionType {
+            authors,
+            favorites,
+            search,
+            today
+        }
+        
         /*
          * ************
          * COLLECTIONS
@@ -22,9 +36,9 @@ namespace citations365.Controllers {
         /// <summary>
         /// Today quotes collection
         /// </summary>
-        private static FavoritesCollection _favoritesCollection { get; set; }
+        private static ObservableKeyedCollection _favoritesCollection { get; set; }
 
-        public static FavoritesCollection FavoritesCollection {
+        public static ObservableKeyedCollection FavoritesCollection {
             get {
                 return _favoritesCollection;
             }
@@ -39,7 +53,6 @@ namespace citations365.Controllers {
         /// Initialize the controller
         /// </summary>
         public FavoritesController() {
-
         }
 
         /*
@@ -50,6 +63,7 @@ namespace citations365.Controllers {
         public static async Task<bool> Initialize() {
             if (!IsDataLoaded()) {
                 _favoritesCollection = await LoadFavoritesCollection();
+                _favoritesCollection.CollectionChanged += CollectionChanged;
             }
             return true;
         }
@@ -58,17 +72,17 @@ namespace citations365.Controllers {
         /// Load Favorites quotes from IO
         /// </summary>
         /// <returns>True if the data has been loaded</returns>
-        public static async Task<FavoritesCollection> LoadFavoritesCollection() {
+        public static async Task<ObservableKeyedCollection> LoadFavoritesCollection() {
             try {
-                FavoritesCollection collection = await DataSerializer<FavoritesCollection>.RestoreObjectsAsync("FavoritesCollection.xml");
+                ObservableKeyedCollection collection = await DataSerializer<ObservableKeyedCollection>.RestoreObjectsAsync("FavoritesCollection.xml");
                 if (collection != null) {
                     return collection;
 
                 } else {
-                    return new FavoritesCollection(); ;
+                    return new ObservableKeyedCollection(); ;
                 }
             } catch (IsolatedStorageException exception) {
-                return new FavoritesCollection();
+                return new ObservableKeyedCollection();
             }
         }
 
@@ -77,15 +91,11 @@ namespace citations365.Controllers {
         /// </summary>
         /// <returns>True if the save succededreturns>
         public static async Task<bool> SaveFavoritesCollection() {
-            if (FavoritesCollection.Count < 1) {
+            try {
+                await DataSerializer<ObservableKeyedCollection>.SaveObjectsAsync(FavoritesCollection, "FavoritesCollection.xml");
                 return true;
-            } else {
-                try {
-                    await DataSerializer<FavoritesCollection>.SaveObjectsAsync(FavoritesCollection, "FavoritesCollection.xml");
-                    return true;
-                } catch (IsolatedStorageException exception) {
-                    return false;
-                }
+            } catch (IsolatedStorageException exception) {
+                return false;
             }
         }
 
@@ -119,8 +129,9 @@ namespace citations365.Controllers {
             }
 
             if (!_favoritesCollection.Contains(quote.Link)) {
-                _favoritesCollection.Add(quote);
-                return await SaveFavoritesCollection();
+                quote.IsFavorite = Quote.FavoriteIcon;      // Update favorite icon
+                FavoritesCollection.Add(quote);            // Add quote to favorites collection
+                return await SaveFavoritesCollection();     // Save the collection to storage
             }   return false;
         }
 
@@ -135,9 +146,48 @@ namespace citations365.Controllers {
             }
 
             if (_favoritesCollection.Contains(quote.Link)) {
-                _favoritesCollection.Remove(quote);
+                //quote.IsFavorite = GetFavoriteIcon(quote.Link);
+                FavoritesCollection.Remove(quote.Link);
                 return await SaveFavoritesCollection();
             }   return false;
+        }
+
+        public static async Task<bool> RemoveFavorite(Quote quote, CollectionType collectionType) {
+            if (quote == null) {
+                return false;
+            }
+
+            var key = quote.Link;
+            if (FavoritesCollection.Contains(key)) {
+                FavoritesCollection.Remove(key);
+                SyncAllFavorites(key, collectionType);
+                return await SaveFavoritesCollection();
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Notify others collections on add/remove favorite quote
+        /// </summary>
+        private static void SyncAllFavorites(string key, CollectionType collectionType) {
+            switch (collectionType) {
+                case CollectionType.authors:
+                    TodayController.SyncFavorites(key);
+                    SearchController.SyncFavorites(key);
+                    break;
+                case CollectionType.favorites:
+                    TodayController.SyncFavorites(key);
+                    SearchController.SyncFavorites(key);
+                    break;
+                case CollectionType.search:
+                    TodayController.SyncFavorites(key);
+                    break;
+                case CollectionType.today:
+                    SearchController.SyncFavorites(key);
+                    break;
+                default:
+                    break;
+            }
         }
 
         /// <summary>
@@ -175,6 +225,18 @@ namespace citations365.Controllers {
                 return Quote.FavoriteIcon;
             }
             return Quote.UnFavoriteIcon;
+        }
+
+        /// <summary>
+        /// Notify Collection changed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e) {
+            
+        }
+
+        private static void QuotePropertyChanged(object sender, PropertyChangedEventArgs e) {
         }
     }
 }
