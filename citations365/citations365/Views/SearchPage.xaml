@@ -28,7 +28,6 @@
                 <TextBox x:Name="InputSearch" Margin="40,20,40,0" Width="370"
                          KeyDown="InputSearch_KeyDown" 
                          GotFocus="InputSearch_GotFocus"
-                         LostFocus="InputSearch_LostFocus"
                          Loaded="InputSearch_Loaded"/>
                 <TextBlock 
                     x:Name="TextInfos"

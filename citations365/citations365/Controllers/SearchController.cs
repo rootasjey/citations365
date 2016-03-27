@@ -25,9 +25,16 @@ namespace citations365.Controllers
         private string _url = "http://evene.lefigaro.fr/citations/mot.php?mot=";
 
         /// <summary>
+        /// For some requests, the url is re-writed, so we save it to fetch next pages
+        /// </summary>
+        private string _redirectedURL = "";
+
+        /// <summary>
         /// Pagination of the search result
         /// </summary>
         private static int _page = 1;
+
+        private string _pageQuery = "&p=";
 
         /// <summary>
         /// True if we have reached the end of the pagination of results
@@ -98,43 +105,65 @@ namespace citations365.Controllers
             return await LoadData();
         }
 
+        private string URLBuilding(string query) {
+            if (_redirectedURL.Length > 0) {
+                if (_redirectedURL.Contains(_pageQuery)) {
+                    _redirectedURL = _redirectedURL.Substring(0, _redirectedURL.IndexOf(_pageQuery));
+                }
+                return _redirectedURL + _pageQuery + _page;
+
+            } else {
+                return _url + query + _pageQuery + _page;
+            }
+        }
+
         public async Task<bool> GetQuotes(string query) {
-            // Checks if it's a new search
+            int quotesAdded = 0;
+            string localURL;
+            string responseBodyAsText;
+            string author = "";
+            string reference = "";
+
+            // Checks if this is a new search
             if (query != _query) {
                 _page = 1;
                 _reachedEnd = false;
+                _redirectedURL = "";
+                SearchCollection.Clear();
             }
 
             if (_reachedEnd) {
-                return false;
-            }
-            if (!NetworkInterface.GetIsNetworkAvailable()) {
+                // We must watch if we've reached the end of the search.
+                // If there's 0 quote added in the function call, we're at the end.
                 return false;
             }
 
-            // We must watch if we've reached the end of the search.
-            // If there's 0 quote added in the function call, we're at the end.
-            int quotesAdded = 0;            
+            if (!NetworkInterface.GetIsNetworkAvailable()) {
+                return false; // check connectivity
+            }
 
             // Save the last query (if it's not an empty string)
             _query = query.Length > 0 ? query : _query;
 
             // URL building
-            _url += query + "&page=" + _page;
-            
+            localURL = URLBuilding(query);
+
+
             HttpClient http = new HttpClient();
 
             try {
-                string responseBodyAsText = await http.GetStringAsync(_url);
+                HttpResponseMessage message = await http.GetAsync(localURL);
+                _redirectedURL = message.RequestMessage.RequestUri.ToString();
+                responseBodyAsText = await message.Content.ReadAsStringAsync();
 
+                // HTML Document building
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(responseBodyAsText);
 
                 // Regex Definitions
                 Regex content_regex     = new Regex("<div class=\"figsco__quote__text\">" + "((.|\n)*?)" + "</a></div>");
-                Regex author_regex      = new Regex("<div class=\"figsco__fake__col-9\">" + "((.|\n)*?)" + "</a>");
+                Regex author_regex = new Regex("<div class=\"figsco__fake__col-9\">" + "((.|\n)*?)" + "<br>");
                 Regex authorLink_regex  = new Regex("/celebre/biographie/" + "((.|\n)*?)" + ".php");
-                Regex reference_regex   = new Regex("</a>" + "((.|\n)*?)" + "/" + "((.|\n)*?)" + "</br>");
                 Regex quoteLink_regex   = new Regex("/citation/" + "((.|\n)*?)" + ".php");
 
                 // Loop
@@ -143,28 +172,45 @@ namespace citations365.Controllers
                     MatchCollection content_match       = content_regex.Matches(q);
                     MatchCollection author_match        = author_regex.Matches(q);
                     MatchCollection authorLink_match    = authorLink_regex.Matches(q);
-                    MatchCollection reference_match     = reference_regex.Matches(q);
                     MatchCollection quoteLink_match     = quoteLink_regex.Matches(q);
 
                     Quote quote = new Quote();
                     quote.Content = content_match.Count > 0 ? content_match[0].ToString() : null;
 
-                    if (quote.Content == null) continue; // check 1 (anything but a quote)
+                    if (quote.Content == null) continue; // check 1 (a quote must have a content)
 
-                    quote.Author        = author_match.Count > 0 ? author_match[0].ToString() : null;
+                    // REFERENCE TEST (Test if there's a reference)
+                    string authorAndRef = author_match.Count > 0 ? author_match[0].ToString() : null;
+                    if (authorAndRef == null) continue; // check 2 (a quote must have an author || Anonyme)
+
+                    int separator = authorAndRef.LastIndexOf('/');
+                    
+                    if (separator < 0) {
+                        author = authorAndRef;
+                    } else {
+                        if (authorAndRef.Substring(separator - 1).StartsWith("</a>")) {
+                            separator -= 1;
+                        }
+
+                        author = authorAndRef.Substring(0, separator);
+                        reference = authorAndRef.Substring(separator + 2);
+                        if (reference.StartsWith("a>")) reference = ""; // cans get </a>, so empty the var
+                    }                    
+
+                    // Quote assignation
+                    quote.Author        = author;
                     quote.AuthorLink    = authorLink_match.Count > 0 ? "http://www.evene.fr" + authorLink_match[0].ToString() : null;
-                    quote.Reference     = reference_match.Count > 0 ? reference_match[0].ToString() : null;
                     quote.Link          = quoteLink_match.Count > 0 ? quoteLink_match[0].ToString() : null;
+                    quote.Reference     = reference;
 
-                    if (quote.Author == null) continue; // check 2 (section, no quote)
-                    quote = Controller.Normalize(quote);
+                    if (quote.Author == null) continue; // check 3 (can be a section, no quote)
+                    quote = Controller.Normalize(quote); // Delete html tags
 
                     SearchCollection.Add(quote);
                     quotesAdded++;
                 }
 
-                if (quotesAdded == 0) {
-                    // If we're here, we've reached the end of the search
+                if (quotesAdded == 0) { // If we're here, we've reached the end of the search
                     _reachedEnd = true;
                     _page = 0;
                 }

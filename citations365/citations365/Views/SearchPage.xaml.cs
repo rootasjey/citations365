@@ -32,7 +32,10 @@ namespace citations365.Views {
         /// <summary>
         /// Contains the text infos contents
         /// </summary>
-        private static IDictionary<string, string> _textInfosContent =
+        private static IDictionary<string, string> _tips =
+            new Dictionary<string, string>();
+
+        private static IDictionary<string, string> _infos =
             new Dictionary<string, string>();
 
         /// <summary>
@@ -69,13 +72,16 @@ namespace citations365.Views {
         /// Populate the text infos dictionary
         /// </summary>
         private void PopulateTextInfos() {
-            if (_textInfosContent.Count > 0) {
-                return;
+            if (_tips.Count < 1) {
+                _tips["default"] = "Recherchez des citations par mot-clés";
+                _tips["resultats"] = "La dernière recherche est disponible en cliquant le bouton 'résultats' même après avoir changé de page";
+                _tips["searchback"] = "Après avoir effectué une recherche, vous pouvez appuyer sur un des boutons retour pour afficher le champ de recherche à nouveau";
             }
 
-            _textInfosContent["default"] = "Recherchez des citations par mot-clés";
-            _textInfosContent["searchFailed"] = "Désolé, nous n'avons trouvé aucune citation comportement ce mot clé :/";
-            _textInfosContent["searching"] = "Patientez quelques instants, nous recherchons dans le Cyber-Espace...";
+            if (_infos.Count < 1) {
+                _infos["searchFailed"] = "Désolé, nous n'avons trouvé aucune citation comportant ce mot clé :/";
+                _infos["searching"] = "Patientez quelques instants, nous recherchons dans le Cyber-Espace...";
+            }
         }
 
         /// <summary>
@@ -129,7 +135,7 @@ namespace citations365.Views {
             } else {
                 NoContentView.Visibility = Visibility.Visible;
                 ListQuotes.Visibility = Visibility.Collapsed;
-                TextInfos.Text = _textInfosContent["searchFailed"];
+                TextInfos.Text = _infos["searchFailed"];
             }
 
             _performingSearch = false;
@@ -145,7 +151,7 @@ namespace citations365.Views {
         private void ShowLoading() {
             ListQuotes.Visibility = Visibility.Collapsed;
             InputSearch.Visibility = Visibility.Collapsed;
-            TextInfos.Text = _textInfosContent["searching"];
+            TextInfos.Text = _infos["searching"];
         }
 
         private void HideLoading() {
@@ -160,8 +166,11 @@ namespace citations365.Views {
             if (NoContentView.Visibility == Visibility.Collapsed) {
                 ListQuotes.Visibility = Visibility.Collapsed;
                 NoContentView.Visibility = Visibility.Visible;
-                TextInfos.Text = _textInfosContent["default"];
+                TextInfos.Text = _tips["default"];
                 InputSearch.Visibility = Visibility.Visible;
+
+                // Auto focus
+                InputFocus();
             }
         }
 
@@ -169,10 +178,13 @@ namespace citations365.Views {
         /// Display the quotes list and hide the text input 
         /// </summary>
         private void ShowResults() {
-            if (NoContentView.Visibility == Visibility.Visible) {
-                NoContentView.Visibility = Visibility.Collapsed;
-                ListQuotes.Visibility = Visibility.Visible;
+            if (NoContentView.Visibility == Visibility.Collapsed 
+                || SearchController.SearchCollection.Count < 1) {
+                return;
             }
+
+            NoContentView.Visibility = Visibility.Collapsed;
+            ListQuotes.Visibility = Visibility.Visible;
         }
 
         /// <summary>
@@ -182,6 +194,8 @@ namespace citations365.Views {
         /// <param name="e"></param>
         private void InputSearch_KeyDown(object sender, KeyRoutedEventArgs e) {
             if (e.Key == Windows.System.VirtualKey.Enter && !_performingSearch) {
+                _performingSearch = true;
+
                 string query = InputSearch.Text;
                 RunSearch(query);
             }
@@ -206,6 +220,11 @@ namespace citations365.Views {
             ShowInput();
         }
 
+        /// <summary>
+        /// Fired when the TextBox get focus
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void InputSearch_GotFocus(object sender, RoutedEventArgs e) {
             TextBox inputSearch = (TextBox)sender;
             if (inputSearch.FocusState == FocusState.Unfocused) {
@@ -214,19 +233,35 @@ namespace citations365.Views {
             }   
         }
 
+        /// <summary>
+        /// Set the focus programmatically on the TextBox
+        /// </summary>
         private void InputFocus() {
-            bool result = InputSearch.Focus(FocusState.Programmatic);
+            InputSearch.Focus(FocusState.Programmatic);
         }
 
+        /// <summary>
+        /// Fired when the TextBox is loaded
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void InputSearch_Loaded(object sender, RoutedEventArgs e) {
             InputFocus();
         }
 
+        /// <summary>
+        /// Fired when the TextBox lose fucous
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void InputSearch_LostFocus(object sender, RoutedEventArgs e) {
-            //InputFocus();
         }
 
-        private void Page_KeyDown(object sender, KeyRoutedEventArgs e) {
+        private void StartSlideShow() {
+
+        }
+
+        private void StopSlideShow() {
 
         }
     }

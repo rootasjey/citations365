@@ -81,6 +81,9 @@ namespace citations365.Controllers {
         /// Fetch the web link and extract content
         /// </summary>
         public async Task<bool> GetTodayQuotes() {
+            string author = "";
+            string reference = "";
+
             // If there's no internet connection
             if (!NetworkInterface.GetIsNetworkAvailable()) {
                 await LoadToday(); // Load data from IO
@@ -106,9 +109,8 @@ namespace citations365.Controllers {
 
                 // Regex Definitions
                 Regex content_regex     = new Regex("<div class=\"figsco__quote__text\">" + "((.|\n)*?)" + "</a></div>");
-                Regex author_regex      = new Regex("<div class=\"figsco__fake__col-9\">" + "((.|\n)*?)" + "</a>");
+                Regex author_regex      = new Regex("<div class=\"figsco__fake__col-9\">" + "((.|\n)*?)" + "<br>");
                 Regex authorLink_regex  = new Regex("/celebre/biographie/" + "((.|\n)*?)" + ".php");
-                Regex reference_regex   = new Regex("</a>" + "((.|\n)*?)" + "/" + "((.|\n)*?)" + "</br>");
                 Regex quoteLink_regex   = new Regex("/citation/" + "((.|\n)*?)" + ".php");
 
                 // Loop
@@ -117,7 +119,6 @@ namespace citations365.Controllers {
                     MatchCollection content_match       = content_regex.Matches(q);
                     MatchCollection author_match        = author_regex.Matches(q);
                     MatchCollection authorLink_match    = authorLink_regex.Matches(q);
-                    MatchCollection reference_match     = reference_regex.Matches(q);
                     MatchCollection quoteLink_match     = quoteLink_regex.Matches(q);
 
                     Quote quote = new Quote();
@@ -125,9 +126,27 @@ namespace citations365.Controllers {
 
                     if (quote.Content == null) continue;
 
-                    quote.Author = author_match.Count > 0 ? author_match[0].ToString() : null;
+                    // REFERENCE TEST (Test if there's a reference)
+                    string authorAndRef = author_match.Count > 0 ? author_match[0].ToString() : null;
+                    if (authorAndRef == null) continue; // check 2 (a quote must have an author || Anonyme)
+
+                    int separator = authorAndRef.LastIndexOf('/');
+
+                    if (separator < 0) {
+                        author = authorAndRef;
+                    } else {
+                        if (authorAndRef.Substring(separator - 1).StartsWith("</a>")) {
+                            separator -= 1;
+                        }
+
+                        author = authorAndRef.Substring(0, separator);
+                        reference = authorAndRef.Substring(separator + 2);
+                        if (reference.StartsWith("a>")) reference = ""; // cans get </a>, so empty the var
+                    }
+
+                    quote.Author = author;
                     quote.AuthorLink = authorLink_match.Count > 0 ? "http://www.evene.fr" + authorLink_match[0].ToString() : null;
-                    quote.Reference = reference_match.Count > 0 ? reference_match[0].ToString() : null;
+                    quote.Reference = reference;
                     quote.Link = quoteLink_match.Count > 0 ? quoteLink_match[0].ToString() : null;
 
                     quote = Controller.Normalize(quote);
