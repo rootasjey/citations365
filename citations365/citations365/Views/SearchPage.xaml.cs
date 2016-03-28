@@ -54,9 +54,6 @@ namespace citations365.Views {
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
-            // Set the input focus to ensure that keyboard events are raised.
-            //this.Loaded += delegate { this.Focus(FocusState.Programmatic); };
-            //InputSearch.Loaded += delegate { InputSearch.Focus(FocusState.Programmatic); };
         }
 
         /// <summary>
@@ -88,6 +85,7 @@ namespace citations365.Views {
         /// Set the binding
         /// </summary>
         private void BindCollectionToView() {
+            //ListQuotes.ItemsSource = SearchController.SearchCollection;
             ListQuotes.ItemsSource = SearchController.SearchCollection;
         }
 
@@ -126,7 +124,8 @@ namespace citations365.Views {
             ShowLoading();
 
             // Get the quotes
-            result = await Scontroller.GetQuotes(query);
+            //result = await Scontroller.GetQuotes(query);
+            result = await Scontroller.Search(query);
 
             // Hide load scren
             if (result) {

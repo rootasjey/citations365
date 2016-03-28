@@ -33,7 +33,10 @@
                     Text="Il n'y a pas de contenu pour le moment. Essayez de recharger la page et vérifiez votre connexion internet"/>
             </StackPanel>
 
-            <ListView x:Name="ListQuotes" Margin="40,0,50,0" Visibility="Collapsed">
+            <ListView x:Name="ListQuotes" Margin="40,0,50,0" Visibility="Collapsed"
+                      IncrementalLoadingTrigger="Edge"
+                      SelectionMode="None"
+                      IsItemClickEnabled="True">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid>

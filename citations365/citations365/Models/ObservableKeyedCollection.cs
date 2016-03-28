@@ -1,13 +1,113 @@
-﻿using System;
+﻿using citations365.Controllers;
+using HtmlAgilityPack;
+using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO.IsolatedStorage;
+using System.Linq;
+using System.Net.Http;
+using System.Net.NetworkInformation;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Windows.Foundation;
+using Windows.UI.Xaml.Data;
 
 namespace citations365.Models {
-    public class ObservableKeyedCollection : KeyedCollection<string, Quote>, INotifyCollectionChanged, INotifyPropertyChanged {
+    public class ObservableKeyedCollection : KeyedCollection<string, Quote>,
+        INotifyCollectionChanged, INotifyPropertyChanged, ISupportIncrementalLoading {
+
+        /* ******
+         * EVENTS
+         * ******
+         */
         public event NotifyCollectionChangedEventHandler CollectionChanged;
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /* *********
+         * VARIABLES
+         * *********
+         */
+        /// <summary>
+        /// Collection's name
+        /// Useful to save it to the app storage
+        /// </summary>
+        public virtual string Name { get; }
+
+        /// <summary>
+        /// Specifies the number of items to load
+        /// for the LoadMoreItemsAsync method (not necessary in our scenario)
+        /// </summary>
+        public virtual uint ItemsToLoad {
+            get {
+                return 15;
+            }
+        }
+
+        /// <summary>
+        /// If true, last most recent quotes will be saved to Isolated Storage
+        /// </summary>
+        public virtual bool AllowOffline {
+            get {
+                return false;
+            }
+        }
+
+        
+        private int _page = 1;
+        /// <summary>
+        /// Quote's Pagination (as all quotes are not fetched in the same time)
+        /// </summary>
+        public virtual int Page {
+            get {
+                return _page;
+            }
+            set {
+                if (_page != value) {
+                    _page = value;
+                }
+            }
+        }
+
+        private string _redirectedURL;
+        /// <summary>
+        /// For some requests, the url is re-written, so we save it to fetch next pages
+        /// </summary>
+        public virtual string RedirectedURL {
+            get {
+                return _redirectedURL;
+            }
+            set {
+                if (_redirectedURL != value) {
+                    _redirectedURL = value;
+                }
+            }
+        }
+
+        
+        private bool _hasMoreItems = false;
+        /// <summary>
+        /// Tells if more items can be fetched
+        /// </summary>
+        public virtual bool HasMoreItems {
+            get {
+                return _hasMoreItems;
+            }
+            set {
+                if (_hasMoreItems != value) {
+                    _hasMoreItems = value;
+                }
+            }
+        }
+
+        public ObservableKeyedCollection() {
+
+        }
+
+        /* *******
+         * METHODS
+         * *******
+         */
         /// <summary>
         /// Specifies the key value for the dictionnary
         /// </summary>
@@ -88,6 +188,236 @@ namespace citations365.Models {
             if (null != handler) {
                 handler(this, new NotifyCollectionChangedEventArgs(action));
             }
+        }
+
+        IAsyncOperation<LoadMoreItemsResult> ISupportIncrementalLoading.LoadMoreItemsAsync(uint count) {
+            return LoadMoreItemsAsync(count).AsAsyncOperation();
+        }
+
+        /// <summary>
+        /// Fires when we reached the end of the ListView
+        /// and more items can be fetched
+        /// </summary>
+        /// <param name="count">Number of items to get</param>
+        /// <returns>Number of items fetched</returns>
+        public async Task<LoadMoreItemsResult> LoadMoreItemsAsync(uint count) {
+            int itemsCount = await BuildAndFetch();
+            return new LoadMoreItemsResult { Count = (uint)itemsCount };
+        }
+
+        /// <summary>
+        /// Build the url and fetch quotes
+        /// </summary>
+        public virtual async Task<int> BuildAndFetch(string query = "") {
+            // URL building
+            string url = "";
+            return await Fetch(url);
+        }
+
+        /// <summary>
+        /// Get online data (quotes) from the url
+        /// </summary>
+        /// <param name="url">URL string to request</param>
+        /// <returns>Number of results added to the collection</returns>
+        public async Task<int> Fetch(string url) {
+            int quotesAdded = 0;
+            string responseBodyAsText;
+            string author = "";
+            string reference = "";
+
+            // If there's no internet connection
+            if (!NetworkInterface.GetIsNetworkAvailable()) {
+                await handleFailedFetch(); // Load data from IO
+                return 0;
+            }
+
+            // Fetch the content from a web source
+            HttpClient http = new HttpClient();
+
+            try {
+                HttpResponseMessage message = await http.GetAsync(url);
+                RedirectedURL = message.RequestMessage.RequestUri.ToString();
+                responseBodyAsText = await message.Content.ReadAsStringAsync();
+
+                // HTML Document building
+                HtmlDocument doc = new HtmlDocument();
+                doc.LoadHtml(responseBodyAsText);
+
+                // Regex Definitions
+                Regex content_regex = new Regex("<div class=\"figsco__quote__text\">" + "((.|\n)*?)" + "</a></div>");
+                Regex author_regex = new Regex("<div class=\"figsco__fake__col-9\">" + "((.|\n)*?)" + "<br>");
+                Regex authorLink_regex = new Regex("/celebre/biographie/" + "((.|\n)*?)" + ".php");
+                Regex quoteLink_regex = new Regex("/citation/" + "((.|\n)*?)" + ".php");
+
+                // Loop
+                string[] quotesArray = doc.DocumentNode.Descendants("article").Select(y => y.InnerHtml).ToArray();
+                foreach (string q in quotesArray) {
+                    MatchCollection content_match = content_regex.Matches(q);
+                    MatchCollection author_match = author_regex.Matches(q);
+                    MatchCollection authorLink_match = authorLink_regex.Matches(q);
+                    MatchCollection quoteLink_match = quoteLink_regex.Matches(q);
+
+                    Quote quote = new Quote();
+                    quote.Content = content_match.Count > 0 ? content_match[0].ToString() : null;
+
+                    if (quote.Content == null) continue;
+
+                    // REFERENCE TEST (Test if there's a reference)
+                    string authorAndRef = author_match.Count > 0 ? author_match[0].ToString() : null;
+                    if (authorAndRef == null) continue; // check 2 (a quote must have an author || Anonyme)
+
+                    int separator = authorAndRef.LastIndexOf('/');
+
+                    if (separator < 0) {
+                        author = authorAndRef;
+                    } else {
+                        if (authorAndRef.Substring(separator - 1).StartsWith("</a>")) {
+                            separator -= 1;
+                        }
+
+                        author = authorAndRef.Substring(0, separator);
+                        reference = authorAndRef.Substring(separator + 2);
+                        if (reference.StartsWith("a>")) reference = ""; // cans get </a>, so empty the var
+                    }
+
+                    quote.Author = author;
+                    quote.AuthorLink = authorLink_match.Count > 0 ? "http://www.evene.fr" + authorLink_match[0].ToString() : null;
+                    quote.Reference = reference;
+                    quote.Link = quoteLink_match.Count > 0 ? quoteLink_match[0].ToString() : null;
+
+                    quote = Controller.Normalize(quote);
+
+                    if (!Contains(quote.Link)) {
+                        Add(quote);
+                        quotesAdded++;
+                    }
+                }
+
+                if (quotesAdded == 0) { // If we're here, we've reached the end of the search
+                    HasMoreItems = false;
+                    Page = 0;
+                }
+
+                if (AllowOffline && Page == 1) { // save the first quotes to IO
+                    SaveIO();
+                }
+
+                Page++; // fetch the next quotes' page the next time
+
+                // Test that we've got at least one piece of data
+                return quotesAdded;
+
+            } catch (HttpRequestException hre) {
+                // The request failed, load quotes from IO
+                HasMoreItems = false;
+                await handleFailedFetch();
+                return Count;
+            }
+        }
+
+        public bool IsDataLoaded() {
+            return Count > 0;
+        }
+
+        /// <summary>
+        /// Save the collection to the isolated storage
+        /// </summary>
+        /// <param name="xmlName"></param>
+        /// <returns></returns>
+        public async Task<bool> SaveIO() {
+            if (Count < 1) {
+                return true;
+            } else {
+                try {
+                    await DataSerializer<ObservableKeyedCollection>.SaveObjectsAsync(this, Name);
+                    return true;
+                } catch (IsolatedStorageException exception) {
+                    return false; // error
+                }
+            }
+        }
+
+        /// <summary>
+        /// Load the collection from the IO
+        /// </summary>
+        /// <param name="xmlName">Collection's name</param>
+        /// <returns></returns>
+        public async Task<bool> LoadIO () {
+            try {
+                ObservableKeyedCollection collection = await DataSerializer<ObservableKeyedCollection>.RestoreObjectsAsync(Name);
+                if (collection != null) {
+                    foreach (Quote quote in collection) {
+                        Add(quote);
+                    }
+                    return true;
+                }
+                return false;
+            } catch (IsolatedStorageException exception) {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Fired when the Fetch method fail to get data
+        /// </summary>
+        /// <returns></returns>
+        public virtual async Task<bool> handleFailedFetch() {
+            return true;
+        }
+
+
+        /* ***************
+         * HELPERS METHODS
+         * ***************
+         */
+        /// <summary>
+        /// Delete HTML tags from the quote props and checks values
+        /// </summary>
+        /// <param name="quote"></param>
+        /// <returns></returns>
+        public Quote Normalize(Quote quote) {
+            // Delete HTML
+            quote.Author = DeleteHTMLTags(quote.Author);
+            quote.Content = DeleteHTMLTags(quote.Content);
+            quote.Reference = DeleteHTMLTags(quote.Reference);
+
+            quote.IsFavorite = FavoritesController.GetFavoriteIcon(quote.Link);
+
+            // Check values
+            if (quote.Author.Contains("Vos avis")) {
+                quote.Author = "Anonyme";
+            }
+            return quote;
+        }
+
+        /// <summary>
+        /// Normalize the text:
+        /// Remove the html tags (<h1></h1>, ...), ans special chars (&amp;)
+        /// </summary>
+        /// <param name="text">Normalize</param>
+        public string DeleteHTMLTags(string text) {
+            if (text == null) {
+                return null;
+            }
+
+            text = Regex.Replace(text, @"<(.|\n)*?>", string.Empty);
+
+            text = text
+                .Replace("&laquo;", "")
+                .Replace("&ldquo;", "")
+                .Replace("&rdquo;", "")
+                .Replace("&nbsp;", "")
+                .Replace("&raquo;", "")
+                .Replace("&#039;", "'")
+                .Replace("&quot;", "'")
+                .Replace("&amp;", "&")
+                .Replace("[+]", "")
+                .Replace("[", "")
+                .Replace("]", "")
+                .Replace("\n", "")
+                .Replace("  ", "");
+
+            return text;
         }
     }
 }

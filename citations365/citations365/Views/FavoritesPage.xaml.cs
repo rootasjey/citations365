@@ -35,7 +35,7 @@ namespace citations365.Views
         }
 
         public FavoritesPage() {
-            this.InitializeComponent();
+            InitializeComponent();
             Populate();
         }
 
