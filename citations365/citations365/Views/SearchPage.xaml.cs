@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
 namespace citations365.Views {
@@ -87,30 +88,6 @@ namespace citations365.Views {
         private void BindCollectionToView() {
             //ListQuotes.ItemsSource = SearchController.SearchCollection;
             ListQuotes.ItemsSource = SearchController.SearchCollection;
-        }
-
-        /// <summary>
-        /// Add/Remove a favorite
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private async void Favorite_Tapped(object sender, TappedRoutedEventArgs e) {
-            FontIcon icon = (FontIcon)sender;
-            Quote quote = (Quote)icon.DataContext;
-
-            if (FavoritesController.IsFavorite(quote.Link)) {
-                // Remove from favorites
-                bool result = await FavoritesController.RemoveFavorite(quote);
-                if (result) {
-                    quote.IsFavorite = Quote.UnFavoriteIcon;
-                }
-            } else {
-                // Add to favorites
-                bool result = await FavoritesController.AddFavorite(quote);
-                if (result) {
-                    quote.IsFavorite = Quote.FavoriteIcon;
-                }
-            }
         }
 
         /// <summary>
@@ -263,5 +240,43 @@ namespace citations365.Views {
         private void StopSlideShow() {
 
         }
+
+        /* ******
+         * EVENTS
+         * ******
+         */
+        private void Quote_Tapped(object sender, TappedRoutedEventArgs e) {
+            StackPanel panel = (StackPanel)sender;
+            Quote quote = (Quote)panel.DataContext;
+
+            if (quote.AuthorLink != null && quote.AuthorLink.Length > 0) {
+                Frame.Navigate(typeof(DetailAuthorPage), quote, new DrillInNavigationTransitionInfo());
+            }
+        }
+
+        /// <summary>
+        /// Add/Remove a favorite
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void Favorite_Tapped(object sender, TappedRoutedEventArgs e) {
+            FontIcon icon = (FontIcon)sender;
+            Quote quote = (Quote)icon.DataContext;
+
+            if (FavoritesController.IsFavorite(quote.Link)) {
+                // Remove from favorites
+                bool result = await FavoritesController.RemoveFavorite(quote);
+                if (result) {
+                    quote.IsFavorite = Quote.UnFavoriteIcon;
+                }
+            } else {
+                // Add to favorites
+                bool result = await FavoritesController.AddFavorite(quote);
+                if (result) {
+                    quote.IsFavorite = Quote.FavoriteIcon;
+                }
+            }
+        }
+
     }
 }

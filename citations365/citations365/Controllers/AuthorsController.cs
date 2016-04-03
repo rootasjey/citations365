@@ -22,7 +22,7 @@ namespace citations365.Controllers
         /// <summary>
         /// Authors list url
         /// </summary>
-        private string _url = "http://www.evene.fr/citations/dictionnaire-citations-auteurs.php";
+        private const string _url = "http://www.evene.fr/citations/dictionnaire-citations-auteurs.php";
         
         /*
          * ************
@@ -54,7 +54,7 @@ namespace citations365.Controllers
         /// Initialize the controller
         /// </summary>
         public AuthorsController() {
-
+            //LoadData();
         }
 
         /*
@@ -69,7 +69,7 @@ namespace citations365.Controllers
         public async Task<bool> LoadData() {
             if (!IsDataLoaded()) {
                 return await GetAuthors();
-            }   return false;
+            }   return true;
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace citations365.Controllers
         /// </summary>
         public async Task<bool> Reload() {
             if (IsDataLoaded()) {
-                _authorsCollection.Clear();
+                AuthorsCollection.Clear();
             }
             return await LoadAuthors();
         }
@@ -87,7 +87,7 @@ namespace citations365.Controllers
         /// </summary>
         /// <returns>True if data is already loaded</returns>
         public bool IsDataLoaded() {
-            return _authorsCollection.Count > 0;
+            return AuthorsCollection.Count > 0;
         }
 
         public async Task<bool> GetAuthors() {
@@ -96,6 +96,7 @@ namespace citations365.Controllers
 
             // Try from the web
             if (ioAvailable) {
+                //return await UpdateAuthors();
                 return true;
             }
 
@@ -123,8 +124,9 @@ namespace citations365.Controllers
                         Author author = new Author() {
                             Name = authorsNames[i],
                             Link = authorsLinks[i],
+                            ImageLink = "ms-appx:///Assets/Icons/gray.png"
                         };
-                        _authorsCollection.Add(author);
+                        AuthorsCollection.Add(author);
                     }
 
                     SaveAuthors();
@@ -139,6 +141,13 @@ namespace citations365.Controllers
             }
         }
 
+        public async Task<bool> UpdateAuthors() {
+            foreach (Author author in AuthorsCollection) {
+                author.ImageLink = "ms-appx:///Assets/Icons/gray.png";
+            }
+            return await SaveAuthors();
+        }
+
         /// <summary>
         /// Load authors from IO
         /// </summary>
@@ -147,7 +156,10 @@ namespace citations365.Controllers
             try {
                 ObservableCollection<Author> collection = await DataSerializer<ObservableCollection<Author>>.RestoreObjectsAsync("AuthorsCollection.xml");
                 if (collection != null) {
-                    _authorsCollection = collection;
+                    foreach (Author author in collection) {
+                        //author.ImageLink = "ms-appx:///Assets/Icons/Contacts_Filled.png";
+                        AuthorsCollection.Add(author);
+                    }
                     return true;
                 }
                 return false;
@@ -161,11 +173,11 @@ namespace citations365.Controllers
         /// </summary>
         /// <returns>True if the data was successfully saved</returns>
         public async Task<bool> SaveAuthors() {
-            if (_authorsCollection.Count < 1) {
+            if (AuthorsCollection.Count < 1) {
                 return true;
             } else {
                 try {
-                    await DataSerializer<ObservableCollection<Author>>.SaveObjectsAsync(_authorsCollection, "AuthorsCollection.xml");
+                    await DataSerializer<ObservableCollection<Author>>.SaveObjectsAsync(AuthorsCollection, "AuthorsCollection.xml");
                     return true;
                 } catch (IsolatedStorageException exception) {
                     return false;

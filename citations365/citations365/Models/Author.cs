@@ -6,16 +6,15 @@ using System.Threading.Tasks;
 
 namespace citations365.Models {
     public class Author {
+        private string _name { get; set; }
+
+        private string _link { get; set; }
+
+        private string _imageLink { get; set; }
+
         /// <summary>
         /// Author's name
         /// </summary>
-        private string _name { get; set; }
-
-        /// <summary>
-        /// Author's link
-        /// </summary>
-        private string _link { get; set; }
-
         public string Name {
             get {
                 return _name;
@@ -27,6 +26,9 @@ namespace citations365.Models {
             }
         }
 
+        /// <summary>
+        /// Author's link
+        /// </summary>
         public string Link {
             get {
                 return _link;
@@ -34,6 +36,20 @@ namespace citations365.Models {
             set {
                 if (value != _link) {
                     _link = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Author picture
+        /// </summary>
+        public string ImageLink {
+            get {
+                return _imageLink;
+            }
+            set {
+                if (_imageLink != value) {
+                    _imageLink = value;
                 }
             }
         }

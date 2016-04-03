@@ -3,6 +3,7 @@ using citations365.Models;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media.Animation;
 
 // Pour plus d'informations sur le modèle d'élément Page vierge, voir la page http://go.microsoft.com/fwlink/?LinkId=234238
 namespace citations365.Views {
@@ -67,6 +68,15 @@ namespace citations365.Views {
                 if (result) {
                     quote.IsFavorite = Quote.FavoriteIcon;
                 }
+            }
+        }
+
+        private void Quote_Tapped(object sender, TappedRoutedEventArgs e) {
+            StackPanel panel = (StackPanel)sender;
+            Quote quote = (Quote)panel.DataContext;
+
+            if (quote.AuthorLink != null && quote.AuthorLink.Length > 0) {
+                Frame.Navigate(typeof(DetailAuthorPage), quote, new DrillInNavigationTransitionInfo());
             }
         }
     }

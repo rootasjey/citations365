@@ -296,6 +296,9 @@ namespace citations365.Models {
                 if (quotesAdded == 0) { // If we're here, we've reached the end of the search
                     HasMoreItems = false;
                     Page = 0;
+
+                } else {
+                    HasMoreItems = true;
                 }
 
                 if (AllowOffline && Page == 1) { // save the first quotes to IO
