@@ -222,8 +222,6 @@ namespace citations365.Models {
         public async Task<int> Fetch(string url) {
             int quotesAdded = 0;
             string responseBodyAsText;
-            string author = "";
-            string reference = "";
 
             // If there's no internet connection
             if (!NetworkInterface.GetIsNetworkAvailable()) {
@@ -248,42 +246,39 @@ namespace citations365.Models {
                 Regex author_regex = new Regex("<div class=\"figsco__fake__col-9\">" + "((.|\n)*?)" + "<br>");
                 Regex authorLink_regex = new Regex("/celebre/biographie/" + "((.|\n)*?)" + ".php");
                 Regex quoteLink_regex = new Regex("/citation/" + "((.|\n)*?)" + ".php");
-
+                
                 // Loop
-                string[] quotesArray = doc.DocumentNode.Descendants("article").Select(y => y.InnerHtml).ToArray();
-                foreach (string q in quotesArray) {
-                    MatchCollection content_match = content_regex.Matches(q);
-                    MatchCollection author_match = author_regex.Matches(q);
-                    MatchCollection authorLink_match = authorLink_regex.Matches(q);
-                    MatchCollection quoteLink_match = quoteLink_regex.Matches(q);
+                var quotes = doc.DocumentNode.Descendants("article");
+                foreach (HtmlNode q in quotes) {
+                    var content = q.Descendants("div").Where(x => x.GetAttributeValue("class", "") == "figsco__quote__text").FirstOrDefault();
+                    var authorAndReference = q.Descendants("div").Where(x => x.GetAttributeValue("class", "") == "figsco__fake__col-9").FirstOrDefault();
 
-                    Quote quote = new Quote();
-                    quote.Content = content_match.Count > 0 ? content_match[0].ToString() : null;
+                    if (content == null)            continue; // check if this is a valid quote
+                    if (authorAndReference == null) continue; // ------------------------------
 
-                    if (quote.Content == null) continue;
+                    var authorNode = authorAndReference.Descendants("a").FirstOrDefault();
+                    string authorName = "De Anonyme";
+                    string authorLink = "";
 
-                    // REFERENCE TEST (Test if there's a reference)
-                    string authorAndRef = author_match.Count > 0 ? author_match[0].ToString() : null;
-                    if (authorAndRef == null) continue; // check 2 (a quote must have an author || Anonyme)
+                    if (authorNode != null) { // if the quote as an author
+                        authorName = "De " + authorNode.InnerText;
+                        authorLink = "http://www.evene.fr" + authorNode.GetAttributeValue("href", "");
+                    }
+                                        
+                    string quoteLink = content.ChildNodes.FirstOrDefault().GetAttributeValue("href", "");
 
-                    int separator = authorAndRef.LastIndexOf('/');
-
-                    if (separator < 0) {
-                        author = authorAndRef;
-                    } else {
-                        if (authorAndRef.Substring(separator - 1).StartsWith("</a>")) {
-                            separator -= 1;
-                        }
-
-                        author = authorAndRef.Substring(0, separator);
-                        reference = authorAndRef.Substring(separator + 2);
-                        if (reference.StartsWith("a>")) reference = ""; // cans get </a>, so empty the var
+                    string referenceName = "";
+                    int separator = authorAndReference.InnerText.LastIndexOf('/');
+                    if (separator > -1) {
+                        referenceName = authorAndReference.InnerText.Substring(separator + 2);
                     }
 
-                    quote.Author = author;
-                    quote.AuthorLink = authorLink_match.Count > 0 ? "http://www.evene.fr" + authorLink_match[0].ToString() : null;
-                    quote.Reference = reference;
-                    quote.Link = quoteLink_match.Count > 0 ? quoteLink_match[0].ToString() : null;
+                    Quote quote         = new Quote();
+                    quote.Content       = content.InnerText;
+                    quote.Author        = authorName;
+                    quote.AuthorLink    = authorLink;
+                    quote.Reference     = referenceName;
+                    quote.Link          = quoteLink;
 
                     quote = Controller.Normalize(quote);
 
@@ -293,7 +288,7 @@ namespace citations365.Models {
                     }
                 }
 
-                if (quotesAdded == 0) { // If we're here, we've reached the end of the search
+                if (quotesAdded == 0) { // If true, we've reached the end of the search
                     HasMoreItems = false;
                     Page = 0;
 

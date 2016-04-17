@@ -96,8 +96,9 @@ namespace citations365.Controllers
             quote.IsFavorite = FavoritesController.GetFavoriteIcon(quote.Link);
 
             // Check values
-            if (quote.Author.Contains("Vos avis")) {
-                quote.Author = "Anonyme";
+            if (quote.Reference.Contains("Vos avis")) {
+                int index = quote.Reference.IndexOf("Vos avis");
+                quote.Reference = quote.Reference.Substring(0, index);
             }
             return quote;
         }
