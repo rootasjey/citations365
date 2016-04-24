@@ -5,9 +5,54 @@
     xmlns:local="using:citations365.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:Components="using:citations365.Components"
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Components:PageHeader HorizontalAlignment="Left" Margin="70,0,0,0" VerticalAlignment="Top" Width="340" Height="59">
+            <ContentControl>
+                <TextBlock x:Name="HeaderContent" Text="PRÉFÉRENCES" FontSize="28" FontWeight="Light" FontFamily="Segoe UI" />
+            </ContentControl>
+        </Components:PageHeader>
 
+        <Pivot x:Name="PivotSettings" Margin="60,60">
+            <PivotItem Header="réglages" Margin="10,20">
+                <StackPanel>
+                    <RichTextBlock>
+                        <Paragraph FontWeight="Bold">TÂCHES EN ARRIÈRE-PLAN</Paragraph>
+                        <Paragraph>
+                            Activez cette option pour avoir 
+                            la citation du jour sur la tuile dynamique 
+                            de l'application ainsi que sur l'écran de verrouillage.
+                        </Paragraph>
+                    </RichTextBlock>
+                    
+                    <ToggleSwitch x:Name="TaskSwitch"/>
+                </StackPanel>                
+            </PivotItem>
+
+            <PivotItem Header="à propos" Margin="10,20">
+                <StackPanel>
+                    <RichTextBlock>
+                        <Paragraph FontWeight="Bold">DONNÉES</Paragraph>
+                        <Paragraph>
+                            Les données des citations proviennent du site
+                            <Hyperlink>http://evene.lefigaro.fr/</Hyperlink>
+                            et cette application est entièrement indépendante de ce site.
+                        </Paragraph>
+
+                        <Paragraph FontWeight="Bold" Margin="0,20,0,0">FEEDBACK</Paragraph>
+                        <Paragraph>
+                            Si l'application vos plaît, laissez un commentaire dans le store.
+                        </Paragraph>
+                        
+                        <Paragraph Margin="0,20,0,0">
+                            Contactez-nous par mail si vous rencontrez des problèmes ou avez des remarques.
+                        </Paragraph>
+                    </RichTextBlock>
+                    <FontIcon Glyph="&#xE120;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>
+                </StackPanel>
+            </PivotItem>
+        </Pivot>
     </Grid>
 </Page>

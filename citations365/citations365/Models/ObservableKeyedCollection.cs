@@ -240,12 +240,6 @@ namespace citations365.Models {
                 // HTML Document building
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(responseBodyAsText);
-
-                // Regex Definitions
-                Regex content_regex = new Regex("<div class=\"figsco__quote__text\">" + "((.|\n)*?)" + "</a></div>");
-                Regex author_regex = new Regex("<div class=\"figsco__fake__col-9\">" + "((.|\n)*?)" + "<br>");
-                Regex authorLink_regex = new Regex("/celebre/biographie/" + "((.|\n)*?)" + ".php");
-                Regex quoteLink_regex = new Regex("/citation/" + "((.|\n)*?)" + ".php");
                 
                 // Loop
                 var quotes = doc.DocumentNode.Descendants("article");

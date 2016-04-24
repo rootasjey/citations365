@@ -24,7 +24,7 @@ namespace citations365.Views
     {
         public SettingsPage()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
     }
 }
