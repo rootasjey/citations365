@@ -1,5 +1,5 @@
-﻿using citations365.Controllers;
-using citations365.Models;
+﻿using BackgroundTasks.Controllers;
+using BackgroundTasks.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,7 +17,7 @@ using Windows.UI.Xaml.Navigation;
 
 // Pour plus d'informations sur le modèle d'élément Page vierge, voir la page http://go.microsoft.com/fwlink/?LinkId=234238
 
-namespace citations365.Views {
+namespace BackgroundTasks.Views {
     /// <summary>
     /// Une page vide peut être utilisée seule ou constituer une page de destination au sein d'un frame.
     /// </summary>

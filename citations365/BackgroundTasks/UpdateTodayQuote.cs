@@ -1,11 +1,14 @@
-﻿using HtmlAgilityPack;
+﻿using BackgroundTasks.Models;
+using HtmlAgilityPack;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Background;
+using Windows.Data.Xml.Dom;
 using Windows.Foundation;
+using Windows.UI.Notifications;
 
 namespace BackgroundTasks {
     public sealed class UpdateTodayQuote : IBackgroundTask {
@@ -16,7 +19,8 @@ namespace BackgroundTasks {
         public async void Run(IBackgroundTaskInstance taskInstance) {
             _deferral = taskInstance.GetDeferral();
 
-            await Fetch(_url);
+            BackgroundQuote recent = await Fetch(_url);
+            UpdateTile(recent);
 
             _deferral.Complete();
         }
@@ -26,12 +30,12 @@ namespace BackgroundTasks {
         /// </summary>
         /// <param name="url">URL string to request</param>
         /// <returns>Number of results added to the collection</returns>
-        private async Task Fetch(string url) {
+        private async Task<BackgroundQuote> Fetch(string url) {
             string responseBodyAsText;
 
             // If there's no internet connection
             if (!NetworkInterface.GetIsNetworkAvailable()) {
-                //return "";
+                return new BackgroundQuote();
             }
 
             // Fetch the content from a web source
@@ -75,13 +79,14 @@ namespace BackgroundTasks {
                     authorName = DeleteHTMLTags(authorName);
 
                     //return quote + " - " + authorName;
+                    return new BackgroundQuote(quote, authorName, authorLink, null, referenceName, quoteLink);
                 }
 
-                //return "";
+                return new BackgroundQuote();
 
             } catch (HttpRequestException hre) {
                 // The request failed
-                //return "";
+                return new BackgroundQuote();
             }
         }
 
@@ -115,8 +120,31 @@ namespace BackgroundTasks {
             return text;
         }
 
-        public void UpdateTile(string text) {
+        /// <summary>
+        /// Update the application's tile with the most recent quote
+        /// </summary>
+        /// <param name="quote">The quote's content to update the tile with</param>
+        public void UpdateTile(BackgroundQuote quote) {
+            XmlDocument tileXml = TileUpdateManager.GetTemplateContent(TileTemplateType.TileWideText09);
+            XmlNodeList tileTextAttributes = tileXml.GetElementsByTagName("text");
 
+            tileTextAttributes[0].InnerText = quote.Author;
+            tileTextAttributes[1].InnerText = quote.Content;
+
+            // Square tile
+            XmlDocument squareTileXml = TileUpdateManager.GetTemplateContent(TileTemplateType.TileSquare150x150Text02);
+            XmlNodeList squareTileTextAttributes = squareTileXml.GetElementsByTagName("text");
+            //squareTileTextAttributes[0].AppendChild(squareTileXml.CreateTextNode("Hello World! My very own tile notification"));
+            squareTileTextAttributes[0].InnerText = quote.Author;
+            squareTileTextAttributes[1].InnerText = quote.Content;
+
+            // Integration of the two tile templates
+            IXmlNode node = tileXml.ImportNode(squareTileXml.GetElementsByTagName("binding").Item(0), true);
+            tileXml.GetElementsByTagName("visual").Item(0).AppendChild(node);
+
+            // Tile Notification
+            TileNotification tileNotification = new TileNotification(tileXml);
+            TileUpdateManager.CreateTileUpdaterForApplication().Update(tileNotification);
         }
     }
 }

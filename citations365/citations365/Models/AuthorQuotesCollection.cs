@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace citations365.Models {
+namespace BackgroundTasks.Models {
     public class AuthorQuotesCollection : ObservableKeyedCollection {
         private string _query { get; set; }
 

@@ -1,4 +1,4 @@
-﻿using citations365.Models;
+﻿using BackgroundTasks.Models;
 using HtmlAgilityPack;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace citations365.Controllers
+namespace BackgroundTasks.Controllers
 {
     public class AuthorsController
     {

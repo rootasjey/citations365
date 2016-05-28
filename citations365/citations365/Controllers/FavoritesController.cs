@@ -1,11 +1,11 @@
-﻿using citations365.Models;
+﻿using BackgroundTasks.Models;
 using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO.IsolatedStorage;
 using System.Threading.Tasks;
 
-namespace citations365.Controllers {
+namespace BackgroundTasks.Controllers {
     public class FavoritesController {
         /*
          * ***********

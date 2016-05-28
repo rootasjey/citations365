@@ -1,4 +1,4 @@
-﻿using citations365.Models;
+﻿using BackgroundTasks.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,13 +9,15 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Windows.Data.Xml.Dom;
 using Windows.Storage;
 using Windows.UI;
+using Windows.UI.Notifications;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Media;
 
-namespace citations365.Controllers
+namespace BackgroundTasks.Controllers
 {
     public class Controller {
         /*
@@ -78,10 +80,29 @@ namespace citations365.Controllers
         /// Update the application's tile with the most recent quote
         /// </summary>
         /// <param name="quote">The quote's content to update the tile with</param>
-        public void UpdateTile(Quote quote) {
+        public static void UpdateTile(Quote quote) {
+            XmlDocument tileXml = TileUpdateManager.GetTemplateContent(TileTemplateType.TileWideText09);
+            XmlNodeList tileTextAttributes = tileXml.GetElementsByTagName("text");
 
+            tileTextAttributes[0].InnerText = quote.Author;
+            tileTextAttributes[1].InnerText = quote.Content;
+
+            // Square tile
+            XmlDocument squareTileXml = TileUpdateManager.GetTemplateContent(TileTemplateType.TileSquare150x150Text02);
+            XmlNodeList squareTileTextAttributes = squareTileXml.GetElementsByTagName("text");
+            //squareTileTextAttributes[0].AppendChild(squareTileXml.CreateTextNode("Hello World! My very own tile notification"));
+            squareTileTextAttributes[0].InnerText = quote.Author;
+            squareTileTextAttributes[1].InnerText = quote.Content;
+
+            // Integration of the two tile templates
+            IXmlNode node = tileXml.ImportNode(squareTileXml.GetElementsByTagName("binding").Item(0), true);
+            tileXml.GetElementsByTagName("visual").Item(0).AppendChild(node);
+
+            // Tile Notification
+            TileNotification tileNotification = new TileNotification(tileXml);
+            TileUpdateManager.CreateTileUpdaterForApplication().Update(tileNotification);
         }
-                
+
         /// <summary>
         /// Delete HTML tags from the quote props and checks values
         /// </summary>

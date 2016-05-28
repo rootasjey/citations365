@@ -1,8 +1,9 @@
-﻿using citations365.Models;
+﻿using BackgroundTasks.Models;
 using System.IO.IsolatedStorage;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Background;
 
-namespace citations365.Controllers {
+namespace BackgroundTasks.Controllers {
     public class SettingsController
     {
         /*
@@ -23,6 +24,8 @@ namespace citations365.Controllers {
                 _userSettings = value;
             }
         }
+
+        string _taskName = "UpdateTodayQuoteTask";
 
         /*
          * ************
@@ -84,6 +87,33 @@ namespace citations365.Controllers {
 
             } catch (IsolatedStorageException exception) {
                 return false; // error
+            }
+        }
+
+        public void RegisterBackgroundTask() {
+            foreach (var task in BackgroundTaskRegistration.AllTasks) {
+                if (task.Value.Name == _taskName) {
+                    task.Value.Unregister(false);
+                    break;
+                }
+            }
+
+            var requestTask = BackgroundExecutionManager.RequestAccessAsync();
+
+            var builder = new BackgroundTaskBuilder();
+
+            builder.Name = _taskName;
+            builder.TaskEntryPoint = "BackgroundTasks.UpdateTodayQuote";
+            builder.SetTrigger(new TimeTrigger(15, false));
+            BackgroundTaskRegistration taskRegistered = builder.Register();
+        }
+
+        public void UnregisterBackgroundTask() {
+            foreach (var task in BackgroundTaskRegistration.AllTasks) {
+                if (task.Value.Name == _taskName) {
+                    task.Value.Unregister(false);
+                    break;
+                }
             }
         }
     }

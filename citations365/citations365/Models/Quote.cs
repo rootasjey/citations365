@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace citations365.Models {
+namespace BackgroundTasks.Models {
     public class Quote : INotifyPropertyChanged {
         private string _content;
         private string _author;

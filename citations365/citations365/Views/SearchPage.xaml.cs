@@ -1,5 +1,5 @@
-﻿using citations365.Controllers;
-using citations365.Models;
+﻿using BackgroundTasks.Controllers;
+using BackgroundTasks.Models;
 using System.Collections.Generic;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -7,7 +7,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
-namespace citations365.Views {
+namespace BackgroundTasks.Views {
     /// <summary>
     /// Une page vide peut être utilisée seule ou constituer une page de destination au sein d'un frame.
     /// </summary>

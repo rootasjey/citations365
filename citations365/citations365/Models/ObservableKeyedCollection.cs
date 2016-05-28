@@ -1,4 +1,4 @@
-﻿using citations365.Controllers;
+﻿using BackgroundTasks.Controllers;
 using HtmlAgilityPack;
 using System;
 using System.Collections.ObjectModel;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI.Xaml.Data;
 
-namespace citations365.Models {
+namespace BackgroundTasks.Models {
     public class ObservableKeyedCollection : KeyedCollection<string, Quote>,
         INotifyCollectionChanged, INotifyPropertyChanged, ISupportIncrementalLoading {
 

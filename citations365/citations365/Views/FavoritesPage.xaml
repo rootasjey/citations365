@@ -1,12 +1,12 @@
 ﻿<Page
-    x:Class="citations365.Views.FavoritesPage"
+    x:Class="BackgroundTasks.Views.FavoritesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:citations365.Views"
-    xmlns:controller="using:citations365.Controllers"
+    xmlns:local="using:BackgroundTasks.Views"
+    xmlns:controller="using:BackgroundTasks.Controllers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:Components="using:citations365.Components"
+    xmlns:Components="using:BackgroundTasks.Components"
     mc:Ignorable="d">
 
     <Page.Resources>

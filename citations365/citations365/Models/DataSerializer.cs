@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
 
-namespace citations365.Models {
+namespace BackgroundTasks.Models {
     public class DataSerializer<DataType> {
         public static async Task SaveObjectsAsync(DataType sourceData, String targetFileName) {
             StorageFile file = await ApplicationData.Current.LocalFolder.CreateFileAsync(targetFileName, CreationCollisionOption.ReplaceExisting);

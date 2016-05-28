@@ -1,5 +1,5 @@
-﻿using citations365.Models;
-using citations365.Views;
+﻿using BackgroundTasks.Models;
+using BackgroundTasks.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +17,7 @@ using Windows.UI.Xaml.Navigation;
 
 // Pour plus d'informations sur le modèle d'élément Page vierge, consultez la page http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
-namespace citations365 {
+namespace BackgroundTasks {
     /// <summary>
     /// The "chrome" layer of the app that provides top-level navigation with
     /// proper keyboarding navigation.

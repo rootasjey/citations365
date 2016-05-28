@@ -1,4 +1,4 @@
-﻿using citations365.Models;
+﻿using BackgroundTasks.Models;
 using HtmlAgilityPack;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -9,7 +9,7 @@ using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace citations365.Controllers {
+namespace BackgroundTasks.Controllers {
     public class TodayController
     {
         /*
