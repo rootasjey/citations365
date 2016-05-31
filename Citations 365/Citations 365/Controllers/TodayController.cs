@@ -126,7 +126,7 @@ namespace citations365.Controllers {
         public static void SyncFavorites(string key) {
             if (TodayCollection.Contains(key)) {
                 Quote quote = TodayCollection[key];
-                quote.IsFavorite = FavoritesController.GetFavoriteIcon(key);
+                quote.IsFavorite = FavoritesController.IsFavorite(key);
             }
         }
         

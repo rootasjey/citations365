@@ -48,9 +48,11 @@ namespace citations365.Views {
                 ListQuotes.ItemsSource = TodayController.TodayCollection;
 
                 NoContentView.Visibility = Visibility.Collapsed;
-                ListQuotes.Visibility = Visibility.Visible;
+                //ListQuotes.Visibility = Visibility.Visible;
 
                 //Controller.UpdateTile(TodayController.TodayCollection[0]);
+            } else {
+                ListQuotes.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -62,13 +64,13 @@ namespace citations365.Views {
                 // Remove from favorites
                 bool result = await FavoritesController.RemoveFavorite(quote);
                 if (result) {
-                    quote.IsFavorite = Quote.UnFavoriteIcon;
+                    quote.IsFavorite = false;
                 }
             } else {
                 // Add to favorites
                 bool result = await FavoritesController.AddFavorite(quote);
                 if (result) {
-                    quote.IsFavorite = Quote.FavoriteIcon;
+                    quote.IsFavorite = true;
                 }
             }
         }
@@ -80,6 +82,45 @@ namespace citations365.Views {
             if (quote.AuthorLink != null && quote.AuthorLink.Length > 0) {
                 Frame.Navigate(typeof(DetailAuthorPage), quote, new DrillInNavigationTransitionInfo());
             }
+        }
+
+        private async void ItemSwipeTriggerComplete(object sender, LLM.SwipeCompleteEventArgs args) {
+            LLM.LLMListViewItem item = (LLM.LLMListViewItem)sender;
+            Quote quote = (Quote)item.Content;
+
+            if (args.SwipeDirection == LLM.SwipeDirection.Left) {
+                
+            } else {
+                // Favorite/Un-Favorite
+                if (FavoritesController.IsFavorite(quote.Link)) {
+                    // Remove from favorites
+                    bool result = await FavoritesController.RemoveFavorite(quote);
+                    if (result) {
+                        quote.IsFavorite = false;
+                    }
+                } else {
+                    // Add to favorites
+                    bool result = await FavoritesController.AddFavorite(quote);
+                    if (result) {
+                        quote.IsFavorite = true;
+                    }
+                }
+            }
+        }
+
+        private void ItemSwipeTriggerInTouch(object sender, LLM.SwipeTriggerEventArgs args) {
+            var itemData = (sender as LLM.LLMListViewItem).Content as Quote;
+
+            if (args.SwipeDirection == LLM.SwipeDirection.Left) {
+                itemData.IsShared = args.IsTrigger;
+
+            } else {
+                itemData.IsFavorite = args.IsTrigger;             
+            }
+        }
+
+        private void ItemSwipeBeginRestore(object sender, LLM.SwipeReleaseEventArgs args) {
+
         }
     }
 }

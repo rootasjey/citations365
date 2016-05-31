@@ -373,8 +373,6 @@ namespace citations365.Models {
             quote.Content = DeleteHTMLTags(quote.Content);
             quote.Reference = DeleteHTMLTags(quote.Reference);
 
-            quote.IsFavorite = FavoritesController.GetFavoriteIcon(quote.Link);
-
             // Check values
             if (quote.Author.Contains("Vos avis")) {
                 quote.Author = "Anonyme";

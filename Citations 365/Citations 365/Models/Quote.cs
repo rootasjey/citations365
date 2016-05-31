@@ -9,7 +9,9 @@ namespace citations365.Models {
         private string _date;
         private string _reference;
         private string _link;
-        private char _isFavorite;
+        private char _favIcon;
+        private bool _isFavorite;
+        private bool _isShared = false;
 
         /// <summary>
         /// Favorite symbol icon
@@ -118,7 +120,19 @@ namespace citations365.Models {
             }
         }
 
-        public char IsFavorite {
+        public char FavIcon {
+            get {
+                return _favIcon;
+            }
+            set {
+                if (_favIcon != value) {
+                    _favIcon = value;
+                    NotifyPropertyChanged("FavIcon");
+                }
+            }
+        }
+
+        public bool IsFavorite {
             get {
                 return _isFavorite;
             }
@@ -126,6 +140,18 @@ namespace citations365.Models {
                 if (_isFavorite != value) {
                     _isFavorite = value;
                     NotifyPropertyChanged("IsFavorite");
+                }
+            }
+        }
+
+        public bool IsShared {
+            get {
+                return _isShared;
+            }
+            set {
+                if (_isShared != value) {
+                    _isShared = value;
+                    NotifyPropertyChanged("IsShared");
                 }
             }
         }

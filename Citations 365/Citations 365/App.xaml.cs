@@ -48,7 +48,7 @@ namespace citations365
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached) {
                 // disabled, obscures the hamburger button, enable if you need it
-                //this.DebugSettings.EnableFrameRateCounter = true;
+                this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
 

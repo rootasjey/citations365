@@ -91,16 +91,21 @@ namespace citations365.Controllers {
             }
         }
 
+        public bool IsLiveTaskActivated() {
+            foreach (var task in BackgroundTaskRegistration.AllTasks) {
+                if (task.Value.Name == _taskName) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void RegisterBackgroundTask() {
             foreach (var task in BackgroundTaskRegistration.AllTasks) {
                 if (task.Value.Name == _taskName) {
-                    task.Value.Unregister(false);
-                    break;
+                    return;
                 }
             }
-
-            //var requestTask = BackgroundExecutionManager.RequestAccessAsync();
-
             var builder = new BackgroundTaskBuilder();
 
             builder.Name = _taskName;

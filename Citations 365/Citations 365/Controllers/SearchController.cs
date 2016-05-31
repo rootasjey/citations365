@@ -123,7 +123,7 @@ namespace citations365.Controllers {
         public static void SyncFavorites(string key) {
             if (SearchCollection.Contains(key)) {
                 Quote quote = SearchCollection[key];
-                quote.IsFavorite = FavoritesController.GetFavoriteIcon(key);
+                quote.IsFavorite = FavoritesController.IsFavorite(key);
             }
         }
     }

@@ -129,7 +129,7 @@ namespace citations365.Controllers {
             }
 
             if (!_favoritesCollection.Contains(quote.Link)) {
-                quote.IsFavorite = Quote.FavoriteIcon;      // Update favorite icon
+                quote.IsFavorite = true;
                 FavoritesCollection.Add(quote);            // Add quote to favorites collection
                 return await SaveFavoritesCollection();     // Save the collection to storage
             }   return false;

@@ -6,11 +6,11 @@
     xmlns:controller="using:citations365.Controllers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:Components="using:citations365.Components"
     mc:Ignorable="d">
 
     <Page.Resources>
         <controller:FavoriteColorConverter x:Key="FavoriteColorConverter"/>
+        <controller:FavoriteIconConverter x:Key="FavoriteIconConverter"/>
     </Page.Resources>
     
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
@@ -58,7 +58,7 @@
                             </StackPanel>
                             <FontIcon Grid.Column="1" Tapped="Favorite_Tapped" 
                                       HorizontalAlignment="Left" 
-                                      Glyph="{Binding IsFavorite}"
+                                      Glyph="{Binding IsFavorite, Converter={StaticResource FavoriteIconConverter}}"
                                       Foreground="{Binding IsFavorite, Converter={StaticResource FavoriteColorConverter}}"
                                       FontSize="36" FontFamily="Segoe MDL2 Assets"/>
                         </Grid>

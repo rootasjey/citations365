@@ -11,6 +11,7 @@
 
     <Page.Resources>
         <controller:FavoriteColorConverter x:Key="FavoriteColorConverter"/>
+        <controller:FavoriteIconConverter x:Key="FavoriteIconConverter"/>
     </Page.Resources>
     
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -98,7 +99,7 @@
                                     </StackPanel>
                                     <FontIcon Grid.Column="1" Tapped="Favorite_Tapped" 
                                       HorizontalAlignment="Left" 
-                                      Glyph="{Binding IsFavorite}"
+                                      Glyph="{Binding IsFavorite, Converter={StaticResource FavoriteIconConverter}}"
                                       Foreground="{Binding IsFavorite, Converter={StaticResource FavoriteColorConverter}}"
                                       FontSize="36" FontFamily="Segoe MDL2 Assets"/>
                                 </Grid>

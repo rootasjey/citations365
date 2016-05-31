@@ -23,9 +23,7 @@ namespace citations365 {
 
         public Shell()
         {
-            this.InitializeComponent();
-
-            //this.Header = "ACCUEIL";
+            InitializeComponent();
 
             var vm = new ShellViewModel();
 
@@ -58,13 +56,13 @@ namespace citations365 {
             // select the first menu item
             vm.SelectedMenuItem = vm.MenuItems.First();
 
-            this.ViewModel = vm;
+            ViewModel = vm;
 
             // add entry animations
             var transitions = new TransitionCollection { };
             var transition = new NavigationThemeTransition { };
             transitions.Add(transition);
-            this.Frame.ContentTransitions = transitions;
+            Frame.ContentTransitions = transitions;
         }
 
         public ShellViewModel ViewModel { get; private set; }
@@ -73,12 +71,12 @@ namespace citations365 {
         {
             get
             {
-                if (this.Frame.SourcePageType != null) {
+                if (Frame.SourcePageType != null) {
                     //Header = Frame.SourcePageType.Name;
                     SetHeaderTitle(Frame.SourcePageType.Name);
                 }
                 
-                return this.Frame;
+                return Frame;
             }
         }
 
@@ -97,7 +95,7 @@ namespace citations365 {
                     VisualHeader.Text = "AUTEURS";
                     break;
                 case "SettingsPage":
-                    VisualHeader.Text = "PARAMETRES";
+                    VisualHeader.Text = "PARAMÈTRES";
                     break;
                 default:
                     VisualHeader.Text = name;

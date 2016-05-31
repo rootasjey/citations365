@@ -141,13 +141,13 @@ namespace citations365.Views {
                 // Remove from favorites
                 bool result = await FavoritesController.RemoveFavorite(quote);
                 if (result) {
-                    quote.IsFavorite = Quote.UnFavoriteIcon;
+                    quote.IsFavorite = false;
                 }
             } else {
                 // Add to favorites
                 bool result = await FavoritesController.AddFavorite(quote);
                 if (result) {
-                    quote.IsFavorite = Quote.FavoriteIcon;
+                    quote.IsFavorite = true;
                 }
             }
         }

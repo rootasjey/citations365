@@ -5,7 +5,6 @@
     xmlns:local="using:citations365.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:Components="using:citations365.Components"
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -13,38 +12,55 @@
             <PivotItem Header="réglages" Margin="10,20">
                 <StackPanel>
                     <RichTextBlock>
-                        <Paragraph FontWeight="Bold">TUILE DYNAMIQUES</Paragraph>
+                        <Paragraph FontWeight="Bold">TUILE DYNAMIQUE</Paragraph>
                         <Paragraph>
                             Activez cette option pour avoir 
-                            la citation du jour sur la tuile dynamique 
-                            de l'application ainsi que sur l'écran de verrouillage.
+                            la citation du jour sur la tuile de l'application
+                        </Paragraph>
+                    </RichTextBlock>                    
+                    <ToggleSwitch x:Name="TaskSwitch" Toggled="TaskSwitch_Toggled"/>
+
+                    <RichTextBlock Margin="0,24,0,0" Opacity="0.5">
+                        <Paragraph FontWeight="Bold">ÉCRAN DE VERROUILLAGE DYNAMIQUE (PAS ENCORE DISPONIBLE)</Paragraph>
+                        <Paragraph>
+                            Activez cette option pour avoir 
+                            la citation du jour sur l'écran de verrouillage du téléphone.
                         </Paragraph>
                     </RichTextBlock>
-                    
-                    <ToggleSwitch x:Name="TaskSwitch" Toggled="TaskSwitch_Toggled"/>
+                    <ToggleSwitch x:Name="LockscreenSwitch" Opacity="0.5" IsHitTestVisible="False" Toggled="LockscreenSwitch_Toggled"/>
+
+                    <Button x:Name="LockscreenButton" Content="écran de verrouillage" 
+                            Margin="0,34" Click="LockscreenButton_Click"/>
                 </StackPanel>                
             </PivotItem>
 
             <PivotItem Header="à propos" Margin="10,20">
                 <StackPanel>
-                    <RichTextBlock>
+                    <RichTextBlock x:Name="DataBox">
                         <Paragraph FontWeight="Bold">DONNÉES</Paragraph>
                         <Paragraph>
                             Les données des citations proviennent du site
-                            <Hyperlink>http://evene.lefigaro.fr/</Hyperlink>
-                            et cette application est entièrement indépendante de ce site.
-                        </Paragraph>
-
-                        <Paragraph FontWeight="Bold" Margin="0,20,0,0">FEEDBACK</Paragraph>
-                        <Paragraph>
-                            Si l'application vos plaît, laissez un commentaire dans le store.
-                        </Paragraph>
-                        
-                        <Paragraph Margin="0,20,0,0">
-                            Contactez-nous par mail si vous rencontrez des problèmes ou avez des remarques.
+                            <Hyperlink NavigateUri="http://evene.lefigaro.fr/">Evene</Hyperlink>
+                            et cette application n'est aucunement liée à la marque Evene
                         </Paragraph>
                     </RichTextBlock>
-                    <FontIcon Glyph="&#xE120;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>
+
+                    <RichTextBlock x:Name="NoteBox" Margin="0, 24,0,0">
+                        <Paragraph FontWeight="Bold" Margin="0,0,0,0">NOTATION</Paragraph>
+                        <Paragraph>
+                            N'hésitez pas à noter l'app sur le store si l'application vous plaît
+                        </Paragraph>                        
+                    </RichTextBlock>
+                    <Button x:Name="NoteButton" Content="noter l'app" Margin="0,12,0,24" Click="NoteButton_Click"/>
+
+                    <RichTextBlock x:Name="FeedbackBox">
+                        <Paragraph FontWeight="Bold" Margin="0,0,0,0">FEEDBACK</Paragraph>
+                        <Paragraph Margin="0,0,0,0">
+                            Envoyez un mail si vous rencontrez des problèmes ou si vous avez des remarques
+                        </Paragraph>
+                    </RichTextBlock>
+                    <Button x:Name="FeedbackButton" Content="envoyer un avis" Margin="0,12,0,0" Click="FeedbackButton_Click"/>
+                    <!--<FontIcon Glyph="&#xE120;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>-->
                 </StackPanel>
             </PivotItem>
         </Pivot>
