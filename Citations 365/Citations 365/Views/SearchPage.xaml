@@ -6,21 +6,21 @@
     xmlns:controller="using:citations365.Controllers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ctrl="using:LLM"
     mc:Ignorable="d">
 
     <Page.Resources>
+        <Color x:Key="SharedColor">#FF2980b9</Color>
+        <Color x:Key="FavoritedColor">#FFc0392b</Color>
         <controller:FavoriteColorConverter x:Key="FavoriteColorConverter"/>
         <controller:FavoriteIconConverter x:Key="FavoriteIconConverter"/>
+        <controller:FavoriteColorIconConverter x:Key="FavoriteColorIconConverter"/>
+        <controller:FavoriteSwypeColorConverter x:Key="FavoriteSwypeColorConverter"/>
+        <controller:ShareSwypeColorConverter x:Key="ShareSwypeColorConverter"/>
     </Page.Resources>
-    
+
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
           EntranceNavigationTransitionInfo.IsTargetElement="True">
-        
-        <!--<Components:PageHeader HorizontalAlignment="Left" Margin="50,0,0,0" VerticalAlignment="Top" Width="340" Height="59">
-            <ContentControl>
-                <TextBlock Text="RECHERCHE" FontSize="28" FontWeight="Light" FontFamily="Segoe UI" />
-            </ContentControl>
-        </Components:PageHeader>-->
 
         <Grid Margin="0,60,0,0">
             <StackPanel x:Name="NoContentView" VerticalAlignment="Center">
@@ -39,11 +39,57 @@
                     Text="Recherchez des citations par mot-clés"/>
             </StackPanel>
 
-            <ListView x:Name="ListQuotes" 
-                      Margin="40,0,50,0" 
-                      Visibility="Collapsed"
-                      SelectionMode="None"
-                      IsItemClickEnabled="True">
+            <ctrl:LLMListView x:Name="ListQuotes"
+                              Margin="40,0,50,0"
+                              Visibility="Collapsed"
+                              Canvas.ZIndex="1"
+                              IncrementalLoadingTrigger="Edge"
+                              SelectionMode="None"
+                              IsItemClickEnabled="True"
+                              ItemLeftSwipeMode="Collapse"
+                              ItemRightSwipeMode="Collapse"
+                              CanPullToRefresh="False"
+                              ItemLeftActionRateForSwipeLength="0.4"
+                              ItemRightActionRateForSwipeLength="0.4"
+                              ItemSwipeProgressInTouch="ItemSwipeProgressInTouch"
+                              ItemSwipeTriggerComplete="ItemSwipeTriggerComplete"
+                              ItemSwipeTriggerInTouch="ItemSwipeTriggerInTouch"
+                              ItemSwipeBeginTrigger="ItemSwipeBeginTrigger"
+                              ItemSwipeBeginRestore="ItemSwipeBeginRestore">
+                <ctrl:LLMListView.ItemLeftSwipeContentTemplate>
+                    <DataTemplate>
+                        <Grid Background="{Binding IsShared, Converter={StaticResource ShareSwypeColorConverter}, ConverterParameter={StaticResource SharedColor}}">
+                            <StackPanel x:Name="LeftPanel" HorizontalAlignment="Left" Orientation="Horizontal">
+                                <StackPanel.RenderTransform>
+                                    <TranslateTransform/>
+                                </StackPanel.RenderTransform>
+                                <TextBlock x:Name="LeftSwipeText" Margin="24,0,12,0" Foreground="White"
+                                           Text="Share" FontSize="18" FontWeight="Light" VerticalAlignment="Center"/>
+                                <FontIcon x:Name="LeftSwypeGlyph" FontSize="24" Glyph="&#xE72D;"  Foreground="white" 
+                                          VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12"
+                                          FontFamily="Segoe MDL2 Assets"/>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ctrl:LLMListView.ItemLeftSwipeContentTemplate>
+                <ctrl:LLMListView.ItemRightSwipeContentTemplate>
+                    <DataTemplate>
+                        <Grid Background="{Binding IsFavorite, Converter={StaticResource FavoriteSwypeColorConverter}, ConverterParameter={StaticResource FavoritedColor}}">
+                            <StackPanel x:Name="RightPanel" HorizontalAlignment="Right" Orientation="Horizontal">
+                                <StackPanel.RenderTransform>
+                                    <TranslateTransform/>
+                                </StackPanel.RenderTransform>
+                                <FontIcon x:Name="RightSwypeGlyph" FontSize="24" Glyph="{Binding IsFavorite, Converter={StaticResource FavoriteIconConverter}}" 
+                                          VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12"
+                                          Foreground="{Binding IsFavorite, Converter={StaticResource FavoriteColorIconConverter}}"
+                                          FontFamily="Segoe MDL2 Assets"/>
+                                <TextBlock x:Name="RightSwipeText" Margin="12,0,24,0" 
+                                           Text="Favorite" FontSize="18" FontWeight="Light" Foreground="White" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ctrl:LLMListView.ItemRightSwipeContentTemplate>
+
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -56,7 +102,8 @@
                                 <TextBlock Text="{Binding Author}" FontWeight="Normal" FontSize="18" TextWrapping="Wrap"/>
                                 <TextBlock Text="{Binding Reference}" FontWeight="Normal" FontSize="18" TextWrapping="WrapWholeWords"/>
                             </StackPanel>
-                            <FontIcon Grid.Column="1" Tapped="Favorite_Tapped" 
+                            <FontIcon Grid.Column="1" 
+                                      Tapped="Favorite_Tapped" 
                                       HorizontalAlignment="Left" 
                                       Glyph="{Binding IsFavorite, Converter={StaticResource FavoriteIconConverter}}"
                                       Foreground="{Binding IsFavorite, Converter={StaticResource FavoriteColorConverter}}"
@@ -71,12 +118,12 @@
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                     </Style>
                 </ListView.ItemContainerStyle>
-            </ListView>
+            </ctrl:LLMListView>
         </Grid>
 
         <CommandBar VerticalAlignment="Bottom">
-            <AppBarButton Icon="List" Label="Résultats" Click="ResultsButton_Click"/>
-            <AppBarButton Icon="Undo" Label="Nouvelle recherche" Click="NewSearchButton_Click"/>
+            <AppBarButton x:Name="CmdResults" Icon="List" Label="Résultats" Click="ResultsButton_Click"/>
+            <AppBarButton x:Name="CmdSearch" Icon="Undo" Label="Nouvelle recherche" Visibility="Collapsed" Click="NewSearchButton_Click"/>
         </CommandBar>
     </Grid>
 </Page>

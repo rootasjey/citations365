@@ -68,5 +68,71 @@ namespace citations365.Views
                 Frame.Navigate(typeof(DetailAuthorPage), quote, new DrillInNavigationTransitionInfo());
             }
         }
+
+        private async void ItemSwipeTriggerComplete(object sender, LLM.SwipeCompleteEventArgs args) {
+            LLM.LLMListViewItem item = (LLM.LLMListViewItem)sender;
+            Quote quote = (Quote)item.Content;
+
+            if (args.SwipeDirection == LLM.SwipeDirection.Left) {
+                quote.IsShared = false;
+                Controller.share(quote);
+
+            } else {
+                // Favorite/Un-Favorite
+                if (FavoritesController.IsFavorite(quote.Link)) {
+                    // Remove from favorites
+                    bool result = await FavoritesController.RemoveFavorite(quote);
+                    if (result) {
+                        quote.IsFavorite = false;
+                    }
+                } else {
+                    // Add to favorites
+                    bool result = await FavoritesController.AddFavorite(quote);
+                    if (result) {
+                        quote.IsFavorite = true;
+                    }
+                }
+            }
+        }
+
+        private void ItemSwipeTriggerInTouch(object sender, LLM.SwipeTriggerEventArgs args) {
+            var quote = (sender as LLM.LLMListViewItem).Content as Quote;
+
+            if (args.SwipeDirection == LLM.SwipeDirection.Left) {
+                quote.IsShared = args.IsTrigger;
+
+            } else {
+                quote.IsFavorite = FavoritesController.IsFavorite(quote) ? !args.IsTrigger : args.IsTrigger;
+            }
+        }
+
+        /* ************************
+         * VISUAL SWYPE (ITEM MOVE)
+         * ************************
+         */
+        private void ItemSwipeProgressInTouch(object sender, LLM.SwipeProgressEventArgs args) {
+            if (args.SwipeDirection == LLM.SwipeDirection.None)
+                return;
+
+            var panel = Controller.Getpanel(sender, args.SwipeDirection);
+            Controller.SwipeMovePanel(panel, args);
+        }
+
+        private void ItemSwipeBeginTrigger(object sender, LLM.SwipeReleaseEventArgs args) {
+            if (args.SwipeDirection == LLM.SwipeDirection.None)
+                return;
+
+            var panel = Controller.Getpanel(sender, args.SwipeDirection);
+            Controller.SwipeReleasePanel(panel, args);
+        }
+
+        private void ItemSwipeBeginRestore(object sender, LLM.SwipeReleaseEventArgs args) {
+            if (args.SwipeDirection == LLM.SwipeDirection.None)
+                return;
+
+            var panel = Controller.Getpanel(sender, args.SwipeDirection);
+            Controller.SwipeReleasePanel(panel, args);
+        }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using citations365.Presentation;
+﻿using citations365.Controllers;
+using citations365.Presentation;
 using System.Linq;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
@@ -24,6 +25,8 @@ namespace citations365 {
         public Shell()
         {
             InitializeComponent();
+
+            Controller.RegisterForShare();
 
             var vm = new ShellViewModel();
 
@@ -72,7 +75,6 @@ namespace citations365 {
             get
             {
                 if (Frame.SourcePageType != null) {
-                    //Header = Frame.SourcePageType.Name;
                     SetHeaderTitle(Frame.SourcePageType.Name);
                 }
                 

@@ -1,4 +1,5 @@
 ﻿using citations365.Models;
+using LLMListView;
 using System;
 using System.Text.RegularExpressions;
 using Windows.ApplicationModel.DataTransfer;
@@ -7,8 +8,10 @@ using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Notifications;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Animation;
 
 namespace citations365.Controllers {
     public class Controller {
@@ -28,7 +31,9 @@ namespace citations365.Controllers {
             }
         }
 
-        DataTransferManager _dataTransferManager;
+        static DataTransferManager _dataTransferManager;
+
+        private static Quote _sharedQuote;
 
         /*
          * ************
@@ -53,32 +58,35 @@ namespace citations365.Controllers {
         /// Open the Share UI with the quote's data (share on twitter, facebook, sms, ...)
         /// </summary>
         /// <param name="quote">The quote to share</param>
-        public void share(Quote quote)
-        {
-            // If the user clicks the share button, invoke the share flow programatically. 
+        public static void share(Quote quote) {
+            // If the user clicks the share button, invoke the share flow programatically.
+            _sharedQuote = quote; 
             DataTransferManager.ShowShareUI();
-
         }
 
-        private void RegisterForShare() {
+        public static void RegisterForShare() {
             _dataTransferManager = DataTransferManager.GetForCurrentView();
             _dataTransferManager.DataRequested += new TypedEventHandler<DataTransferManager,
-                DataRequestedEventArgs>(this.ShareTextHandler);
+                DataRequestedEventArgs>(ShareTextHandler);
         }
 
-        private void ShareTextHandler(DataTransferManager sender, DataRequestedEventArgs e) {
+        public static void ShareTextHandler(DataTransferManager sender, DataRequestedEventArgs e) {
+            string text = _sharedQuote.Content + " - " + _sharedQuote.Author;
+            if (!string.IsNullOrWhiteSpace(_sharedQuote.Reference)) {
+                text += " (" + _sharedQuote.Reference + ")";
+            }
+
             DataRequest request = e.Request;
-            request.Data.Properties.Title = "Share Text Example";
-            request.Data.Properties.Description = "A demonstration that shows how to share text.";
-            request.Data.SetText("Hello World!");
+            request.Data.Properties.Title = "Citations 365";
+            request.Data.Properties.Description = "Share a quote";
+            request.Data.SetText(text);
         }
 
         /// <summary>
         /// Copy the quote's content to the clipboard
         /// </summary>
         /// <param name="quote">The quote's content to copy</param>
-        public void Copy(Quote quote)
-        {
+        public void Copy(Quote quote) {
             DataPackage dataPackage = new DataPackage();
             dataPackage.RequestedOperation = DataPackageOperation.Copy;
             dataPackage.SetText(quote.Content + " - " + quote.Author);
@@ -164,8 +172,51 @@ namespace citations365.Controllers {
             return text;
         }
 
+
+        /* ***********************
+         * LISTVIEW SWYPE HERLPERS
+         * ***********************
+         */
+        public static StackPanel Getpanel(object sender, LLM.SwipeDirection direction) {
+            var llmItem = sender as LLM.LLMListViewItem;
+            StackPanel panel = null;
+
+            if (direction == LLM.SwipeDirection.Right) {
+                panel = llmItem.GetSwipeControl<StackPanel>(direction, "RightPanel");
+            } else {
+                panel = llmItem.GetSwipeControl<StackPanel>(direction, "LeftPanel");
+            }
+
+            return panel;
+        }
+
+        public static void SwipeMovePanel(StackPanel panel, LLM.SwipeProgressEventArgs args) {
+            var cumlative = Math.Abs(args.Cumulative);
+
+            if (panel == null && cumlative - panel.ActualWidth >= 0)
+                return;
+
+            if (args.CurrentRate < 0.3 && cumlative - panel.ActualWidth > 0) {
+                (panel.RenderTransform as TranslateTransform).X += args.Delta / 2;
+            } else if (args.CurrentRate >= 0.3 && args.CurrentRate < 0.4 && cumlative - panel.ActualWidth > 0) {
+                (panel.RenderTransform as TranslateTransform).X += args.Delta * 2;
+            } else {
+                (panel.RenderTransform as TranslateTransform).X = args.SwipeDirection == LLM.SwipeDirection.Left ? cumlative - panel.ActualWidth : panel.ActualHeight - cumlative;
+            }
+        }
+
+        public static void SwipeReleasePanel(StackPanel panel, LLM.SwipeReleaseEventArgs args) {
+            var story = new Storyboard();
+            var transform = panel.RenderTransform as TranslateTransform;
+            story.Children.Add(Utils.CreateDoubleAnimation(transform, "X", args.EasingFunc, args.ItemToX, args.Duration - 10));
+            story.Begin();
+        }
     }
 
+    /* **********
+     * CONVERTERS
+     * **********
+     */
     public class FavoriteColorConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, string language) {
             if ((bool)value) {
@@ -186,13 +237,6 @@ namespace citations365.Controllers {
                 return new SolidColorBrush((Color)parameter);
             }
             return new SolidColorBrush(new Color() { R = 231, G = 76, B = 60, A = 255 });
-            //var color = new Color();
-            //color.R = 236;
-            //color.G = 240;
-            //color.B = 241;
-            //color.A = 255;
-            //var redColor = new SolidColorBrush(color);
-            //return redColor;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language) {
@@ -215,13 +259,6 @@ namespace citations365.Controllers {
 
     public class FavoriteColorIconConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, string language) {
-            //var color = new Color();
-            //color.R = 236;
-            //color.G = 240;
-            //color.B = 241;
-            //color.A = 255;
-            //var redColor = new SolidColorBrush(color);
-            //return redColor;
             return new SolidColorBrush(Colors.White);
         }
 
@@ -236,7 +273,6 @@ namespace citations365.Controllers {
                 return new SolidColorBrush((Color)parameter);
             }
             return new SolidColorBrush(new Color() { R = 52, G = 152, B = 219, A = 255 });
-            //return new SolidColorBrush(new Color() { R = 236, G = 240, B = 241, A = 255 });
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language) {

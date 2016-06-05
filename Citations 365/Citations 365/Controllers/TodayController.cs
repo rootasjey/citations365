@@ -73,13 +73,8 @@ namespace citations365.Controllers {
         /// </summary>
         /// <returns>True if the data has been loaded</returns>
         public async Task<bool> LoadData() {
-            // Initialize the favorites collection
             await FavoritesController.Initialize();
 
-            //if (!IsDataLoaded()) {
-            //    return await GetTodayQuotes();
-            //}
-            //return false;
             if (IsDataLoaded()) {
                 return true;
             }

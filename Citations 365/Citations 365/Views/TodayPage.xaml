@@ -44,8 +44,10 @@
                               ItemRightSwipeMode="Collapse"
                               ItemLeftActionRateForSwipeLength="0.4"
                               ItemRightActionRateForSwipeLength="0.4"
+                              ItemSwipeProgressInTouch="ItemSwipeProgressInTouch"
                               ItemSwipeTriggerComplete="ItemSwipeTriggerComplete"
                               ItemSwipeTriggerInTouch="ItemSwipeTriggerInTouch"
+                              ItemSwipeBeginTrigger="ItemSwipeBeginTrigger"
                               ItemSwipeBeginRestore="ItemSwipeBeginRestore">
                 <ctrl:LLMListView.ItemLeftSwipeContentTemplate>
                     <DataTemplate>

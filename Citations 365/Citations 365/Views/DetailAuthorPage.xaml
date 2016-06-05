@@ -6,21 +6,20 @@
     xmlns:controller="using:citations365.Controllers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:Components="using:citations365.Components"
+    xmlns:ctrl="using:LLM"
     mc:Ignorable="d">
 
     <Page.Resources>
+        <Color x:Key="SharedColor">#FF2980b9</Color>
+        <Color x:Key="FavoritedColor">#FFc0392b</Color>
         <controller:FavoriteColorConverter x:Key="FavoriteColorConverter"/>
         <controller:FavoriteIconConverter x:Key="FavoriteIconConverter"/>
+        <controller:FavoriteColorIconConverter x:Key="FavoriteColorIconConverter"/>
+        <controller:FavoriteSwypeColorConverter x:Key="FavoriteSwypeColorConverter"/>
+        <controller:ShareSwypeColorConverter x:Key="ShareSwypeColorConverter"/>
     </Page.Resources>
-    
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <!--<Components:PageHeader HorizontalAlignment="Left" Margin="70,0,0,0" VerticalAlignment="Top" Width="340" Height="59">
-            <ContentControl>
-                <TextBlock x:Name="HeaderContent" Text="" FontSize="28" FontWeight="Light" FontFamily="Segoe UI" />
-            </ContentControl>
-        </Components:PageHeader>-->
 
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Pivot x:Name="PagePivot" Margin="60,60" SelectionChanged="PagePivot_SelectionChanged">
             <PivotItem Header="BIOGRAPHIE">
                 <Grid>
@@ -38,17 +37,17 @@
                                 </ImageBrush>
                             </Ellipse.Fill>
                         </Ellipse>
-                        <FontIcon Margin="0,-110,0,0" Glyph="&#xE13D;" 
+                        <FontIcon Margin="0,-110,0,0" Glyph="&#xE13D;"
                               Grid.Row="0"
-                              FontSize="46" 
-                              FontFamily="Segoe MDL2 Assets" 
-                              Foreground="White" 
+                              FontSize="46"
+                              FontFamily="Segoe MDL2 Assets"
+                              Foreground="White"
                               Canvas.ZIndex="2"/>
 
                         <TextBlock x:Name="LifeTime" TextAlignment="Center" Margin="0,12,0,0"/>
                         <TextBlock x:Name="Job" TextAlignment="Center"/>
                         <TextBlock x:Name="MainQuote" FontSize="24" TextAlignment="Center" TextWrapping="Wrap"/>
-                    </StackPanel>                    
+                    </StackPanel>
 
                     <ScrollViewer Name="ViewBio" Visibility="Collapsed" Margin="0,40" Grid.Row="1">
                         <TextBlock x:Name="ContentBio" FontSize="21" FontWeight="Light" TextWrapping="Wrap"/>
@@ -79,12 +78,57 @@
                             HorizontalAlignment="Center"
                             Text="Cet auteur n'a pas de célèbres citations :/"/>
                     </StackPanel>
-                    
-                    <ListView x:Name="ListQuotes" 
-                              Visibility="Collapsed" 
-                              Margin="-10,40,0,0"
+
+                    <ctrl:LLMListView x:Name="ListQuotes"
+                              Margin="40,0,50,0"
+                              Visibility="Visible"
+                              Canvas.ZIndex="1"
+                              IncrementalLoadingTrigger="Edge"
                               SelectionMode="None"
-                              IsItemClickEnabled="True">
+                              IsItemClickEnabled="True"
+                              ItemLeftSwipeMode="Collapse"
+                              ItemRightSwipeMode="Collapse"
+                              ItemLeftActionRateForSwipeLength="0.4"
+                              ItemRightActionRateForSwipeLength="0.4"
+                              ItemSwipeProgressInTouch="ItemSwipeProgressInTouch"
+                              ItemSwipeTriggerComplete="ItemSwipeTriggerComplete"
+                              ItemSwipeTriggerInTouch="ItemSwipeTriggerInTouch"
+                              ItemSwipeBeginTrigger="ItemSwipeBeginTrigger"
+                              ItemSwipeBeginRestore="ItemSwipeBeginRestore">
+                        <ctrl:LLMListView.ItemLeftSwipeContentTemplate>
+                            <DataTemplate>
+                                <Grid Background="{Binding IsShared, Converter={StaticResource ShareSwypeColorConverter}, ConverterParameter={StaticResource SharedColor}}">
+                                    <StackPanel x:Name="LeftPanel" HorizontalAlignment="Left" Orientation="Horizontal">
+                                        <StackPanel.RenderTransform>
+                                            <TranslateTransform/>
+                                        </StackPanel.RenderTransform>
+                                        <TextBlock x:Name="LeftSwipeText" Margin="24,0,12,0" Foreground="White"
+                                           Text="Share" FontSize="18" FontWeight="Light" VerticalAlignment="Center"/>
+                                        <FontIcon x:Name="LeftSwypeGlyph" FontSize="24" Glyph="&#xE72D;"  Foreground="white" 
+                                          VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12"
+                                          FontFamily="Segoe MDL2 Assets"/>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ctrl:LLMListView.ItemLeftSwipeContentTemplate>
+                        <ctrl:LLMListView.ItemRightSwipeContentTemplate>
+                            <DataTemplate>
+                                <Grid Background="{Binding IsFavorite, Converter={StaticResource FavoriteSwypeColorConverter}, ConverterParameter={StaticResource FavoritedColor}}">
+                                    <StackPanel x:Name="RightPanel" HorizontalAlignment="Right" Orientation="Horizontal">
+                                        <StackPanel.RenderTransform>
+                                            <TranslateTransform/>
+                                        </StackPanel.RenderTransform>
+                                        <FontIcon x:Name="RightSwypeGlyph" FontSize="24" Glyph="{Binding IsFavorite, Converter={StaticResource FavoriteIconConverter}}" 
+                                          VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12"
+                                          Foreground="{Binding IsFavorite, Converter={StaticResource FavoriteColorIconConverter}}"
+                                          FontFamily="Segoe MDL2 Assets"/>
+                                        <TextBlock x:Name="RightSwipeText" Margin="12,0,24,0" 
+                                           Text="Favorite" FontSize="18" FontWeight="Light" Foreground="White" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ctrl:LLMListView.ItemRightSwipeContentTemplate>
+
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -97,7 +141,8 @@
                                         <TextBlock Text="{Binding Author}" FontWeight="Normal" FontSize="18" TextWrapping="Wrap"/>
                                         <TextBlock Text="{Binding Reference}" FontWeight="Normal" FontSize="18" TextWrapping="WrapWholeWords"/>
                                     </StackPanel>
-                                    <FontIcon Grid.Column="1" Tapped="Favorite_Tapped" 
+                                    <FontIcon Grid.Column="1" 
+                                      Tapped="Favorite_Tapped" 
                                       HorizontalAlignment="Left" 
                                       Glyph="{Binding IsFavorite, Converter={StaticResource FavoriteIconConverter}}"
                                       Foreground="{Binding IsFavorite, Converter={StaticResource FavoriteColorConverter}}"
@@ -112,7 +157,7 @@
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                             </Style>
                         </ListView.ItemContainerStyle>
-                    </ListView>
+                    </ctrl:LLMListView>
                 </Grid>
             </PivotItem>
         </Pivot>

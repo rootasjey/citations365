@@ -1,8 +1,11 @@
 ﻿using citations365.Controllers;
 using citations365.Models;
+using LLMListView;
+using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 
 // Pour plus d'informations sur le modèle d'élément Page vierge, voir la page http://go.microsoft.com/fwlink/?LinkId=234238
@@ -30,7 +33,7 @@ namespace citations365.Views {
         /// Page Constructor
         /// </summary>
         public TodayPage() {
-            this.InitializeComponent();
+            InitializeComponent();
             Populate();
         }
 
@@ -48,7 +51,6 @@ namespace citations365.Views {
                 ListQuotes.ItemsSource = TodayController.TodayCollection;
 
                 NoContentView.Visibility = Visibility.Collapsed;
-                //ListQuotes.Visibility = Visibility.Visible;
 
                 //Controller.UpdateTile(TodayController.TodayCollection[0]);
             } else {
@@ -89,7 +91,9 @@ namespace citations365.Views {
             Quote quote = (Quote)item.Content;
 
             if (args.SwipeDirection == LLM.SwipeDirection.Left) {
-                
+                quote.IsShared = false;
+                Controller.share(quote);
+
             } else {
                 // Favorite/Un-Favorite
                 if (FavoritesController.IsFavorite(quote.Link)) {
@@ -107,20 +111,45 @@ namespace citations365.Views {
                 }
             }
         }
-
+        
         private void ItemSwipeTriggerInTouch(object sender, LLM.SwipeTriggerEventArgs args) {
-            var itemData = (sender as LLM.LLMListViewItem).Content as Quote;
+            var quote = (sender as LLM.LLMListViewItem).Content as Quote;
 
             if (args.SwipeDirection == LLM.SwipeDirection.Left) {
-                itemData.IsShared = args.IsTrigger;
+                quote.IsShared = args.IsTrigger;
 
             } else {
-                itemData.IsFavorite = args.IsTrigger;             
+                quote.IsFavorite = FavoritesController.IsFavorite(quote) ? !args.IsTrigger : args.IsTrigger;
             }
         }
 
-        private void ItemSwipeBeginRestore(object sender, LLM.SwipeReleaseEventArgs args) {
+        /* ************************
+         * VISUAL SWYPE (ITEM MOVE)
+         * ************************
+         */
+        private void ItemSwipeProgressInTouch(object sender, LLM.SwipeProgressEventArgs args) {
+            if (args.SwipeDirection == LLM.SwipeDirection.None)
+                return;
 
+            var panel = Controller.Getpanel(sender, args.SwipeDirection);
+            Controller.SwipeMovePanel(panel, args);
         }
+
+        private void ItemSwipeBeginTrigger(object sender, LLM.SwipeReleaseEventArgs args) {
+            if (args.SwipeDirection == LLM.SwipeDirection.None)
+                return;
+
+            var panel = Controller.Getpanel(sender, args.SwipeDirection);
+            Controller.SwipeReleasePanel(panel, args);
+        }
+
+        private void ItemSwipeBeginRestore(object sender, LLM.SwipeReleaseEventArgs args) {
+            if (args.SwipeDirection == LLM.SwipeDirection.None)
+                return;
+
+            var panel = Controller.Getpanel(sender, args.SwipeDirection);
+            Controller.SwipeReleasePanel(panel, args);
+        }
+
     }
 }

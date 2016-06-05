@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using citations365.Controllers;
 using System.Threading.Tasks;
 
 namespace citations365.Models {
@@ -62,6 +59,10 @@ namespace citations365.Models {
             }
 
             return await Fetch(url);
+        }
+
+        public override bool IsFavorite(Quote quote) {
+            return FavoritesController.IsFavorite(quote);
         }
     }
 }

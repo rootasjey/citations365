@@ -9,7 +9,6 @@ namespace citations365.Models {
         private string _date;
         private string _reference;
         private string _link;
-        private char _favIcon;
         private bool _isFavorite;
         private bool _isShared = false;
 
@@ -116,18 +115,6 @@ namespace citations365.Models {
             set {
                 if (_link != value) {
                     _link = value;
-                }
-            }
-        }
-
-        public char FavIcon {
-            get {
-                return _favIcon;
-            }
-            set {
-                if (_favIcon != value) {
-                    _favIcon = value;
-                    NotifyPropertyChanged("FavIcon");
                 }
             }
         }
