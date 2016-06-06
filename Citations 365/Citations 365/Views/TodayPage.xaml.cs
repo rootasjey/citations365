@@ -1,11 +1,8 @@
 ﻿using citations365.Controllers;
 using citations365.Models;
-using LLMListView;
-using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 
 // Pour plus d'informations sur le modèle d'élément Page vierge, voir la page http://go.microsoft.com/fwlink/?LinkId=234238
@@ -15,9 +12,6 @@ namespace citations365.Views {
     /// </summary>
     public sealed partial class TodayPage : Page
     {
-        /// <summary>
-        /// Today controller
-        /// </summary>
         private static TodayController _Tcontroller;
 
         public static TodayController Tcontroller {
@@ -28,36 +22,58 @@ namespace citations365.Views {
                 return _Tcontroller;
             }
         }
-
-        /// <summary>
-        /// Page Constructor
-        /// </summary>
+        
         public TodayPage() {
             InitializeComponent();
-            Populate();
+            PopulatePage();
         }
+        
+        public async void PopulatePage() {
+            ShowLoadingQuotesIndicator();
 
-        /// <summary>
-        /// Fill the page with data
-        /// </summary>
-        public async void Populate() {
             await Tcontroller.LoadData();
             BindCollectionToView();
+
+            HideLoadingQuotesIndicator();
         }
 
         private void BindCollectionToView() {
-            // Set the binding, show the list
             if (Tcontroller.IsDataLoaded()) {
+                ShowListQuotes();
                 ListQuotes.ItemsSource = TodayController.TodayCollection;
-
-                NoContentView.Visibility = Visibility.Collapsed;
-
                 //Controller.UpdateTile(TodayController.TodayCollection[0]);
+
             } else {
-                ListQuotes.Visibility = Visibility.Collapsed;
+                ShowNoQuotesView();
             }
         }
 
+        private void ShowLoadingQuotesIndicator() {
+            ViewLoadingQuote.Visibility = Visibility.Visible;
+            RingLoadingQuotes.IsActive = true;
+            RingLoadingQuotes.Visibility = Visibility.Visible;
+        }
+
+        private void HideLoadingQuotesIndicator() {
+            ViewLoadingQuote.Visibility = Visibility.Collapsed;
+            RingLoadingQuotes.IsActive = false;
+            RingLoadingQuotes.Visibility = Visibility.Collapsed;
+        }
+
+        private void ShowNoQuotesView() {
+            ListQuotes.Visibility = Visibility.Collapsed;
+            NoContentView.Visibility = Visibility.Visible;
+        }
+
+        private void ShowListQuotes() {
+            ListQuotes.Visibility = Visibility.Visible;
+            NoContentView.Visibility = Visibility.Collapsed;
+        }
+
+        /* ***************
+         * EVENTS HANDLERS
+         * ***************
+         */
         private async void Favorite_Tapped(object sender, TappedRoutedEventArgs e) {
             FontIcon icon = (FontIcon)sender;
             Quote quote = (Quote)icon.DataContext;

@@ -1,18 +1,9 @@
 ﻿using citations365.Controllers;
 using citations365.Models;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 // Pour plus d'informations sur le modèle d'élément Page vierge, voir la page http://go.microsoft.com/fwlink/?LinkId=234238
@@ -32,6 +23,8 @@ namespace citations365.Views {
             }
         }
 
+        private bool _isQuotesLoaded { get; set; }
+
         public DetailAuthorPage() {
             InitializeComponent();
         }
@@ -49,48 +42,56 @@ namespace citations365.Views {
                 url = author.Link;
                 imageLink = author.ImageLink;
 
-                Populate(name, url, imageLink);
+                PopulatePage(name, url, imageLink);
             } 
             else if (e.Parameter.GetType() == typeof(Quote)) {
                 Quote quote = (Quote)e.Parameter;
                 name = quote.Author;
                 url = quote.AuthorLink;
 
-                Populate(name, url);
+                PopulatePage(name, url);
             }
-            
         }
 
-        private async void Populate(string name, string url, 
+        private async void PopulatePage(string name, string url, 
             string imageLink = "ms-appx:///Assets/Icons/gray.png") {
+
+            ShowAuthorBioLoadingIndicator();
 
             PopulateHeader(name);
             AuthorInfos infos = await DAuthorController.LoadData(url);
 
+            HideAuthorBioLoadingIndicator();
+
             if (infos != null) {
                 PopulateBio(infos, imageLink);
                 ShowBio();
+
+            } else {
+                ShowNoBioView();
             }
         }
 
         private void PopulateHeader(string name) {
-            //HeaderContent.Text = name;
+            AuthorName.Text = name.Replace("De ", "").ToUpper();
         }
 
         private void PopulateBio(AuthorInfos infos, string imageLink) {
-            ContentBio.Text = infos.bio;
-            LifeTime.Text = infos.birth + " - " + infos.death;
-            Job.Text = infos.job;
-            MainQuote.Text = infos.quote;
-            AuthorImage.UriSource = new Uri(imageLink);
+            ContentBio.Text         = infos.bio;
+            LifeTime.Text           = infos.birth + " - " + infos.death;
+            Job.Text                = infos.job;
+            MainQuote.Text          = infos.quote;
+            AuthorImage.UriSource   = new Uri(imageLink);
         }
 
         private void ShowBio() {
             if (ContentBio.Text.Length < 1) {
+                ShowNoBioView();
                 return;
             }
+
             ViewBio.Visibility = Visibility.Visible;
-            NoContentViewBio.Visibility = Visibility.Collapsed;
+            //NoContentViewBio.Visibility = Visibility.Collapsed;
         }
 
         private void HideBio() {
@@ -98,13 +99,9 @@ namespace citations365.Views {
             NoContentViewBio.Visibility = Visibility.Visible;
         }
 
-        private void ShowQuotesLoading() {
-        }
-
-        private void HideQuotesLoading() {
-        }
-
         private void BindCollectionToView() {
+            _isQuotesLoaded = true;
+
             NoContentViewQuotes.Visibility = Visibility.Collapsed;
             ListQuotes.Visibility = Visibility.Visible;
             ListQuotes.ItemsSource = DAuthorController.AuthorQuotesCollection;
@@ -117,20 +114,58 @@ namespace citations365.Views {
         }
 
         private async void PopulateQuotes() {
-            if (DAuthorController.QuotesLoaded()) {
+            if (_isQuotesLoaded) {
                 return;
             }
 
-            // Load quotes if there aren't
+            if (DAuthorController.QuotesLoaded() && DAuthorController.isSameRequest()) {
+                BindCollectionToView();
+                return;
+            }
+
             if (DAuthorController.HasQuotes()) {
-                ShowQuotesLoading();
+                ShowQuotesLoadingIndicator();
                 bool result = await DAuthorController.FetchQuotes();
 
-                if (DAuthorController.AuthorQuotesCollection.Count > 0) {
+                HideQuotesLoadingIndicator();
+                if (result) {
                     BindCollectionToView();
+
+                } else {
+                    ShowNoQuotesView();
                 }
-                HideQuotesLoading();
             }
+        }
+
+        private void ShowQuotesLoadingIndicator() {
+            NoContentViewQuotes.Visibility = Visibility.Collapsed;
+            RingLoadingQuotes.IsActive = true;
+            RingLoadingQuotes.Visibility = Visibility.Visible;
+        }
+
+        private void HideQuotesLoadingIndicator() {
+            RingLoadingQuotes.IsActive = false;
+            RingLoadingQuotes.Visibility = Visibility.Collapsed;
+        }
+
+        private void ShowNoQuotesView() {
+            NoContentViewQuotes.Visibility = Visibility.Visible;
+            ListQuotes.Visibility = Visibility.Collapsed;
+        }
+
+        private void ShowAuthorBioLoadingIndicator() {
+            RingLoadingAuthorBio.IsActive = true;
+            RingLoadingAuthorBio.Visibility = Visibility.Visible;
+            NoContentViewBio.Visibility = Visibility.Collapsed;
+        }
+
+        private void HideAuthorBioLoadingIndicator() {
+            RingLoadingAuthorBio.IsActive = false;
+            RingLoadingAuthorBio.Visibility = Visibility.Collapsed;
+        }
+
+        private void ShowNoBioView() {
+            NoContentViewBio.Visibility = Visibility.Visible;
         }
 
         private async void Favorite_Tapped(object sender, TappedRoutedEventArgs e) {

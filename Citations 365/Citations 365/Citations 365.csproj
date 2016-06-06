@@ -17,8 +17,11 @@
     <EnableDotNetNativeCompatibleProfile>true</EnableDotNetNativeCompatibleProfile>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <PackageCertificateKeyFile>citations365_TemporaryKey.pfx</PackageCertificateKeyFile>
-    <PackageCertificateThumbprint>4399DFC664C5BFBD87A7BC7229EE342514ED8AD4</PackageCertificateThumbprint>
+    <PackageCertificateKeyFile>Citations 365_StoreKey.pfx</PackageCertificateKeyFile>
+    <PackageCertificateThumbprint>130D4F6EE72BADDE638C82859F8B01FCA2BF375F</PackageCertificateThumbprint>
+    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <AppxBundle>Always</AppxBundle>
+    <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
     <DebugSymbols>true</DebugSymbols>
@@ -92,6 +95,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
+    <None Include="Citations 365_StoreKey.pfx" />
     <None Include="citations365_TemporaryKey.pfx" />
     <None Include="project.json" />
   </ItemGroup>
@@ -140,6 +144,7 @@
   <ItemGroup>
     <Content Include="Assets\Icons\Contacts.svg" />
     <Content Include="Assets\Icons\gray.png" />
+    <None Include="Package.StoreAssociation.xml" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />

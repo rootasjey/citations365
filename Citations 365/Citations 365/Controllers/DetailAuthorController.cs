@@ -1,11 +1,8 @@
 ﻿using citations365.Models;
 using HtmlAgilityPack;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace citations365.Controllers {
@@ -34,6 +31,11 @@ namespace citations365.Controllers {
 
         private string _quotesLink { get; set; }
 
+        private string _lastURL { get; set; }
+
+        private AuthorInfos _lastAuthor { get; set; }
+
+        private bool _isSameRequest { get; set; }
         /*
          * ***********
          * CONSTRUCTOR
@@ -52,9 +54,25 @@ namespace citations365.Controllers {
          * ********
          */
         public async Task<AuthorInfos> LoadData(string url) {
-            AuthorQuotesCollection.Clear();
+            if (isSameRequest(url)) {
+                return _lastAuthor;
+            }
 
-            return await FetchBio(url);
+            SaveURL(url);
+            return _lastAuthor = await FetchBio(url);
+        }
+
+        private void SaveURL(string url) {
+            _lastURL = url;
+        }
+
+        public bool isSameRequest(string url) {
+            _isSameRequest = _lastURL == url;
+            return _isSameRequest;
+        }
+
+        public bool isSameRequest() {
+            return _isSameRequest;
         }
 
         public async Task<bool> Reload() {

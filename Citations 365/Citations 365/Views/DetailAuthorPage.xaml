@@ -20,6 +20,7 @@
     </Page.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <TextBlock x:Name="AuthorName" Text="AUTEUR" FontSize="24" FontWeight="Bold" Margin="72,40,0,0"/>
         <Pivot x:Name="PagePivot" Margin="60,60" SelectionChanged="PagePivot_SelectionChanged">
             <PivotItem Header="BIOGRAPHIE">
                 <Grid>
@@ -53,8 +54,7 @@
                         <TextBlock x:Name="ContentBio" FontSize="21" FontWeight="Light" TextWrapping="Wrap"/>
                     </ScrollViewer>
 
-                    <StackPanel x:Name="NoContentViewBio" Margin="0,0,0,0"
-                                 Grid.Row="1">
+                    <StackPanel x:Name="NoContentViewBio" Margin="0,0,0,0" Grid.Row="1">
                         <FontIcon Glyph="&#xE7BC;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>
                         <TextBlock 
                             Margin="40,0,40,0"
@@ -64,6 +64,13 @@
                             HorizontalAlignment="Center"
                             Text="Cet auteur n'a pas de biographie :|"/>
                     </StackPanel>
+
+                    <ProgressRing x:Name="RingLoadingAuthorBio" 
+                                  Height="80" Width="80" 
+                                  Grid.Row="1"
+                                  IsActive="False" 
+                                  Visibility="Collapsed" 
+                                  Canvas.ZIndex="3" />
                 </Grid>
             </PivotItem>
             <PivotItem Header="CITATIONS">
@@ -79,8 +86,14 @@
                             Text="Cet auteur n'a pas de célèbres citations :/"/>
                     </StackPanel>
 
+                    <ProgressRing x:Name="RingLoadingQuotes" 
+                                  Height="80" Width="80" 
+                                  IsActive="False" 
+                                  Visibility="Collapsed" 
+                                  Canvas.ZIndex="3" />
+
                     <ctrl:LLMListView x:Name="ListQuotes"
-                              Margin="40,0,50,0"
+                              Margin="-12,0,0,0"
                               Visibility="Visible"
                               Canvas.ZIndex="1"
                               IncrementalLoadingTrigger="Edge"
