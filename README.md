@@ -2,7 +2,7 @@
 A quotes app written for Windows 10
 
 # screenshot
-<img src="screenshot365.png" alt="citations365" height="350" />
+<img src="screenshot365.png" alt="citations365" height="400" />
 
 # features
 * a new quote every day
