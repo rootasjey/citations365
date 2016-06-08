@@ -120,7 +120,8 @@
                             <StackPanel Orientation="Horizontal" Height="48">
                                 <FontIcon x:Name="Glyph" FontSize="16" Glyph="{x:Bind SymbolAsChar}" 
                                           VerticalAlignment="Center" HorizontalAlignment="Center" 
-                                          ToolTipService.ToolTip="{x:Bind Label}" Margin="12"/>
+                                          ToolTipService.ToolTip="{x:Bind Label}" Margin="16,0,24,0"
+                                          Grid.RowSpan="2" />
                                 <TextBlock Grid.Column="1" Text="{x:Bind Label, Mode=OneWay}" 
                                            Style="{StaticResource MenuTitleTextBlockStyle}" />
                             </StackPanel>
