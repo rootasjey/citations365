@@ -220,10 +220,9 @@ namespace citations365.Controllers {
     public class FavoriteColorConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, string language) {
             if ((bool)value) {
-                // red color
-                return new SolidColorBrush(new Color() { R = 246, G = 71, B = 71, A = 255 });
+                return new SolidColorBrush(new Color() { R = 246, G = 71, B = 71, A = 255 }); // red color
             }
-            return Application.Current.Resources["ApplicationForegroundThemeBrush"]; ;
+            return Application.Current.Resources["ApplicationPageBackgroundThemeBrush"]; // ApplicationForegroundThemeBrush
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language) {
@@ -279,4 +278,35 @@ namespace citations365.Controllers {
             throw new NotImplementedException();
         }
     }
+
+    public class TextVisibilityConverter : IValueConverter {
+        public object Convert(object value, Type targetType, object parameter, string language) {
+            return string.IsNullOrEmpty((string)value) ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language) {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class UpperTextConverter : IValueConverter {
+        public object Convert(object value, Type targetType, object parameter, string language) {
+            return ((string)value).ToUpper();
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language) {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class EmptyViewVisibility : IValueConverter {
+        public object Convert(object value, Type targetType, object parameter, string language) {
+            return string.IsNullOrEmpty((string)value) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language) {
+            throw new NotImplementedException();
+        }
+    }
+    
 }

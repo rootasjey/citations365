@@ -2,6 +2,7 @@
 using System.IO.IsolatedStorage;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Background;
+using Windows.UI.Xaml;
 
 namespace citations365.Controllers {
     public class SettingsController
@@ -106,21 +107,42 @@ namespace citations365.Controllers {
                     return;
                 }
             }
+
+            BackgroundExecutionManager.RequestAccessAsync();
+
             var builder = new BackgroundTaskBuilder();
 
             builder.Name = _taskName;
             builder.TaskEntryPoint = _entryPoint;
-            builder.SetTrigger(new TimeTrigger(15, false));
+            builder.SetTrigger(new TimeTrigger(120, false));
             BackgroundTaskRegistration taskRegistered = builder.Register();
         }
 
         public void UnregisterBackgroundTask() {
             foreach (var task in BackgroundTaskRegistration.AllTasks) {
                 if (task.Value.Name == _taskName) {
+                    BackgroundExecutionManager.RemoveAccess();
                     task.Value.Unregister(false);
                     break;
                 }
             }
+        }
+
+        public void UpdateAppTheme(ApplicationTheme theme) {
+            userSettings.applicationTheme = theme;
+            SaveSettings();
+
+            // TODO: change theme dynamically
+            // update listview styles
+            //App._shell.RequestedTheme = (ElementTheme)theme;
+        }
+
+        public bool IsApplicationThemeLight() {
+            return ApplicationTheme.Light == userSettings.applicationTheme;
+        }
+
+        public ApplicationTheme GetAppTheme() {
+            return userSettings.applicationTheme;
         }
     }
 }

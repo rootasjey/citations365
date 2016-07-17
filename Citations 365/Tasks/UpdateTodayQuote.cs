@@ -1,10 +1,7 @@
 ﻿using HtmlAgilityPack;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tasks.Models;
@@ -12,8 +9,7 @@ using Windows.ApplicationModel.Background;
 using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
 
-namespace Tasks
-{
+namespace Tasks {
     public sealed class UpdateTodayQuote : IBackgroundTask {
         BackgroundTaskDeferral _deferral;
         string _url = "http://evene.lefigaro.fr/citations/citation-jour.php";

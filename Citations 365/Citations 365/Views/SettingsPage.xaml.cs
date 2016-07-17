@@ -35,10 +35,15 @@ namespace citations365.Views {
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
             UpdateTaskSwitcher();
+            UpdateThemeSwitcher();
         }
 
         private void UpdateTaskSwitcher() {
             TaskSwitch.IsOn = Scontroller.IsLiveTaskActivated();
+        }
+
+        private void UpdateThemeSwitcher() {
+            ThemeSwitch.IsOn = Scontroller.IsApplicationThemeLight();
         }
 
         /// <summary>
@@ -68,7 +73,6 @@ namespace citations365.Views {
         }
 
         private async void NoteButton_Click(object sender, RoutedEventArgs e) {
-            string appIdentifier = "2896fa7c-cc90-4288-8016-43d0eb4855e5";
             string appID = "9wzdncrcwfqr";
             var op = await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-windows-store://review/?ProductId=" + appID));
         }
@@ -76,6 +80,21 @@ namespace citations365.Views {
         private async void LockscreenButton_Click(object sender, RoutedEventArgs e) {
             // Launch URI for the lock screen settings screen. 
             var op = await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:lockscreen"));
+        }
+
+        private void ChangeTheme(ApplicationTheme theme) {
+            if (theme != Scontroller.GetAppTheme()) {
+                _Scontroller.UpdateAppTheme(theme);
+            }
+        }
+
+        private void ThemeSwitch_Toggled(object sender, RoutedEventArgs e) {
+            var toggle = (ToggleSwitch)sender;
+            if (toggle.IsOn) {
+                ChangeTheme(ApplicationTheme.Light);
+            } else {
+                ChangeTheme(ApplicationTheme.Dark);
+            }
         }
     }
 }

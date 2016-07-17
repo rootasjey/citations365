@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI.Xaml;
 
 namespace citations365.Models {
     public class UserSettings {
@@ -25,6 +26,20 @@ namespace citations365.Models {
         /// Bing Search secret key
         /// </summary>
         private const string _bingSearchKey = "pCzCBMoEJtZ76ni+ge9sbAYr5PXDfe2ksLPW63wxcVs= ";
+
+        private ApplicationTheme _applicationTheme = ApplicationTheme.Dark;
+
+        public ApplicationTheme applicationTheme {
+            get {
+                return _applicationTheme;
+            }
+
+            set {
+                if (_applicationTheme != value) {
+                    _applicationTheme = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Tells if the app is on offline mode

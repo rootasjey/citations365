@@ -1,5 +1,6 @@
 ﻿using citations365.Models;
 using HtmlAgilityPack;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
@@ -113,11 +114,13 @@ namespace citations365.Controllers {
                 _quotesLink = _quotesLink != null ? _quotesLink : "";
 
                 AuthorInfos infos = new AuthorInfos() {
-                    job = job,
-                    bio = Controller.DeleteHTMLTags(bio),
-                    birth = birth,
-                    death = death,
-                    quote = quote
+                    Biography = Controller.DeleteHTMLTags(bio),
+                    Birth = birth,
+                    Death = death,
+                    Picture = new Uri("ms-appx:///Assets/Icons/gray.png"),
+                    Job = job,
+                    LifeTime = birth + " - " + death,
+                    Quote = quote
                 };
 
                 return infos;
@@ -145,10 +148,12 @@ namespace citations365.Controllers {
     }
 
     public class AuthorInfos {
-        public string bio { get; set; }
-        public string birth { get; set; }
-        public string death { get; set; }
-        public string job { get; set; }
-        public string quote { get; set; }
+        public string Biography { get; set; }
+        public string Birth { get; set; }
+        public string Death { get; set; }
+        public string Job { get; set; }
+        public string Quote { get; set; }
+        public string LifeTime { get; set; }
+        public Uri Picture { get; set; }
     }
 }

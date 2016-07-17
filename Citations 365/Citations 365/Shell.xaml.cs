@@ -58,7 +58,6 @@ namespace citations365 {
 
             // select the first menu item
             vm.SelectedMenuItem = vm.MenuItems.First();
-
             ViewModel = vm;
 
             // add entry animations
@@ -75,14 +74,18 @@ namespace citations365 {
             get
             {
                 if (Frame.SourcePageType != null) {
-                    SetHeaderTitle(Frame.SourcePageType.Name);
+                    SetPageHeaderTitle(Frame.SourcePageType.Name);
                 }
                 
                 return Frame;
             }
         }
 
-        private void SetHeaderTitle(string name) {
+        /// <summary>
+        /// Set the related header when loading to a page
+        /// </summary>
+        /// <param name="name">page name</param>
+        private void SetPageHeaderTitle(string name) {
             switch (name) {
                 case "TodayPage":
                     VisualHeader.Text = "ACCEUIL";
@@ -103,6 +106,14 @@ namespace citations365 {
                     VisualHeader.Text = name;
                     break;
             }
+        }
+
+        /// <summary>
+        /// Set a custom header
+        /// </summary>
+        /// <param name="name">custom header's name</param>
+        public void SetHeaderTitle(string name) {
+            VisualHeader.Text = name;
         }
     }
 }

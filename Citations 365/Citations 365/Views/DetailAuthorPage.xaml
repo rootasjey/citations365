@@ -17,62 +17,73 @@
         <controller:FavoriteColorIconConverter x:Key="FavoriteColorIconConverter"/>
         <controller:FavoriteSwypeColorConverter x:Key="FavoriteSwypeColorConverter"/>
         <controller:ShareSwypeColorConverter x:Key="ShareSwypeColorConverter"/>
+        <controller:TextVisibilityConverter x:Key="TextVisibilityConverter"/>
+        <controller:UpperTextConverter x:Key="UpperTextConverter"/>
+        <controller:EmptyViewVisibility x:Key="EmptyViewVisibility"/>
     </Page.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <TextBlock x:Name="AuthorName" Text="AUTEUR" FontSize="24" FontWeight="Bold" Margin="72,40,0,0"/>
-        <Pivot x:Name="PagePivot" Margin="60,60" SelectionChanged="PagePivot_SelectionChanged">
+        <Pivot x:Name="PagePivot" Margin="0,0,0,0" SelectionChanged="PagePivot_SelectionChanged">
             <PivotItem Header="BIOGRAPHIE">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="240"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <StackPanel>
-                        <Ellipse Height="110" Width="110" Margin="0,40,0,0" Grid.Row="0">
-                            <Ellipse.Fill>
-                                <ImageBrush Stretch="UniformToFill">
-                                    <ImageBrush.ImageSource>
-                                        <BitmapImage x:Name="AuthorImage"/>
-                                    </ImageBrush.ImageSource>
-                                </ImageBrush>
-                            </Ellipse.Fill>
-                        </Ellipse>
-                        <FontIcon Margin="0,-110,0,0" Glyph="&#xE13D;"
-                              Grid.Row="0"
-                              FontSize="46"
-                              FontFamily="Segoe MDL2 Assets"
-                              Foreground="White"
-                              Canvas.ZIndex="2"/>
+                <ScrollViewer>
+                    <StackPanel x:Name="AuthorInfos">
+                        <StackPanel Margin="0,0,0,36">
+                            <Ellipse Height="110" Width="110" Margin="0,40,0,0">
+                                <Ellipse.Fill>
+                                    <ImageBrush Stretch="UniformToFill">
+                                        <ImageBrush.ImageSource>
+                                            <BitmapImage x:Name="AuthorImage" UriSource="{Binding Picture}"/>
+                                        </ImageBrush.ImageSource>
+                                    </ImageBrush>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <FontIcon Margin="0,-110,0,0" Glyph="&#xE13D;"
+                                  FontSize="46"
+                                  FontFamily="Segoe MDL2 Assets"
+                                  Foreground="White"
+                                  Canvas.ZIndex="2"/>
 
-                        <TextBlock x:Name="LifeTime" TextAlignment="Center" Margin="0,12,0,0"/>
-                        <TextBlock x:Name="Job" TextAlignment="Center"/>
-                        <TextBlock x:Name="MainQuote" FontSize="24" TextAlignment="Center" TextWrapping="Wrap"/>
+                            <TextBlock x:Name="LifeTime" Text="{Binding LifeTime}" TextAlignment="Center" Margin="0,12,0,0"
+                                       Visibility="{Binding Quote, Converter={StaticResource TextVisibilityConverter}}"/>
+                            <TextBlock x:Name="Job" Text="{Binding Job}" TextAlignment="Center" TextWrapping="Wrap"
+                                       Visibility="{Binding Quote, Converter={StaticResource TextVisibilityConverter}}"/>
+                            <TextBlock x:Name="MainQuote" 
+                                       Text="{Binding Quote, Converter={StaticResource UpperTextConverter}}" 
+                                       FontSize="24" TextAlignment="Center" 
+                                       Margin="0,36" TextWrapping="Wrap"
+                                       Visibility="{Binding Quote, Converter={StaticResource TextVisibilityConverter}}"/>
+                        </StackPanel>
+
+                         <TextBlock x:Name="ContentBio" 
+                                    Text="{Binding Biography}"
+                                    FontSize="21" 
+                                    FontWeight="Light" 
+                                    TextWrapping="Wrap"
+                                    Visibility="{Binding Biography, Converter={StaticResource TextVisibilityConverter}}"
+                                    Margin="0,0,0,80"/>
+
+                        <ItemsControl x:Name="NoContentViewBio"
+                                    Visibility="{Binding Biography, Converter={StaticResource EmptyViewVisibility}}">
+                            <FontIcon Glyph="&#xE7BC;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>
+                            <TextBlock 
+                                Margin="40,0,40,0"
+                                FontSize="24"
+                                FontWeight="Light"
+                                TextWrapping="Wrap"
+                                HorizontalAlignment="Center"
+                                Text="Cet auteur n'a pas de biographie :|"/>
+                        </ItemsControl>
+
+                        <ProgressRing x:Name="RingLoadingAuthorBio" 
+                                      Height="80" Width="80" 
+                                      Grid.Row="1"
+                                      IsActive="False" 
+                                      Visibility="Collapsed" 
+                                      Canvas.ZIndex="3" />
                     </StackPanel>
-
-                    <ScrollViewer Name="ViewBio" Visibility="Collapsed" Margin="0,40" Grid.Row="1">
-                        <TextBlock x:Name="ContentBio" FontSize="21" FontWeight="Light" TextWrapping="Wrap"/>
-                    </ScrollViewer>
-
-                    <StackPanel x:Name="NoContentViewBio" Margin="0,0,0,0" Grid.Row="1">
-                        <FontIcon Glyph="&#xE7BC;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>
-                        <TextBlock 
-                            Margin="40,0,40,0"
-                            FontSize="24"
-                            FontWeight="Light"
-                            TextWrapping="Wrap"
-                            HorizontalAlignment="Center"
-                            Text="Cet auteur n'a pas de biographie :|"/>
-                    </StackPanel>
-
-                    <ProgressRing x:Name="RingLoadingAuthorBio" 
-                                  Height="80" Width="80" 
-                                  Grid.Row="1"
-                                  IsActive="False" 
-                                  Visibility="Collapsed" 
-                                  Canvas.ZIndex="3" />
-                </Grid>
+                </ScrollViewer>
             </PivotItem>
+            
             <PivotItem Header="CITATIONS">
                 <Grid>
                     <StackPanel x:Name="NoContentViewQuotes" VerticalAlignment="Center" Margin="0,60,0,0">
@@ -93,7 +104,7 @@
                                   Canvas.ZIndex="3" />
 
                     <ctrl:LLMListView x:Name="ListQuotes"
-                              Margin="-12,0,0,0"
+                              Margin="0,0,0,0"
                               Visibility="Visible"
                               Canvas.ZIndex="1"
                               IncrementalLoadingTrigger="Edge"
@@ -144,22 +155,22 @@
 
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="50"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Margin="0,0,100,50" Grid.Column="0">
-                                        <TextBlock Text="{Binding Content}" FontWeight="Light" FontSize="24" TextWrapping="WrapWholeWords"/>
+                                <Grid Margin="24,50,40,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="17"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Grid.Column="0" Grid.Row="0">
+                                        <TextBlock Text="{Binding Content}" FontWeight="Light" FontSize="20" TextWrapping="WrapWholeWords"/>
                                         <TextBlock Text="{Binding Author}" FontWeight="Normal" FontSize="18" TextWrapping="Wrap"/>
-                                        <TextBlock Text="{Binding Reference}" FontWeight="Normal" FontSize="18" TextWrapping="WrapWholeWords"/>
+                                        <TextBlock Text="{Binding Reference}" FontWeight="Normal" FontSize="18" TextWrapping="WrapWholeWords"
+                                           Visibility="{Binding Reference, Converter={StaticResource TextVisibilityConverter}}"/>
                                     </StackPanel>
-                                    <FontIcon Grid.Column="1" 
-                                      Tapped="Favorite_Tapped" 
-                                      HorizontalAlignment="Left" 
-                                      Glyph="{Binding IsFavorite, Converter={StaticResource FavoriteIconConverter}}"
-                                      Foreground="{Binding IsFavorite, Converter={StaticResource FavoriteColorConverter}}"
-                                      FontSize="36" FontFamily="Segoe MDL2 Assets"/>
+                                    
+                                    <Rectangle Grid.Column="1" 
+                                       Grid.Row="1" 
+                                       Margin="0,7"
+                                       Fill="{Binding IsFavorite, Converter={StaticResource FavoriteColorConverter}}"/>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>

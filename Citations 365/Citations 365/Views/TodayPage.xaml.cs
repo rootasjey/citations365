@@ -41,7 +41,7 @@ namespace citations365.Views {
             if (Tcontroller.IsDataLoaded()) {
                 ShowListQuotes();
                 ListQuotes.ItemsSource = TodayController.TodayCollection;
-                //Controller.UpdateTile(TodayController.TodayCollection[0]);
+                Controller.UpdateTile(TodayController.TodayCollection[0]);
 
             } else {
                 ShowNoQuotesView();

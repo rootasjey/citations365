@@ -27,7 +27,7 @@
         </StackPanel>
 
         <GridView  x:Name="AuthorsGrid"
-                   Margin="0,120,0,0" HorizontalAlignment="Center"
+                   Margin="0,0,0,0" HorizontalAlignment="Center"
                    Visibility="Collapsed">
             <GridView.ItemTemplate>
                 <DataTemplate>

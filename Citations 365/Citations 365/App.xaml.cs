@@ -1,40 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+﻿using citations365.Controllers;
+using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Foundation.Metadata;
 using Windows.Phone.UI.Input;
-using Windows.UI;
 using Windows.UI.Core;
-using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-namespace citations365
-{
+namespace citations365 {
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>
     sealed partial class App : Application
     {
+        // TODO: Check this external var doesn't create unexpected behavior
+        // or memory leaks
+        private static Shell _privateShell;
+        public static Shell _shell {
+            get {
+                return _privateShell;
+            }
+            set {
+                _privateShell = value;
+            }
+        }
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
         /// </summary>
         public App()
         {
-            this.InitializeComponent();
-            this.Suspending += OnSuspending;
+            InitializeComponent();
+            Suspending += OnSuspending;
+
+            AppLoadSettings();            
+        }
+
+        private async void AppLoadSettings() {
+            await SettingsController.LoadSettings();
+            ChangeAppTheme();
+        }
+
+        public void ChangeAppTheme() {
+            RequestedTheme = SettingsController.userSettings.applicationTheme;
         }
 
         /// <summary>
@@ -59,6 +69,8 @@ namespace citations365
             if (shell == null) {
                 // Create a Shell which navigates to the first page
                 shell = new Shell();
+
+                _shell = shell; // keep an external ref
 
                 // hook-up shell root frame navigation events
                 shell.RootFrame.NavigationFailed += OnNavigationFailed;

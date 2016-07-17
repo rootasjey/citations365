@@ -42,61 +42,35 @@ namespace citations365.Views {
                 url = author.Link;
                 imageLink = author.ImageLink;
 
-                PopulatePage(name, url, imageLink);
+                GetPageData(name, url);
             } 
             else if (e.Parameter.GetType() == typeof(Quote)) {
                 Quote quote = (Quote)e.Parameter;
                 name = quote.Author;
                 url = quote.AuthorLink;
 
-                PopulatePage(name, url);
+                GetPageData(name, url);
             }
         }
 
-        private async void PopulatePage(string name, string url, 
-            string imageLink = "ms-appx:///Assets/Icons/gray.png") {
-
+        private async void GetPageData(string name, string url) {
             ShowAuthorBioLoadingIndicator();
 
             PopulateHeader(name);
             AuthorInfos infos = await DAuthorController.LoadData(url);
+            BindAuthorDataContext(infos);
 
             HideAuthorBioLoadingIndicator();
-
-            if (infos != null) {
-                PopulateBio(infos, imageLink);
-                ShowBio();
-
-            } else {
-                ShowNoBioView();
-            }
         }
 
         private void PopulateHeader(string name) {
-            AuthorName.Text = name.Replace("De ", "").ToUpper();
+            var _name = name.Replace("De ", "").ToUpper();
+            //AuthorName.Text = _name;
+            App._shell.SetHeaderTitle(_name);
         }
 
-        private void PopulateBio(AuthorInfos infos, string imageLink) {
-            ContentBio.Text         = infos.bio;
-            LifeTime.Text           = infos.birth + " - " + infos.death;
-            Job.Text                = infos.job;
-            MainQuote.Text          = infos.quote;
-            AuthorImage.UriSource   = new Uri(imageLink);
-        }
-
-        private void ShowBio() {
-            if (ContentBio.Text.Length < 1) {
-                ShowNoBioView();
-                return;
-            }
-
-            ViewBio.Visibility = Visibility.Visible;
-            //NoContentViewBio.Visibility = Visibility.Collapsed;
-        }
-
-        private void HideBio() {
-            ViewBio.Visibility = Visibility.Collapsed;
-            NoContentViewBio.Visibility = Visibility.Visible;
+        private void BindAuthorDataContext(AuthorInfos authorInfos) {
+            AuthorInfos.DataContext = authorInfos;
         }
 
         private void BindCollectionToView() {
@@ -156,7 +130,6 @@ namespace citations365.Views {
         private void ShowAuthorBioLoadingIndicator() {
             RingLoadingAuthorBio.IsActive = true;
             RingLoadingAuthorBio.Visibility = Visibility.Visible;
-            NoContentViewBio.Visibility = Visibility.Collapsed;
         }
 
         private void HideAuthorBioLoadingIndicator() {
@@ -164,9 +137,6 @@ namespace citations365.Views {
             RingLoadingAuthorBio.Visibility = Visibility.Collapsed;
         }
 
-        private void ShowNoBioView() {
-            NoContentViewBio.Visibility = Visibility.Visible;
-        }
 
         private async void Favorite_Tapped(object sender, TappedRoutedEventArgs e) {
             FontIcon icon = (FontIcon)sender;

@@ -7,61 +7,72 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Pivot x:Name="PivotSettings" Margin="60,60">
+    <Grid x:Name="SettingsGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+          EntranceNavigationTransitionInfo.IsTargetElement="True">
+        <Pivot x:Name="PivotSettings" Margin="40,0">
             <PivotItem Header="réglages" Margin="10,20">
-                <StackPanel>
-                    <RichTextBlock>
-                        <Paragraph FontWeight="Bold">TUILE DYNAMIQUE</Paragraph>
-                        <Paragraph>
-                            Activez cette option pour avoir 
-                            la citation du jour sur la tuile de l'application
-                        </Paragraph>
-                    </RichTextBlock>                    
-                    <ToggleSwitch x:Name="TaskSwitch" Toggled="TaskSwitch_Toggled"/>
+                <ScrollViewer>
+                    <StackPanel>
+                        <TextBlock Text="THÈME (REDÉMARRAGE REQUIS)" FontWeight="Bold"/>
+                        <ToggleSwitch x:Name="ThemeSwitch" Margin="0,0,0,24"
+                                      OnContent="Theme Clair"
+                                      OffContent="Thème Sombre"
+                                      Toggled="ThemeSwitch_Toggled"/>
 
-                    <RichTextBlock Margin="0,24,0,0" Opacity="0.5">
-                        <Paragraph FontWeight="Bold">ÉCRAN DE VERROUILLAGE DYNAMIQUE (PAS ENCORE DISPONIBLE)</Paragraph>
-                        <Paragraph>
-                            Activez cette option pour avoir 
-                            la citation du jour sur l'écran de verrouillage du téléphone.
-                        </Paragraph>
-                    </RichTextBlock>
-                    <ToggleSwitch x:Name="LockscreenSwitch" Opacity="0.5" IsHitTestVisible="False" Toggled="LockscreenSwitch_Toggled"/>
+                        <RichTextBlock>
+                            <Paragraph FontWeight="Bold">TUILE DYNAMIQUE</Paragraph>
+                            <Paragraph>
+                                Activez cette option pour avoir 
+                                la citation du jour sur la tuile de l'application
+                            </Paragraph>
+                        </RichTextBlock>                    
+                        <ToggleSwitch x:Name="TaskSwitch" Toggled="TaskSwitch_Toggled"/>
 
-                    <Button x:Name="LockscreenButton" Content="écran de verrouillage" 
-                            Margin="0,34" Click="LockscreenButton_Click"/>
-                </StackPanel>                
+                        <RichTextBlock Margin="0,24,0,0" Opacity="0.5">
+                            <Paragraph FontWeight="Bold">ÉCRAN DE VERROUILLAGE DYNAMIQUE (PAS ENCORE DISPONIBLE)</Paragraph>
+                            <Paragraph>
+                                Activez cette option pour avoir 
+                                la citation du jour sur l'écran de verrouillage du téléphone.
+                            </Paragraph>
+                        </RichTextBlock>
+                        <ToggleSwitch x:Name="LockscreenSwitch" Opacity="0.5" IsHitTestVisible="False" Toggled="LockscreenSwitch_Toggled"/>
+
+                        <Button x:Name="LockscreenButton" Content="écran de verrouillage" 
+                                Margin="0,34" Click="LockscreenButton_Click"/>
+                    </StackPanel>
+                </ScrollViewer>
             </PivotItem>
 
             <PivotItem Header="à propos" Margin="10,20">
-                <StackPanel>
-                    <RichTextBlock x:Name="DataBox">
-                        <Paragraph FontWeight="Bold">DONNÉES</Paragraph>
-                        <Paragraph>
-                            Les données des citations proviennent du site
-                            <Hyperlink NavigateUri="http://evene.lefigaro.fr/">Evene</Hyperlink>
-                            et cette application n'est aucunement liée à la marque Evene
-                        </Paragraph>
-                    </RichTextBlock>
+                <ScrollViewer>
+                    <StackPanel>
+                        <RichTextBlock x:Name="DataBox">
+                            <Paragraph FontWeight="Bold">DONNÉES</Paragraph>
+                            <Paragraph>
+                                Les données des citations proviennent du site
+                                <Hyperlink NavigateUri="http://evene.lefigaro.fr/">Evene</Hyperlink>
+                                et cette application n'est aucunement liée à la marque Evene
+                            </Paragraph>
+                        </RichTextBlock>
 
-                    <RichTextBlock x:Name="NoteBox" Margin="0, 24,0,0">
-                        <Paragraph FontWeight="Bold" Margin="0,0,0,0">NOTATION</Paragraph>
-                        <Paragraph>
-                            N'hésitez pas à noter l'app sur le store si l'application vous plaît
-                        </Paragraph>                        
-                    </RichTextBlock>
-                    <Button x:Name="NoteButton" Content="noter l'app" Margin="0,12,0,24" Click="NoteButton_Click"/>
+                        <RichTextBlock x:Name="NoteBox" Margin="0, 24,0,0">
+                            <Paragraph FontWeight="Bold" Margin="0,0,0,0">NOTATION</Paragraph>
+                            <Paragraph>
+                                N'hésitez pas à noter l'app sur le store si l'application vous plaît
+                            </Paragraph>                        
+                        </RichTextBlock>
+                        <Button x:Name="NoteButton" Content="noter l'app" Margin="0,12,0,24" Click="NoteButton_Click"/>
 
-                    <RichTextBlock x:Name="FeedbackBox">
-                        <Paragraph FontWeight="Bold" Margin="0,0,0,0">FEEDBACK</Paragraph>
-                        <Paragraph Margin="0,0,0,0">
-                            Envoyez un mail si vous rencontrez des problèmes ou si vous avez des remarques
-                        </Paragraph>
-                    </RichTextBlock>
-                    <Button x:Name="FeedbackButton" Content="envoyer un avis" Margin="0,12,0,0" Click="FeedbackButton_Click"/>
-                    <!--<FontIcon Glyph="&#xE120;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>-->
-                </StackPanel>
+                        <RichTextBlock x:Name="FeedbackBox">
+                            <Paragraph FontWeight="Bold" Margin="0,0,0,0">FEEDBACK</Paragraph>
+                            <Paragraph Margin="0,0,0,0">
+                                Envoyez un mail si vous rencontrez des problèmes ou si vous avez des remarques
+                            </Paragraph>
+                        </RichTextBlock>
+                        <Button x:Name="FeedbackButton" Content="envoyer un avis" Margin="0,12,0,0" Click="FeedbackButton_Click"/>
+                        <!--<FontIcon Glyph="&#xE120;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>-->
+                    </StackPanel>
+                </ScrollViewer>
             </PivotItem>
         </Pivot>
     </Grid>
