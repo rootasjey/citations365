@@ -35,6 +35,8 @@ namespace citations365.Views {
             BindCollectionToView();
 
             HideLoadingQuotesIndicator();
+
+            RefreshBackground();
         }
 
         private void BindCollectionToView() {
@@ -68,6 +70,15 @@ namespace citations365.Views {
         private void ShowListQuotes() {
             ListQuotes.Visibility = Visibility.Visible;
             NoContentView.Visibility = Visibility.Collapsed;
+        }
+
+        private async void RefreshBackground() {
+            string url = await Tcontroller.GetAppBackgroundURL();
+
+            if (!string.IsNullOrEmpty(url) && 
+                url != PageBackground.UriSource?.OriginalString) {
+                PageBackground.UriSource = new System.Uri(url);
+            }
         }
 
         /* ***************
@@ -167,5 +178,12 @@ namespace citations365.Views {
             Controller.SwipeReleasePanel(panel, args);
         }
 
+        private void ListQuotes_ItemClick(object sender, ItemClickEventArgs e) {
+            Quote quote = (Quote)e.ClickedItem;
+
+            if (quote.AuthorLink != null && quote.AuthorLink.Length > 0) {
+                Frame.Navigate(typeof(DetailAuthorPage), quote, new DrillInNavigationTransitionInfo());
+            }
+        }
     }
 }

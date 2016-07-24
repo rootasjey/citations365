@@ -281,6 +281,12 @@ namespace citations365.Views {
             Controller.SwipeReleasePanel(panel, args);
         }
 
+        private void ListQuotes_ItemClick(object sender, ItemClickEventArgs e) {
+            Quote quote = (Quote)e.ClickedItem;
 
+            if (quote.AuthorLink != null && quote.AuthorLink.Length > 0) {
+                Frame.Navigate(typeof(DetailAuthorPage), quote, new DrillInNavigationTransitionInfo());
+            }
+        }
     }
 }

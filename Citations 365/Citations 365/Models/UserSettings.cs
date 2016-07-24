@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.UI.Xaml;
+﻿using Windows.UI.Xaml;
 
 namespace citations365.Models {
     public class UserSettings {
@@ -20,7 +15,11 @@ namespace citations365.Models {
         /// <summary>
         /// Tells which background style the user chosed
         /// </summary>
-        private string _appBackground = "default";
+        private string _appBackground = "";
+
+        private string _appBackgroundURL = "";
+
+        private string _appBackgroundName = "";
 
         /// <summary>
         /// Bing Search secret key
@@ -44,7 +43,7 @@ namespace citations365.Models {
         /// <summary>
         /// Tells if the app is on offline mode
         /// </summary>
-        public bool offline {
+        public bool Offline {
             get {
                 return _offline;
             }
@@ -72,7 +71,7 @@ namespace citations365.Models {
         /// <summary>
         /// Tells which background style the user chosed
         /// </summary>
-        public string appBackground {
+        public string AppBackground {
             get {
                 return _appBackground;
             }
@@ -83,10 +82,32 @@ namespace citations365.Models {
             }
         }
 
+        public string AppBackgroundURL {
+            get {
+                return _appBackgroundURL;
+            }
+            set {
+                if (value != _appBackgroundURL) {
+                    _appBackgroundURL = value;
+                }
+            }
+        }
+
+        public string AppBackgroundName {
+            get {
+                return _appBackgroundName;
+            }
+            set {
+                if (value != _appBackgroundName) {
+                    _appBackgroundName = value;
+                }
+            }
+        }
+
         /// <summary>
         /// Tells which background style the user chosed
         /// </summary>
-        public string bingSearchKey {
+        public string BingSearchKey {
             get {
                 return _bingSearchKey;
             }

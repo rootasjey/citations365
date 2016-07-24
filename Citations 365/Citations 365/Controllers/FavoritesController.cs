@@ -118,6 +118,10 @@ namespace citations365.Controllers {
             return FavoritesCollection != null;
         }
 
+        public static bool HasItems() {
+            return FavoritesCollection.Count > 0;
+        }
+
         /// <summary>
         /// Add a quote into favorites in save the list
         /// </summary>

@@ -65,7 +65,6 @@ namespace citations365.Views {
 
         private void PopulateHeader(string name) {
             var _name = name.Replace("De ", "").ToUpper();
-            //AuthorName.Text = _name;
             App._shell.SetHeaderTitle(_name);
         }
 
@@ -220,6 +219,10 @@ namespace citations365.Views {
 
             var panel = Controller.Getpanel(sender, args.SwipeDirection);
             Controller.SwipeReleasePanel(panel, args);
+        }
+
+        private void ListQuotes_ItemClick(object sender, ItemClickEventArgs e) {
+
         }
     }
 }

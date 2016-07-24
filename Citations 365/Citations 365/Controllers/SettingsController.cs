@@ -1,7 +1,11 @@
-﻿using citations365.Models;
+﻿using citations365.Helpers;
+using citations365.Models;
+using System;
 using System.IO.IsolatedStorage;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Background;
+using Windows.Storage;
+using Windows.System.UserProfile;
 using Windows.UI.Xaml;
 
 namespace citations365.Controllers {
@@ -143,6 +147,74 @@ namespace citations365.Controllers {
 
         public ApplicationTheme GetAppTheme() {
             return userSettings.applicationTheme;
+        }
+
+        public bool IsAppBackgroundDynamic() {
+            return !string.IsNullOrEmpty(userSettings.AppBackground);
+        }
+
+        public static string GetAppBackground() {
+            return userSettings.AppBackground;
+        }
+
+        public static string GetAppBackgroundURL() {
+            return userSettings.AppBackgroundURL;
+        }
+
+        public async void UpdateAppBackground(string background) {
+            if (userSettings.AppBackground == background) {
+                return;
+            }
+
+            TodayController.backgroundChanged = true;
+            userSettings.AppBackground = background;
+            SaveSettings();
+        }
+
+        public static async void UpdateAppBackgroundURL(string url) {
+            if (userSettings.AppBackgroundURL == url) {
+                return;
+            }
+
+            userSettings.AppBackgroundURL = url;
+            SaveSettings();
+        }
+
+        public static async void UpdateAppBackgroundName(string name) {
+            if (userSettings.AppBackgroundName == name) {
+                return;
+            }
+
+            userSettings.AppBackgroundName = name;
+            SaveSettings();
+        }
+
+        public static string GetAppBackgroundName() {
+            return userSettings.AppBackgroundName;
+        }
+
+        public static string GenerateAppBackgroundName() {
+            string previousName = userSettings.AppBackgroundName;
+
+            string name1 = "wall1.png";
+            string name2 = "wall2.png";
+
+            if (previousName == name1) {
+                return name2;
+            }
+            return name1;
+        }
+
+        // Pass in a relative path to a file inside the local appdata folder 
+        public async Task<bool> SetWallpaperAsync() {
+            bool success = false;
+
+            if (UserProfilePersonalizationSettings.IsSupported()) {
+                StorageFile file = await ImageHelper.GetLockscreenImage(GetAppBackgroundName());
+                UserProfilePersonalizationSettings profileSettings = UserProfilePersonalizationSettings.Current;
+                success = await profileSettings.TrySetLockScreenImageAsync(file);
+            }
+            return success;
         }
     }
 }

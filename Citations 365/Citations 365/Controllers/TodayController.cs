@@ -1,4 +1,5 @@
-﻿using citations365.Models;
+﻿using citations365.Helpers;
+using citations365.Models;
 using HtmlAgilityPack;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -8,6 +9,7 @@ using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace citations365.Controllers {
     public class TodayController
@@ -31,6 +33,23 @@ namespace citations365.Controllers {
         /// Save a quote object which is in the viewport
         /// </summary>
         public static Quote _lastPosition;
+
+        private static bool _backgroundChanged = false;
+
+        public static bool backgroundChanged {
+            get {
+                return _backgroundChanged;
+            }
+            set {
+                if (value != _backgroundChanged) {
+                    _backgroundChanged = value;
+                }
+            }
+        }
+
+        private string nasaURL = "http://apod.nasa.gov/apod/astropix.html";
+
+        private string unsplashURL = "https://unsplash.it/1080?random";
 
         /*
          * ************
@@ -151,6 +170,66 @@ namespace citations365.Controllers {
         /// </summary>
         public void SavePosition() {
 
+        }
+
+        public async Task<string> GetAppBackgroundURL() {
+            if (!backgroundChanged) {
+                return SettingsController.GetAppBackgroundURL();
+            }
+
+            string background = SettingsController.GetAppBackground();
+            string backgroundURL = "";
+            backgroundChanged = false;
+
+            switch (background) {
+                case "nasa":
+                    backgroundURL = await GetNasaImage();
+                    break;
+                case "unsplash":
+                    backgroundURL = unsplashURL;
+                    break;
+                default:
+                    backgroundURL = "";
+                    break;
+            }
+
+            string name = SettingsController.GenerateAppBackgroundName();
+
+            StorageFile wallpaper = await ImageHelper.SaveLockscreenImage(name, new System.Uri(backgroundURL));
+            SettingsController.UpdateAppBackgroundURL(wallpaper.Path);
+            SettingsController.UpdateAppBackgroundName(name);
+            return wallpaper.Path;
+        }
+
+        private async Task<string> GetNasaImage() {
+            HttpClient httpClient = new HttpClient();
+            HttpResponseMessage response = null;
+            try {
+                response = await httpClient.GetAsync("http://apod.nasa.gov/apod/");
+                response.EnsureSuccessStatusCode();
+                string responseBodyAsText = await response.Content.ReadAsStringAsync();
+
+                HtmlDocument doc = new HtmlDocument();
+                doc.LoadHtml(responseBodyAsText);
+
+                string start = "<a";
+                string end = ".jpg";
+
+                Regex regex = new Regex(start + "(.*?)" + end);
+                MatchCollection matches = regex.Matches(responseBodyAsText);
+
+                if (matches.Count > 0) {
+                    return "http://apod.nasa.gov/apod/" + matches[0].ToString().Substring(9);
+                }
+
+                return GetDefaultNasaImage();
+            } catch {
+                return GetDefaultNasaImage();
+            }
+        }
+
+        private string GetDefaultNasaImage() {
+            return "/Assets/Backgrounds/nasa.jpg";
         }
     }
 }

@@ -3,24 +3,10 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:citations365.Views"
-    xmlns:controller="using:citations365.Controllers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ctrl="using:LLM"
     mc:Ignorable="d">
-
-    <Page.Resources>
-        <Color x:Key="SharedColor">#FF2980b9</Color>
-        <Color x:Key="FavoritedColor">#FFc0392b</Color>
-        <controller:FavoriteColorConverter x:Key="FavoriteColorConverter"/>
-        <controller:FavoriteIconConverter x:Key="FavoriteIconConverter"/>
-        <controller:FavoriteColorIconConverter x:Key="FavoriteColorIconConverter"/>
-        <controller:FavoriteSwypeColorConverter x:Key="FavoriteSwypeColorConverter"/>
-        <controller:ShareSwypeColorConverter x:Key="ShareSwypeColorConverter"/>
-        <controller:TextVisibilityConverter x:Key="TextVisibilityConverter"/>
-        <controller:UpperTextConverter x:Key="UpperTextConverter"/>
-        <controller:EmptyViewVisibility x:Key="EmptyViewVisibility"/>
-    </Page.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Pivot x:Name="PagePivot" Margin="0,0,0,0" SelectionChanged="PagePivot_SelectionChanged">
@@ -43,15 +29,16 @@
                                   Foreground="White"
                                   Canvas.ZIndex="2"/>
 
-                            <TextBlock x:Name="LifeTime" Text="{Binding LifeTime}" TextAlignment="Center" Margin="0,12,0,0"
-                                       Visibility="{Binding Quote, Converter={StaticResource TextVisibilityConverter}}"/>
+                            <TextBlock x:Name="LifeTime" Text="{Binding LifeTime, Converter={StaticResource UpperText}}" TextAlignment="Center" Margin="0,12,0,0"
+                                       Visibility="{Binding Quote, Converter={StaticResource TextVisibility}}"/>
                             <TextBlock x:Name="Job" Text="{Binding Job}" TextAlignment="Center" TextWrapping="Wrap"
-                                       Visibility="{Binding Quote, Converter={StaticResource TextVisibilityConverter}}"/>
+                                       Visibility="{Binding Quote, Converter={StaticResource TextVisibility}}"/>
                             <TextBlock x:Name="MainQuote" 
-                                       Text="{Binding Quote, Converter={StaticResource UpperTextConverter}}" 
+                                       Text="{Binding Quote, Converter={StaticResource UpperText}}" 
                                        FontSize="24" TextAlignment="Center" 
+                                       FontWeight="Bold"
                                        Margin="0,36" TextWrapping="Wrap"
-                                       Visibility="{Binding Quote, Converter={StaticResource TextVisibilityConverter}}"/>
+                                       Visibility="{Binding Quote, Converter={StaticResource TextVisibility}}"/>
                         </StackPanel>
 
                          <TextBlock x:Name="ContentBio" 
@@ -59,7 +46,7 @@
                                     FontSize="21" 
                                     FontWeight="Light" 
                                     TextWrapping="Wrap"
-                                    Visibility="{Binding Biography, Converter={StaticResource TextVisibilityConverter}}"
+                                    Visibility="{Binding Biography, Converter={StaticResource TextVisibility}}"
                                     Margin="0,0,0,80"/>
 
                         <ItemsControl x:Name="NoContentViewBio"
@@ -110,6 +97,9 @@
                               IncrementalLoadingTrigger="Edge"
                               SelectionMode="None"
                               IsItemClickEnabled="True"
+                              ItemClick="ListQuotes_ItemClick"
+                              ItemContainerStyle="{StaticResource ListViewItemFill}"
+                              ItemTemplate="{StaticResource QuoteTemplate}"
                               ItemLeftSwipeMode="Collapse"
                               ItemRightSwipeMode="Collapse"
                               ItemLeftActionRateForSwipeLength="0.4"
@@ -121,7 +111,7 @@
                               ItemSwipeBeginRestore="ItemSwipeBeginRestore">
                         <ctrl:LLMListView.ItemLeftSwipeContentTemplate>
                             <DataTemplate>
-                                <Grid Background="{Binding IsShared, Converter={StaticResource ShareSwypeColorConverter}, ConverterParameter={StaticResource SharedColor}}">
+                                <Grid Background="{Binding IsShared, Converter={StaticResource ShareSwypeColor}, ConverterParameter={StaticResource SharedColor}}">
                                     <StackPanel x:Name="LeftPanel" HorizontalAlignment="Left" Orientation="Horizontal">
                                         <StackPanel.RenderTransform>
                                             <TranslateTransform/>
@@ -137,14 +127,14 @@
                         </ctrl:LLMListView.ItemLeftSwipeContentTemplate>
                         <ctrl:LLMListView.ItemRightSwipeContentTemplate>
                             <DataTemplate>
-                                <Grid Background="{Binding IsFavorite, Converter={StaticResource FavoriteSwypeColorConverter}, ConverterParameter={StaticResource FavoritedColor}}">
+                                <Grid Background="{Binding IsFavorite, Converter={StaticResource FavoriteSwypeColor}, ConverterParameter={StaticResource FavoritedColor}}">
                                     <StackPanel x:Name="RightPanel" HorizontalAlignment="Right" Orientation="Horizontal">
                                         <StackPanel.RenderTransform>
                                             <TranslateTransform/>
                                         </StackPanel.RenderTransform>
-                                        <FontIcon x:Name="RightSwypeGlyph" FontSize="24" Glyph="{Binding IsFavorite, Converter={StaticResource FavoriteIconConverter}}" 
+                                        <FontIcon x:Name="RightSwypeGlyph" FontSize="24" Glyph="{Binding IsFavorite, Converter={StaticResource FavoriteIcon}}" 
                                           VerticalAlignment="Center" HorizontalAlignment="Center" Margin="12"
-                                          Foreground="{Binding IsFavorite, Converter={StaticResource FavoriteColorIconConverter}}"
+                                          Foreground="{Binding IsFavorite, Converter={StaticResource FavoriteColorIcon}}"
                                           FontFamily="Segoe MDL2 Assets"/>
                                         <TextBlock x:Name="RightSwipeText" Margin="12,0,24,0" 
                                            Text="Favorite" FontSize="18" FontWeight="Light" Foreground="White" VerticalAlignment="Center" />
@@ -152,35 +142,6 @@
                                 </Grid>
                             </DataTemplate>
                         </ctrl:LLMListView.ItemRightSwipeContentTemplate>
-
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="24,50,40,0">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*"/>
-                                        <RowDefinition Height="17"/>
-                                    </Grid.RowDefinitions>
-                                    <StackPanel Grid.Column="0" Grid.Row="0">
-                                        <TextBlock Text="{Binding Content}" FontWeight="Light" FontSize="20" TextWrapping="WrapWholeWords"/>
-                                        <TextBlock Text="{Binding Author}" FontWeight="Normal" FontSize="18" TextWrapping="Wrap"/>
-                                        <TextBlock Text="{Binding Reference}" FontWeight="Normal" FontSize="18" TextWrapping="WrapWholeWords"
-                                           Visibility="{Binding Reference, Converter={StaticResource TextVisibilityConverter}}"/>
-                                    </StackPanel>
-                                    
-                                    <Rectangle Grid.Column="1" 
-                                       Grid.Row="1" 
-                                       Margin="0,7"
-                                       Fill="{Binding IsFavorite, Converter={StaticResource FavoriteColorConverter}}"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Setter Property="HorizontalAlignment" Value="Stretch"/>
-                                <Setter Property="VerticalContentAlignment" Value="Stretch" />
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                            </Style>
-                        </ListView.ItemContainerStyle>
                     </ctrl:LLMListView>
                 </Grid>
             </PivotItem>

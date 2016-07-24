@@ -12,10 +12,13 @@ using Windows.UI.Notifications;
 namespace Tasks {
     public sealed class UpdateTodayQuote : IBackgroundTask {
         BackgroundTaskDeferral _deferral;
+        volatile bool _cancelRequested = false;
         string _url = "http://evene.lefigaro.fr/citations/citation-jour.php";
 
         public async void Run(IBackgroundTaskInstance taskInstance) {
             _deferral = taskInstance.GetDeferral();
+
+            taskInstance.Canceled += new BackgroundTaskCanceledEventHandler(OnCanceled);
 
             BackgroundQuote recent = await Fetch(_url);
             UpdateTile(recent);
@@ -143,6 +146,13 @@ namespace Tasks {
             // Tile Notification
             TileNotification tileNotification = new TileNotification(tileXml);
             TileUpdateManager.CreateTileUpdaterForApplication().Update(tileNotification);
+        }
+
+        private void OnCanceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason) {
+            //
+            // Indicate that the background task is canceled.
+            //
+            _cancelRequested = true;
         }
     }
 }

@@ -36,6 +36,7 @@ namespace citations365.Views {
             base.OnNavigatedTo(e);
             UpdateTaskSwitcher();
             UpdateThemeSwitcher();
+            UpdateAppBackgroundSwitcher();
         }
 
         private void UpdateTaskSwitcher() {
@@ -95,6 +96,50 @@ namespace citations365.Views {
             } else {
                 ChangeTheme(ApplicationTheme.Dark);
             }
+        }
+
+        private void UpdateAppBackgroundSwitcher() {
+            AppBackgroundgSwitch.IsOn = Scontroller.IsAppBackgroundDynamic();
+
+            if (AppBackgroundgSwitch.IsOn) {
+                UpdateAppBackgroundChooser();
+            }
+        }
+
+        private void UpdateAppBackgroundChooser() {
+            string background = SettingsController.GetAppBackground();
+            switch (background) {
+                case "nasa":
+                    nasa.IsChecked = true;
+                    break;
+                case "unsplash":
+                    unsplash.IsChecked = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void AppBgSwitch_Toggled(object sender, RoutedEventArgs e) {
+            var toggle = (ToggleSwitch)sender;
+
+            if (toggle.IsOn) {
+                BackgroundChooser.Visibility = Visibility.Visible;
+            } else {
+                BackgroundChooser.Visibility = Visibility.Collapsed;
+                Scontroller.UpdateAppBackground("");
+            }
+        }
+
+        private void Background_Choosed(object sender, RoutedEventArgs e) {
+            var radioButton = (RadioButton)sender;
+            string background = radioButton.Name;
+
+            Scontroller.UpdateAppBackground(background);
+        }
+
+        private void SetLockscreen_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e) {
+            Scontroller.SetWallpaperAsync();
         }
     }
 }

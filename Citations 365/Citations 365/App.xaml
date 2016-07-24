@@ -3,9 +3,48 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:citations365"
-    xmlns:presentation="using:citations365.Presentation">
+    xmlns:presentation="using:citations365.Presentation"
+    xmlns:converters="using:citations365.Converters">
     
     <Application.Resources>
+        <converters:EmptyViewVisibility x:Key="EmptyViewVisibility"/>
+        <converters:FavoriteColor x:Key="FavoriteColor"/>
+        <converters:FavoriteColorIcon x:Key="FavoriteColorIcon"/>
+        <converters:FavoriteIcon x:Key="FavoriteIcon"/>
+        <converters:FavoriteSwypeColor x:Key="FavoriteSwypeColor"/>
+        <converters:ShareSwypeColor x:Key="ShareSwypeColor"/>
+        <converters:TextVisibility x:Key="TextVisibility"/>
+        <converters:UpperText x:Key="UpperText"/>
+
+        <Color x:Key="SharedColor">#FF2980b9</Color>
+        <Color x:Key="FavoritedColor">#FFc0392b</Color>
+
+        <DataTemplate x:Key="QuoteTemplate">
+            <Grid Margin="40,25,40,25">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="17"/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Column="0" Grid.Row="0">
+                    <TextBlock Text="{Binding Content}" FontWeight="Light" FontSize="20" TextWrapping="WrapWholeWords"/>
+                    <TextBlock Text="{Binding Author, Converter={StaticResource UpperText}}" FontWeight="Bold" FontSize="14" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding Reference, Converter={StaticResource UpperText}}" FontWeight="Normal" FontSize="12" TextWrapping="WrapWholeWords"
+                                           Visibility="{Binding Reference, Converter={StaticResource TextVisibility}}"/>
+                </StackPanel>
+                
+                <Rectangle Grid.Column="1" 
+                           Grid.Row="1" 
+                           Margin="0,7"
+                           Fill="{Binding IsFavorite, Converter={StaticResource FavoriteColor}}"/>
+            </Grid>
+        </DataTemplate>
+
+        <Style x:Key="ListViewItemFill" TargetType="ListViewItem">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        </Style>
+
         <Style x:Key="AppTitleTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
             <Setter Property="Margin" Value="6,6,0,6" />
             <Setter Property="VerticalAlignment" Value="Center" />

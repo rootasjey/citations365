@@ -13,11 +13,25 @@
             <PivotItem Header="réglages" Margin="10,20">
                 <ScrollViewer>
                     <StackPanel>
-                        <TextBlock Text="THÈME (REDÉMARRAGE REQUIS)" FontWeight="Bold"/>
-                        <ToggleSwitch x:Name="ThemeSwitch" Margin="0,0,0,24"
+                        <StackPanel Margin="0,0,0,20">
+                            <TextBlock Text="THÈME (REDÉMARRAGE REQUIS)" FontWeight="Bold"/>
+                            <ToggleSwitch x:Name="ThemeSwitch"
                                       OnContent="Theme Clair"
                                       OffContent="Thème Sombre"
                                       Toggled="ThemeSwitch_Toggled"/>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,20">
+                            <TextBlock Text="IMAGE DU JOUR" FontWeight="Bold"/>
+                            <ToggleSwitch x:Name="AppBackgroundgSwitch" Toggled="AppBgSwitch_Toggled"/>
+
+                            <StackPanel x:Name="BackgroundChooser" Visibility="Collapsed">
+                                <Button x:Name="SetLockscreen" Content="Appliquer à l'écran de verrouillage"
+                                        Margin="0,10" Tapped="SetLockscreen_Tapped"/>
+                                <RadioButton x:Name="nasa" GroupName="AppBackground" Checked="Background_Choosed">Nasa</RadioButton>
+                                <RadioButton x:Name="unsplash" GroupName="AppBackground" Checked="Background_Choosed">Unsplash</RadioButton>
+                            </StackPanel>
+                        </StackPanel>
 
                         <RichTextBlock>
                             <Paragraph FontWeight="Bold">TUILE DYNAMIQUE</Paragraph>

@@ -206,14 +206,14 @@ namespace citations365.Models {
                     var authorAndReference = q.Descendants("div").Where(x => x.GetAttributeValue("class", "") == "figsco__fake__col-9").FirstOrDefault();
 
                     if (content == null) continue; // check if this is a valid quote
-                    if (authorAndReference == null) continue; // ------------------------------
+                    if (authorAndReference == null) continue;
 
                     var authorNode = authorAndReference.Descendants("a").FirstOrDefault();
-                    string authorName = "De Anonyme";
+                    string authorName = "Anonyme";
                     string authorLink = "";
 
                     if (authorNode != null) { // if the quote as an author
-                        authorName = "De " + authorNode.InnerText;
+                        authorName = authorNode.InnerText.StartsWith("Vos avis") ? authorName : authorNode.InnerText;
                         authorLink = "http://www.evene.fr" + authorNode.GetAttributeValue("href", "");
                     }
 
