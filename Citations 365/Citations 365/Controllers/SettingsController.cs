@@ -33,6 +33,9 @@ namespace citations365.Controllers {
         string _taskName = "UpdateTodayQuoteTask";
         string _entryPoint = "Tasks.UpdateTodayQuote";
 
+        string _backgroundTaskName = "UpdateBackground";
+        string _backgroundEntryPoint = "Tasks.UpdateBackground";
+
         /*
          * ************
          * CONSTRUCTOR
@@ -96,18 +99,27 @@ namespace citations365.Controllers {
             }
         }
 
-        public bool IsLiveTaskActivated() {
+        public bool IsQuoteTaskActivated() {
             foreach (var task in BackgroundTaskRegistration.AllTasks) {
-                if (task.Value.Name == _taskName) {
+                if (task.Value.Name == GetTaskQuoteName()) {
                     return true;
                 }
             }
             return false;
         }
 
-        public void RegisterBackgroundTask() {
+        public bool IsWallTaskActivated() {
             foreach (var task in BackgroundTaskRegistration.AllTasks) {
-                if (task.Value.Name == _taskName) {
+                if (task.Value.Name == GetTaskBackgroundName()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void RegisterBackgroundTask(string taskName, string entryPoint) {
+            foreach (var task in BackgroundTaskRegistration.AllTasks) {
+                if (task.Value.Name == taskName) {
                     return;
                 }
             }
@@ -116,20 +128,36 @@ namespace citations365.Controllers {
 
             var builder = new BackgroundTaskBuilder();
 
-            builder.Name = _taskName;
-            builder.TaskEntryPoint = _entryPoint;
+            builder.Name = taskName;
+            builder.TaskEntryPoint = entryPoint;
             builder.SetTrigger(new TimeTrigger(120, false));
             BackgroundTaskRegistration taskRegistered = builder.Register();
         }
 
-        public void UnregisterBackgroundTask() {
+        public void UnregisterBackgroundTask(string taskName) {
             foreach (var task in BackgroundTaskRegistration.AllTasks) {
-                if (task.Value.Name == _taskName) {
+                if (task.Value.Name == taskName) {
                     BackgroundExecutionManager.RemoveAccess();
                     task.Value.Unregister(false);
                     break;
                 }
             }
+        }
+
+        public string GetTaskQuoteName() {
+            return _taskName;
+        }
+
+        public string GetTaskQuoteEntryPoint() {
+            return _entryPoint;
+        }
+
+        public string GetTaskBackgroundName() {
+            return _backgroundTaskName;
+        }
+
+        public string GetTaskBackgroundEntryPoint() {
+            return _backgroundEntryPoint;
         }
 
         public void UpdateAppTheme(ApplicationTheme theme) {
@@ -158,7 +186,10 @@ namespace citations365.Controllers {
         }
 
         public static string GetAppBackgroundURL() {
-            return userSettings.AppBackgroundURL;
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            string path = (string)localSettings.Values["AppBackgroundPath"];
+            return path;
+            //return userSettings.AppBackgroundURL;
         }
 
         public async void UpdateAppBackground(string background) {
@@ -178,6 +209,9 @@ namespace citations365.Controllers {
 
             userSettings.AppBackgroundURL = url;
             SaveSettings();
+            
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values["AppBackgroundPath"] = url;
         }
 
         public static async void UpdateAppBackgroundName(string name) {
@@ -187,6 +221,9 @@ namespace citations365.Controllers {
 
             userSettings.AppBackgroundName = name;
             SaveSettings();
+
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values["AppBackgroundName"] = name;
         }
 
         public static string GetAppBackgroundName() {

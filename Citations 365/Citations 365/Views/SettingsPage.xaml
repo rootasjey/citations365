@@ -42,14 +42,14 @@
                         </RichTextBlock>                    
                         <ToggleSwitch x:Name="TaskSwitch" Toggled="TaskSwitch_Toggled"/>
 
-                        <RichTextBlock Margin="0,24,0,0" Opacity="0.5">
-                            <Paragraph FontWeight="Bold">ÉCRAN DE VERROUILLAGE DYNAMIQUE (PAS ENCORE DISPONIBLE)</Paragraph>
+                        <RichTextBlock Margin="0,24,0,0">
+                            <Paragraph FontWeight="Bold">ÉCRAN DE VERROUILLAGE DYNAMIQUE</Paragraph>
                             <Paragraph>
-                                Activez cette option pour avoir 
-                                la citation du jour sur l'écran de verrouillage du téléphone.
+                                Mettre à jour l'image de l'écran de verrouillage du téléphone automatiquement.
                             </Paragraph>
                         </RichTextBlock>
-                        <ToggleSwitch x:Name="LockscreenSwitch" Opacity="0.5" IsHitTestVisible="False" Toggled="LockscreenSwitch_Toggled"/>
+                        <ToggleSwitch x:Name="LockscreenSwitch"
+                                      Toggled="LockscreenSwitch_Toggled"/>
 
                         <Button x:Name="LockscreenButton" Content="écran de verrouillage" 
                                 Margin="0,34" Click="LockscreenButton_Click"/>

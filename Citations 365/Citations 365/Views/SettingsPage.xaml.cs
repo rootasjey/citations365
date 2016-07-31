@@ -34,13 +34,18 @@ namespace citations365.Views {
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
-            UpdateTaskSwitcher();
+            UpdateQuoteTaskSwitcher();
+            UpdateWallTaskSwitcher();
             UpdateThemeSwitcher();
             UpdateAppBackgroundSwitcher();
         }
 
-        private void UpdateTaskSwitcher() {
-            TaskSwitch.IsOn = Scontroller.IsLiveTaskActivated();
+        private void UpdateQuoteTaskSwitcher() {
+            TaskSwitch.IsOn = Scontroller.IsQuoteTaskActivated();
+        }
+
+        private void UpdateWallTaskSwitcher() {
+            LockscreenSwitch.IsOn = Scontroller.IsWallTaskActivated();
         }
 
         private void UpdateThemeSwitcher() {
@@ -55,14 +60,23 @@ namespace citations365.Views {
         private void TaskSwitch_Toggled(object sender, RoutedEventArgs e) {
             var toggle = (ToggleSwitch)sender;
             if (toggle.IsOn) {
-                Scontroller.RegisterBackgroundTask();
+                Scontroller.RegisterBackgroundTask(
+                    Scontroller.GetTaskQuoteName(), 
+                    Scontroller.GetTaskQuoteEntryPoint());
             } else {
-                Scontroller.UnregisterBackgroundTask();
+                Scontroller.UnregisterBackgroundTask(Scontroller.GetTaskQuoteName());
             }
         }
 
         private void LockscreenSwitch_Toggled(object sender, RoutedEventArgs e) {
-
+            var toggle = (ToggleSwitch)sender;
+            if (toggle.IsOn) {
+                Scontroller.RegisterBackgroundTask(
+                    Scontroller.GetTaskBackgroundName(), 
+                    Scontroller.GetTaskBackgroundEntryPoint());
+            } else {
+                Scontroller.UnregisterBackgroundTask(Scontroller.GetTaskBackgroundName());
+            }
         }
 
         private void FeedbackButton_Click(object sender, RoutedEventArgs e) {

@@ -1,7 +1,5 @@
-﻿using citations365.Models;
-using System;
+﻿using System;
 using System.IO;
-using System.IO.IsolatedStorage;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -32,10 +30,9 @@ namespace citations365.Helpers {
         }
 
         public static async Task<StorageFile> SaveFile(string name, Uri uri) {
-            await DeleteWallpaper(name); // if exists
-
             StorageFile file = await StorageFile.CreateStreamedFileFromUriAsync(name, uri, RandomAccessStreamReference.CreateFromUri(uri));
-            return await file.CopyAsync(ApplicationData.Current.LocalFolder);
+            StorageFile wall = await file.CopyAsync(ApplicationData.Current.LocalFolder, name, NameCollisionOption.ReplaceExisting);
+            return wall;
         }
 
         public static async Task<StorageFile> GetFile(string name) {
