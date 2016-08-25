@@ -54,7 +54,7 @@ namespace citations365.Models {
         }
 
         
-        private int _page = 1;
+        private int _page = 1; // TODO: Set back to 1
         /// <summary>
         /// Quote's Pagination (as all quotes are not fetched in the same time)
         /// </summary>

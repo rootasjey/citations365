@@ -1,19 +1,37 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using System;
 using System.IO;
 using System.Net.Http;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tasks.Models;
 using Windows.ApplicationModel.Background;
+using Windows.Foundation;
+using Windows.Graphics.Display;
+using Windows.Graphics.Imaging;
 using Windows.Storage;
-using Windows.Storage.Streams;
+using Windows.System;
 using Windows.System.UserProfile;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace Tasks {
-    public sealed class UpdateBackground : IBackgroundTask {
+    public sealed class UpdateBackground : XamlRenderingBackgroundTask /*IBackgroundTask*/ {
         BackgroundTaskDeferral _deferral;
         volatile bool _cancelRequested = false;
-        private string unsplashURL = "https://unsplash.it/1080?random";
+        private string _lockscreenURL = "http://www.sideffects.fr/api/365/wallpaper";
+        private string unsplashURL = "https://unsplash.it/1500?random";
+        private string nasaURL = "http://apod.nasa.gov/apod/";
+
+        private string _appBackgroundName = "AppBackgroundName";
+        private string _appBackgroundPath = "AppBackgroundPath";
+        private string _appBackgroundType = "AppBackgroundType";
+        private string _lockscreenBackgroundName = "LockscreenBackgroundName";
+        private string _lockscreenBackgroundPath = "LockscreenBackgroundPath";
 
         private void OnCanceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason) {
             // Indicate that the background task is canceled.
@@ -21,32 +39,86 @@ namespace Tasks {
         }
 
         public async void Run(IBackgroundTaskInstance taskInstance) {
-            // 1.Get userSettings to generate the right file's name
-            // 2.Download the background and save it to IO with the generated file's name
-            // 3.Return the file saved
-            // 4.Save the new file's name and path to userSettings
-            // 5.Set the new wallpaper
             _deferral = taskInstance.GetDeferral();
 
-            string appBackgroundName = RetrieveAppBackgroundName();
-            string newFilesName = GenerateAppBackgroundName(appBackgroundName);
+            //string appBackgroundName = RetrieveAppBackgroundName();
+            //string appBackgroundType = RetrieveAppBackgroundType();
 
-            StorageFile wall = await DownloadImagefromServer(unsplashURL, newFilesName);
-            await SetWallpaperAsync(wall);
-            SaveBackground(wall);
+            //string newFilesName = GenerateAppBackgroundName(appBackgroundName);
+            //string backgroundURL = await GetBackgroundURL(appBackgroundType);
+
+            //StorageFile wall = await DownloadImagefromServer(backgroundURL, newFilesName);
+
+            //await SetWallpaperAsync(wall);
+            //SaveAppBackground(wall);
 
             _deferral.Complete();
         }
 
-        public string RetrieveAppBackgroundName() {
-            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            return (string)localSettings.Values["AppBackgroundName"];
+        protected override async void OnRun(IBackgroundTaskInstance taskInstance) {
+            var deferral = taskInstance.GetDeferral();
+            //string appBackgroundName = RetrieveLockscreenBackgroundName();
+            //StorageFile wall = await DownloadImagefromServer(_lockscreenURL, newFilesName);
+            //SaveLockscreenBackground(wall);
+            var prevName = RetrieveLockscreenBackgroundName();
+            var newName = GenerateAppBackgroundName(prevName);
+            //var path = RetrieveAppBackgroundPath();
+            StorageFile wall = await DownloadImagefromServer("https://unsplash.it/720/1280?random", _appBackgroundName);
+
+            StorageFile lockImage = await TakeScreenshot(wall.Path, newName);
+            await SetWallpaperAsync(lockImage);
+            SaveLockscreenBackgroundName(lockImage.Name);
+            deferral.Complete();
         }
 
-        public void SaveBackground(StorageFile wall) {
+        private async Task<string> GetBackgroundURL(string type) {
+            switch (type) {
+                case "unsplash":
+                    return unsplashURL;
+                case "nasa":
+                    //return nasaURL;
+                    return await GetNasaImage();
+                default:
+                    return "";
+            }
+        }
+
+        public string RetrieveAppBackgroundName() {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            localSettings.Values["AppBackgroundName"] = wall.Name;
-            localSettings.Values["AppBackgroundPath"] = wall.Path;
+            return (string)localSettings.Values[_appBackgroundName];
+        }
+
+        public string RetrieveAppBackgroundType() {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            return (string)localSettings.Values[_appBackgroundType];
+        }
+
+        public string RetrieveLockscreenBackgroundName() {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            return (string)localSettings.Values[_lockscreenBackgroundName];
+        }
+
+        public string RetrieveAppBackgroundPath() {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            var path = (string)localSettings.Values["AppBackgroundPath"];
+            return path;
+        }
+
+        public void SaveAppBackground(StorageFile wall) {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values[_appBackgroundName] = wall.Name;
+            localSettings.Values[_appBackgroundPath] = wall.Path;
+        }
+
+        public void SaveLockscreenBackground(StorageFile background) {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values[_lockscreenBackgroundName] = background.Name;
+            localSettings.Values[_lockscreenBackgroundPath] = background.Path;
+        }
+
+        public void SaveLockscreenBackgroundName(string name) {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values[_lockscreenBackgroundName] = name;
         }
 
         // Pass in a relative path to a file inside the local appdata folder 
@@ -69,7 +141,6 @@ namespace Tasks {
             }
             return name1;
         }
-
 
         private async Task<UserSettings> RestoreSettings() {
             try {
@@ -101,8 +172,9 @@ namespace Tasks {
         }
 
         private async Task<StorageFile> DownloadImagefromServer(string URI, string filename) {
+            filename += ".png";
             var rootFolder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Citations365\\CoverPics", CreationCollisionOption.OpenIfExists);
-            var coverpic = await rootFolder.CreateFileAsync(filename, CreationCollisionOption.FailIfExists);
+            var coverpic = await rootFolder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting);
 
             try {
                 HttpClient client = new HttpClient();
@@ -112,6 +184,109 @@ namespace Tasks {
 
                 return coverpic;
             } catch {
+                return null;
+            }
+        }
+
+        private async Task<string> GetNasaImage() {
+            HttpClient httpClient = new HttpClient();
+            HttpResponseMessage response = null;
+            try {
+                response = await httpClient.GetAsync(nasaURL);
+                response.EnsureSuccessStatusCode();
+                string responseBodyAsText = await response.Content.ReadAsStringAsync();
+
+                HtmlDocument doc = new HtmlDocument();
+                doc.LoadHtml(responseBodyAsText);
+
+                string start = "<a";
+                string end = ".jpg";
+
+                Regex regex = new Regex(start + "(.*?)" + end);
+                MatchCollection matches = regex.Matches(responseBodyAsText);
+
+                if (matches.Count > 0) {
+                    return "http://apod.nasa.gov/apod/" + matches[0].ToString().Substring(9);
+                }
+
+                return GetDefaultNasaImage();
+            } catch {
+                return GetDefaultNasaImage();
+            }
+        }
+
+        private string GetDefaultNasaImage() {
+            return "/Assets/Backgrounds/nasa.jpg";
+        }
+
+        private async Task<StorageFile> TakeScreenshot(string url, string name) {
+            TextBlock txtLine1 = new TextBlock() {
+                Text = "“Plus je connais les hommes, plus j'aime les femmes.”",
+                Foreground = new SolidColorBrush(Windows.UI.Colors.White),
+                FontSize = 56,
+                TextAlignment = TextAlignment.Left,
+                Margin = new Thickness(48, 90, 12, 0),
+                TextWrapping = TextWrapping.Wrap
+            };
+
+            StackPanel sp = new StackPanel() {
+                Background = new SolidColorBrush(Windows.UI.Colors.Brown),
+                Width = 720,
+                Height = 1280,
+                Orientation = Orientation.Vertical
+            };
+            var bitmap = new BitmapImage(new System.Uri(url));
+            var brush = new ImageBrush();
+            brush.ImageSource = bitmap;
+            brush.Opacity = 0.5;
+            sp.Background = brush;
+
+            //TextBlock txtLine2 = new TextBlock {
+            //    Text = "Text Line 2",
+            //    Foreground = new SolidColorBrush(Windows.UI.Colors.White),
+            //    Width = 200,
+            //    Height = 30,
+            //    FontSize = 32,
+            //    TextAlignment = TextAlignment.Left,
+            //    Margin = new Thickness(9, 3, 0, 3)
+            //};
+
+            sp.Children.Add(txtLine1);
+            //sp.Children.Add(txtLine2);
+
+            sp.UpdateLayout();
+            //sp.Measure(new Size(200, 200));
+            //sp.Arrange(new Rect(0, 0, 200, 200));
+            //sp.UpdateLayout();
+
+            //now lets render this stackpanel on image
+            try {
+                RenderTargetBitmap renderTargetBitmap = new RenderTargetBitmap();
+                await renderTargetBitmap.RenderAsync(sp, 720, 1280);
+                var pixelBuffer = await renderTargetBitmap.GetPixelsAsync();
+
+                StorageFolder storageFolder = ApplicationData.Current.LocalFolder;
+                var tileFile = await storageFolder.CreateFileAsync(name, CreationCollisionOption.ReplaceExisting);
+
+                // Encode the image to the selected file on disk
+                using (var fileStream = await tileFile.OpenAsync(FileAccessMode.ReadWrite)) {
+                    var encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.PngEncoderId, fileStream);
+
+                    encoder.SetPixelData(
+                        BitmapPixelFormat.Bgra8,
+                        BitmapAlphaMode.Ignore,
+                        (uint)renderTargetBitmap.PixelWidth,
+                        (uint)renderTargetBitmap.PixelHeight,
+                        DisplayInformation.GetForCurrentView().LogicalDpi,
+                        DisplayInformation.GetForCurrentView().LogicalDpi,
+                        pixelBuffer.ToArray());
+
+                    await encoder.FlushAsync();
+                }
+                return tileFile;
+            } catch (Exception ex) {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+                //new MessageDialog(ex.Message, "Error").ShowAsync();
                 return null;
             }
         }

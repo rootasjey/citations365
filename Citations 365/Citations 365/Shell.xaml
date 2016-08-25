@@ -105,7 +105,7 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal" Background="{ThemeResource SystemChromeMediumColor}" Padding="0,12,0,0">
+        <StackPanel Orientation="Horizontal" Background="{ThemeResource SystemChromeMediumColor}" Padding="0,12,0,0" Canvas.ZIndex="5">
             <Button Content="&#xE700;" Command="{x:Bind ViewModel.ToggleSplitViewPaneCommand}" 
                     Style="{StaticResource IconButtonStyle}" />
             <TextBlock Name="VisualHeader" Text="{x:Bind Header, Mode=TwoWay}" Style="{StaticResource AppTitleTextBlockStyle}" />

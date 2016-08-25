@@ -4,6 +4,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media.Animation;
+using Windows.UI.Xaml.Media.Imaging;
 
 // Pour plus d'informations sur le modèle d'élément Page vierge, voir la page http://go.microsoft.com/fwlink/?LinkId=234238
 namespace citations365.Views {
@@ -37,12 +38,14 @@ namespace citations365.Views {
             HideLoadingQuotesIndicator();
 
             RefreshBackground();
+
+            //PopulateHeroQuote();
         }
 
         private void BindCollectionToView() {
             if (Tcontroller.IsDataLoaded()) {
-                ShowListQuotes();
                 ListQuotes.ItemsSource = TodayController.TodayCollection;
+                ShowListQuotes();
                 Controller.UpdateTile(TodayController.TodayCollection[0]);
 
             } else {
@@ -75,10 +78,15 @@ namespace citations365.Views {
         private async void RefreshBackground() {
             string url = await Tcontroller.GetAppBackgroundURL();
 
-            if (!string.IsNullOrEmpty(url) && 
-                url != PageBackground.UriSource?.OriginalString) {
-                PageBackground.UriSource = new System.Uri(url);
+            if (!string.IsNullOrEmpty(url)) {
+                var bitmap = new BitmapImage(new System.Uri(url));
+                //PageBackground.UriSource = new System.Uri(url);
+                ParallaxImage.Source = bitmap;
             }
+        }
+
+        private void PopulateHeroQuote() {
+            var item = ListQuotes.Items[0];
         }
 
         /* ***************

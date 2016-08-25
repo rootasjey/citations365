@@ -3,10 +3,7 @@ using citations365.Models;
 using HtmlAgilityPack;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.IO.IsolatedStorage;
-using System.Linq;
 using System.Net.Http;
-using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -19,16 +16,6 @@ namespace citations365.Controllers {
          * VARIABLES
          * **********
          */
-        /// <summary>
-        /// Url which will be used to fetch today quotes
-        /// </summary>
-        private string _url = "http://evene.lefigaro.fr/citations/citation-jour.php?page=";
-
-        /// <summary>
-        /// Quote's Pagination (as all quotes are not fetched in the same time)
-        /// </summary>
-        private static int _page = 1;
-
         /// <summary>
         /// Save a quote object which is in the viewport
         /// </summary>
@@ -47,9 +34,17 @@ namespace citations365.Controllers {
             }
         }
 
-        private string nasaURL = "http://apod.nasa.gov/apod/astropix.html";
+        private string unsplashURL {
+            get {
+                return "https://unsplash.it/1500?random";
+            }
+        }
 
-        private string unsplashURL = "https://unsplash.it/1080?random";
+        private string nasaURL {
+            get {
+                return "http://apod.nasa.gov/apod/";
+            }
+        }
 
         /*
          * ************
@@ -110,7 +105,6 @@ namespace citations365.Controllers {
         /// </summary>
         public async Task<bool> Reload() {
             if (IsDataLoaded()) {
-                _page = 0;
                 TodayCollection.Clear();
             }
             return await LoadData();
@@ -195,9 +189,11 @@ namespace citations365.Controllers {
 
             string name = SettingsController.GenerateAppBackgroundName();
 
-            StorageFile wallpaper = await ImageHelper.SaveLockscreenImage(name, new System.Uri(backgroundURL));
+            StorageFile wallpaper = await ImageHelper.SaveLockscreenImage(name, backgroundURL);
             SettingsController.UpdateAppBackgroundURL(wallpaper.Path);
             SettingsController.UpdateAppBackgroundName(name);
+            SettingsController.UpdateAppBackgroundType(background);
+            
             return wallpaper.Path;
         }
 
@@ -205,7 +201,7 @@ namespace citations365.Controllers {
             HttpClient httpClient = new HttpClient();
             HttpResponseMessage response = null;
             try {
-                response = await httpClient.GetAsync("http://apod.nasa.gov/apod/");
+                response = await httpClient.GetAsync(nasaURL);
                 response.EnsureSuccessStatusCode();
                 string responseBodyAsText = await response.Content.ReadAsStringAsync();
 

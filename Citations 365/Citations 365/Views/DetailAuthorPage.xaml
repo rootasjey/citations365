@@ -109,6 +109,12 @@
                               ItemSwipeTriggerInTouch="ItemSwipeTriggerInTouch"
                               ItemSwipeBeginTrigger="ItemSwipeBeginTrigger"
                               ItemSwipeBeginRestore="ItemSwipeBeginRestore">
+                        <ctrl:LLMListView.ItemContainerTransitions>
+                            <TransitionCollection>
+                                <EntranceThemeTransition FromVerticalOffset="100" 
+                                                 IsStaggeringEnabled="True"/>
+                            </TransitionCollection>
+                        </ctrl:LLMListView.ItemContainerTransitions>
                         <ctrl:LLMListView.ItemLeftSwipeContentTemplate>
                             <DataTemplate>
                                 <Grid Background="{Binding IsShared, Converter={StaticResource ShareSwypeColor}, ConverterParameter={StaticResource SharedColor}}">

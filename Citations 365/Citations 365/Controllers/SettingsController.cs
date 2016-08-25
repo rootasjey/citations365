@@ -214,6 +214,11 @@ namespace citations365.Controllers {
             localSettings.Values["AppBackgroundPath"] = url;
         }
 
+        public static void UpdateAppBackgroundType(string type) {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values["AppBackgroundType"] = type;
+        }
+
         public static async void UpdateAppBackgroundName(string name) {
             if (userSettings.AppBackgroundName == name) {
                 return;

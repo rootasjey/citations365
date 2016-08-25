@@ -22,6 +22,12 @@
         <GridView  x:Name="AuthorsGrid"
                    Margin="0,0,0,0" HorizontalAlignment="Center"
                    Visibility="Collapsed">
+            <GridView.ItemContainerTransitions>
+                <TransitionCollection>
+                    <EntranceThemeTransition FromVerticalOffset="100" IsStaggeringEnabled="True"/>
+                </TransitionCollection>
+            </GridView.ItemContainerTransitions>
+            
             <GridView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Margin="40" Tapped="Authors_Tapped" 
