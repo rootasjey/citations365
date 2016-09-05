@@ -33,8 +33,11 @@ namespace citations365.Controllers {
         string _taskName = "UpdateTodayQuoteTask";
         string _entryPoint = "Tasks.UpdateTodayQuote";
 
-        string _backgroundTaskName = "UpdateBackground";
-        string _backgroundEntryPoint = "Tasks.UpdateBackground";
+        //string _backgroundTaskName = "UpdateBackground";
+        //string _backgroundEntryPoint = "Tasks.UpdateBackground";
+
+        string _backgroundTaskName = "LockScreenUpdater";
+        string _backgroundEntryPoint = "OptimizedTasks.LockScreenUpdater";
 
         /*
          * ************
@@ -130,7 +133,7 @@ namespace citations365.Controllers {
 
             builder.Name = taskName;
             builder.TaskEntryPoint = entryPoint;
-            builder.SetTrigger(new TimeTrigger(120, false));
+            builder.SetTrigger(new TimeTrigger(60, false));
             BackgroundTaskRegistration taskRegistered = builder.Register();
         }
 
@@ -187,9 +190,9 @@ namespace citations365.Controllers {
 
         public static string GetAppBackgroundURL() {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            string path = (string)localSettings.Values["AppBackgroundPath"];
+            string path = (string)localSettings.Values["LockscreenBackgroundPath"];
+            path = path == null ? (string)localSettings.Values["AppBackgroundPath"] : path;
             return path;
-            //return userSettings.AppBackgroundURL;
         }
 
         public async void UpdateAppBackground(string background) {

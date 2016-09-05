@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using Tasks.Models;
 using Windows.ApplicationModel.Background;
 using Windows.Data.Xml.Dom;
+using Windows.Storage;
 using Windows.UI.Notifications;
 
 namespace Tasks {
@@ -14,16 +16,47 @@ namespace Tasks {
         BackgroundTaskDeferral _deferral;
         volatile bool _cancelRequested = false;
         string _url = "http://evene.lefigaro.fr/citations/citation-jour.php";
+        string[] _links = { "http://evene.lefigaro.fr/citations/citation-jour.php", "http://evene.lefigaro.fr/citations" };
+
+        private string _dailyQuoteContent = "DailyQuoteContent";
+        private string _dailyQuoteAuthor = "DailyQuoteAuthor";
 
         public async void Run(IBackgroundTaskInstance taskInstance) {
             _deferral = taskInstance.GetDeferral();
 
             taskInstance.Canceled += new BackgroundTaskCanceledEventHandler(OnCanceled);
 
-            BackgroundQuote recent = await Fetch(_url);
+            //BackgroundQuote recent = await Fetch(_url);
+            BackgroundQuote recent = await MultipleFetchs(_links);
             UpdateTile(recent);
+            SaveDailyQuote(recent);
 
             _deferral.Complete();
+        }
+
+        public string RetrieveDailyQuote() {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            return (string)localSettings.Values[_dailyQuoteContent];
+        }
+
+        public void SaveDailyQuote(BackgroundQuote dailyQuote) {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values[_dailyQuoteContent] = dailyQuote.Content;
+            localSettings.Values[_dailyQuoteAuthor] = dailyQuote.Author;
+        }
+
+        private async Task<BackgroundQuote> MultipleFetchs(string[] links)
+        {
+            int attemps = 0;
+            BackgroundQuote recent = null;
+
+            while (recent?.Content == null && attemps < links.Length)
+            {
+                recent = await Fetch(links[attemps]);
+                attemps++;
+            }
+
+            return recent;
         }
 
         /// <summary>
@@ -60,11 +93,11 @@ namespace Tasks {
                     if (authorAndReference == null) continue; // ------------------------------
 
                     var authorNode = authorAndReference.Descendants("a").FirstOrDefault();
-                    string authorName = "De Anonyme";
+                    string authorName = "Anonyme";
                     string authorLink = "";
 
                     if (authorNode != null) { // if the quote as an author
-                        authorName = "De " + authorNode.InnerText;
+                        authorName = authorNode.InnerText;
                         authorLink = "http://www.evene.fr" + authorNode.GetAttributeValue("href", "");
                     }
 

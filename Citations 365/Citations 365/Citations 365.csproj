@@ -152,13 +152,16 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\acorn.png" />
     <Content Include="Assets\Backgrounds\1280.jpg" />
     <Content Include="Assets\Backgrounds\nasa.jpg" />
     <Content Include="Assets\BadgeLogo.scale-200.png" />
     <Content Include="Assets\BadgeLogo.scale-400.png" />
+    <Content Include="Assets\customTile.xml" />
     <Content Include="Assets\Icons\Contacts.svg" />
     <Content Include="Assets\Icons\gray.png" />
     <None Include="Package.StoreAssociation.xml" />
+    <Content Include="Assets\lockScreen.xml" />
     <Content Include="Assets\Square310x310Logo.scale-100.png" />
     <Content Include="Assets\Square310x310Logo.scale-200.png" />
     <Content Include="Assets\Square310x310Logo.scale-400.png" />
@@ -224,6 +227,10 @@
     </SDKReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\OptimizedTasks\OptimizedTasks.vcxproj">
+      <Project>{95cd3d39-e9f2-4847-861f-506fa2c9ec27}</Project>
+      <Name>OptimizedTasks</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Tasks\Tasks.csproj">
       <Project>{72cc9a82-a13f-476b-bb68-164916903ce8}</Project>
       <Name>Tasks</Name>

@@ -64,14 +64,6 @@ namespace citations365.Controllers {
             }
         }
 
-        /*
-         * ***********
-         * CONSTRUCTOR
-         * ***********
-         */
-        /// <summary>
-        /// Initialize the controller
-        /// </summary>
         public TodayController() {
             //TodayCollection.CollectionChanged += CollectionChanged;
             TodayCollection.CollectionChanged += CollectionChanged;
