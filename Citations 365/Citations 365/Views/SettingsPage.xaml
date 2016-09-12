@@ -6,62 +6,73 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
+    
+    <Page.Resources>
+        <Style x:Key="SettingsTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="SemiLight"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
 
+        <Style x:Key="StackPanelStyle" TargetType="StackPanel">
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="Tag" Value="Shrinked"/>
+        </Style>
+    </Page.Resources>
+    
     <Grid x:Name="SettingsGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
           EntranceNavigationTransitionInfo.IsTargetElement="True">
         <Pivot x:Name="PivotSettings" Margin="40,0">
             <PivotItem Header="réglages" Margin="10,20">
-                <ScrollViewer>
+                <ScrollViewer Margin="0,20,0,0">
                     <StackPanel>
-                        <StackPanel Margin="0,0,0,20">
-                            <TextBlock Text="THÈME (REDÉMARRAGE REQUIS)" FontWeight="Bold"/>
+                        <StackPanel Margin="0,0,0,40" Style="{StaticResource StackPanelStyle}" Tapped="StackPanel_ToggleHeight_Tapped">
+                            <TextBlock Text="thème" Style="{StaticResource SettingsTitle}"/>
                             <ToggleSwitch x:Name="ThemeSwitch"
                                       OnContent="Theme Clair"
                                       OffContent="Thème Sombre"
                                       Toggled="ThemeSwitch_Toggled"/>
                         </StackPanel>
 
-                        <StackPanel Margin="0,0,0,20">
-                            <TextBlock Text="IMAGE DU JOUR" FontWeight="Bold"/>
+                        <StackPanel Margin="0,0,0,40" Style="{StaticResource StackPanelStyle}" Tapped="StackPanel_ToggleHeight_Tapped">
+                            <TextBlock Text="arrière plan dynamique" Style="{StaticResource SettingsTitle}"/>
+                            <TextBlock Text="L'arrière plan de l'application sera décorée d'une image" TextWrapping="Wrap"/>
                             <ToggleSwitch x:Name="AppBackgroundgSwitch" Toggled="AppBgSwitch_Toggled"/>
 
                             <StackPanel x:Name="BackgroundChooser" Visibility="Collapsed">
-                                <Button x:Name="SetLockscreen" Content="Appliquer à l'écran de verrouillage"
-                                        Margin="0,10" Tapped="SetLockscreen_Tapped"/>
+                                <!--<Button x:Name="SetLockscreen" Content="Appliquer à l'écran de verrouillage"
+                                        Margin="0,10" Tapped="SetLockscreen_Tapped"/>-->
                                 <RadioButton x:Name="nasa" GroupName="AppBackground" Checked="Background_Choosed">Nasa</RadioButton>
                                 <RadioButton x:Name="unsplash" GroupName="AppBackground" Checked="Background_Choosed">Unsplash</RadioButton>
                             </StackPanel>
                         </StackPanel>
 
-                        <RichTextBlock>
-                            <Paragraph FontWeight="Bold">TUILE DYNAMIQUE</Paragraph>
-                            <Paragraph>
-                                Activez cette option pour avoir 
-                                la citation du jour sur la tuile de l'application
-                            </Paragraph>
-                        </RichTextBlock>                    
-                        <ToggleSwitch x:Name="TaskSwitch" Toggled="TaskSwitch_Toggled"/>
+                        <StackPanel Margin="0,0,0,40" Style="{StaticResource StackPanelStyle}" Tapped="StackPanel_ToggleHeight_Tapped">
+                            <TextBlock Text="tuile dynamique" Style="{StaticResource SettingsTitle}"/>
+                            <TextBlock Text="La citation du jour sera affichée sur la tuile de l'application" TextWrapping="Wrap"/>
+                            <ToggleSwitch x:Name="TaskSwitch" Toggled="TaskSwitch_Toggled"/>
+                        </StackPanel>
 
-                        <RichTextBlock Margin="0,24,0,0">
-                            <Paragraph FontWeight="Bold">ÉCRAN DE VERROUILLAGE DYNAMIQUE</Paragraph>
-                            <Paragraph>
-                                Mettre à jour l'image de l'écran de verrouillage du téléphone automatiquement.
-                            </Paragraph>
-                        </RichTextBlock>
-                        <ToggleSwitch x:Name="LockscreenSwitch"
+                        <StackPanel Margin="0,0,0,40" Style="{StaticResource StackPanelStyle}" Tapped="StackPanel_ToggleHeight_Tapped">
+                            <TextBlock Text="écran de verrouillage" Style="{StaticResource SettingsTitle}"/>
+                            <TextBlock Text="Met à jour l'image de l'écran de verrouillage du téléphone périodiquement" 
+                                       TextWrapping="Wrap"/>
+                            <ToggleSwitch x:Name="LockscreenSwitch"
                                       Toggled="LockscreenSwitch_Toggled"/>
+                        </StackPanel>
 
-                        <Button x:Name="LockscreenButton" Content="écran de verrouillage" 
-                                Margin="0,34" Click="LockscreenButton_Click"/>
+                        <!--<Button x:Name="LockscreenButton" Content="écran de verrouillage" 
+                                Margin="0,34" Click="LockscreenButton_Click"/>-->
                     </StackPanel>
                 </ScrollViewer>
             </PivotItem>
 
             <PivotItem Header="à propos" Margin="10,20">
-                <ScrollViewer>
+                <ScrollViewer Margin="0,20,0,0">
                     <StackPanel>
-                        <RichTextBlock x:Name="DataBox">
-                            <Paragraph FontWeight="Bold">DONNÉES</Paragraph>
+                        <RichTextBlock x:Name="DataBox" Margin="0,0,0,40">
+                            <Paragraph FontWeight="SemiLight" FontSize="24">données</Paragraph>
                             <Paragraph>
                                 Les données des citations proviennent du site
                                 <Hyperlink NavigateUri="http://evene.lefigaro.fr/">Evene</Hyperlink>
@@ -69,21 +80,21 @@
                             </Paragraph>
                         </RichTextBlock>
 
-                        <RichTextBlock x:Name="NoteBox" Margin="0, 24,0,0">
-                            <Paragraph FontWeight="Bold" Margin="0,0,0,0">NOTATION</Paragraph>
+                        <RichTextBlock x:Name="NoteBox" Margin="0,0,0,0">
+                            <Paragraph FontWeight="SemiLight" FontSize="24">notation</Paragraph>
                             <Paragraph>
                                 N'hésitez pas à noter l'app sur le store si l'application vous plaît
                             </Paragraph>                        
                         </RichTextBlock>
-                        <Button x:Name="NoteButton" Content="noter l'app" Margin="0,12,0,24" Click="NoteButton_Click"/>
+                        <Button x:Name="NoteButton" Content="noter l'app" Margin="0,12,0,40" Click="NoteButton_Click"/>
 
                         <RichTextBlock x:Name="FeedbackBox">
-                            <Paragraph FontWeight="Bold" Margin="0,0,0,0">FEEDBACK</Paragraph>
+                            <Paragraph FontWeight="SemiLight" FontSize="24">feedback</Paragraph>
                             <Paragraph Margin="0,0,0,0">
                                 Envoyez un mail si vous rencontrez des problèmes ou si vous avez des remarques
                             </Paragraph>
                         </RichTextBlock>
-                        <Button x:Name="FeedbackButton" Content="envoyer un avis" Margin="0,12,0,0" Click="FeedbackButton_Click"/>
+                        <Button x:Name="FeedbackButton" Content="envoyer un avis" Margin="0,12,0,40" Click="FeedbackButton_Click"/>
                         <!--<FontIcon Glyph="&#xE120;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>-->
                     </StackPanel>
                 </ScrollViewer>

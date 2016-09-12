@@ -155,5 +155,23 @@ namespace citations365.Views {
         private void SetLockscreen_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e) {
             Scontroller.SetWallpaperAsync();
         }
+
+        private void StackPanel_ToggleHeight_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        {
+            StackPanel stack = (StackPanel)sender;
+            string shrinked = "Shrinked";
+            string expended = "Expended";
+
+            if (stack.Tag.ToString() == shrinked)
+            {
+                stack.Tag = expended;
+                stack.Height = double.NaN;
+            }
+            else
+            {
+                stack.Tag = shrinked;
+                stack.Height = stack.MinHeight;
+            }
+        }
     }
 }

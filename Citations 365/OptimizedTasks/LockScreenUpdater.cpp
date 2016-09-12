@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <robuffer.h>
+#include <vector>
 
 using namespace OptimizedTasks;
 using namespace concurrency;
@@ -78,7 +79,7 @@ void LockScreenUpdater::OnRun(IBackgroundTaskInstance^ taskInstance)
 				root->Height = size.Height;
 
 				std::wstringstream imgName;
-				imgName << L"Img0";
+				imgName << L"ImgBackground";
 				Image^ img = (Image^)root->FindName(ref new String(imgName.str().c_str()));
 				img->Source = ref new BitmapImage(ref new Uri(file->Path));
 

@@ -1,8 +1,11 @@
 ﻿using HtmlAgilityPack;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tasks.Models;
@@ -11,52 +14,141 @@ using Windows.Data.Xml.Dom;
 using Windows.Storage;
 using Windows.UI.Notifications;
 
-namespace Tasks {
+namespace Tasks
+{
     public sealed class UpdateTodayQuote : IBackgroundTask {
         BackgroundTaskDeferral _deferral;
         volatile bool _cancelRequested = false;
-        string _url = "http://evene.lefigaro.fr/citations/citation-jour.php";
-        string[] _links = { "http://evene.lefigaro.fr/citations/citation-jour.php", "http://evene.lefigaro.fr/citations" };
+        private string[] _links = {
+            "http://evene.lefigaro.fr/citations/citation-jour.php",
+            "http://evene.lefigaro.fr/citations",
+            "http://evene.lefigaro.fr/citations/citation-jour.php?page="};
 
-        private string _dailyQuoteContent = "DailyQuoteContent";
-        private string _dailyQuoteAuthor = "DailyQuoteAuthor";
+        private const string DAILY_QUOTE_CONTENT = "DailyQuoteContent";
+        private const string DAILY_QUOTE_AUTHOR = "DailyQuoteAuthor";
+        private const string DAILY_LIST_FILENAME = "dailyList.txt";
 
         public async void Run(IBackgroundTaskInstance taskInstance) {
             _deferral = taskInstance.GetDeferral();
 
             taskInstance.Canceled += new BackgroundTaskCanceledEventHandler(OnCanceled);
 
-            //BackgroundQuote recent = await Fetch(_url);
-            BackgroundQuote recent = await MultipleFetchs(_links);
-            UpdateTile(recent);
-            SaveDailyQuote(recent);
+            List<BackgroundQuote> quotesList = null;
+            Random random = new Random();
+
+            StorageFile savedQuotesFile = await ApplicationData.Current.LocalFolder.GetFileAsync(DAILY_LIST_FILENAME);
+            var timelapse = DateTime.Now.Subtract(savedQuotesFile.DateCreated.DateTime);
+
+            if (timelapse.Hours > 6)
+            {
+                // Get new fresh data
+                var randomLinks = completeLinkAndRandomize(_links, random);
+                quotesList = await MultipleFetchs(randomLinks);
+                await SaveDailyList(quotesList);
+            }
+            else
+            {
+                // Pick a random quote
+                quotesList = await RetrieveDailyList(savedQuotesFile);
+            }
+
+            if (quotesList != null && quotesList.Count > 0)
+            {
+                int pick = random.Next(quotesList.Count);
+                UpdateTile(quotesList[pick]);
+                SaveDailyQuote(quotesList[pick]);                
+            }            
 
             _deferral.Complete();
         }
 
+        private string[] completeLinkAndRandomize(string[] links, Random random)
+        {
+            int length = links.Length;
+            int page = random.Next(333);
+            int pos = random.Next(length);
+
+            links[length - 1] = links.LastOrDefault() + page;
+
+            string temp = (string)links.GetValue(pos);
+            links[pos] = links.LastOrDefault();
+
+            if (pos != length - 1)
+            {
+                links[length - 1] = temp;
+            }            
+
+            return links;
+        }
+
         public string RetrieveDailyQuote() {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            return (string)localSettings.Values[_dailyQuoteContent];
+            return (string)localSettings.Values[DAILY_QUOTE_CONTENT];
         }
 
         public void SaveDailyQuote(BackgroundQuote dailyQuote) {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            localSettings.Values[_dailyQuoteContent] = dailyQuote.Content;
-            localSettings.Values[_dailyQuoteAuthor] = dailyQuote.Author;
+            localSettings.Values[DAILY_QUOTE_CONTENT] = dailyQuote.Content;
+            localSettings.Values[DAILY_QUOTE_AUTHOR] = dailyQuote.Author;
         }
 
-        private async Task<BackgroundQuote> MultipleFetchs(string[] links)
+        private async Task SaveDailyList(List<BackgroundQuote> quotesList)
+        {
+            try
+            {
+                StorageFile savedFile =
+                    await ApplicationData.Current.LocalFolder.CreateFileAsync(DAILY_LIST_FILENAME, CreationCollisionOption.ReplaceExisting);
+
+                using (Stream writeStream = await savedFile.OpenStreamForWriteAsync())
+                {
+                    DataContractSerializer serializer = new DataContractSerializer(typeof(List<BackgroundQuote>));
+                    serializer.WriteObject(writeStream, quotesList);
+                    await writeStream.FlushAsync();
+                    writeStream.Dispose();
+                }
+
+                //return true;
+            }
+            catch (Exception e)
+            {
+                //throw;
+                //return false;
+            }
+        }
+
+        private async Task<List<BackgroundQuote>> RetrieveDailyList(StorageFile file)
+        {
+            try
+            {
+                List<BackgroundQuote> results = null;
+
+                using (Stream readStream = await file.OpenStreamForReadAsync())
+                {
+                    DataContractSerializer serializer = new DataContractSerializer(typeof(List<BackgroundQuote>));
+                    results = (List<BackgroundQuote>)serializer.ReadObject(readStream);
+                    await readStream.FlushAsync();
+                    readStream.Dispose();
+                }
+                return results;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+        private async Task<List<BackgroundQuote>> MultipleFetchs(string[] links)
         {
             int attemps = 0;
-            BackgroundQuote recent = null;
+            List<BackgroundQuote> quotes = null;
 
-            while (recent?.Content == null && attemps < links.Length)
+            while (quotes?.Count == null && attemps < links.Length)
             {
-                recent = await Fetch(links[attemps]);
+                quotes = await Fetch(links[attemps]);
                 attemps++;
             }
 
-            return recent;
+            return quotes;
         }
 
         /// <summary>
@@ -64,33 +156,31 @@ namespace Tasks {
         /// </summary>
         /// <param name="url">URL string to request</param>
         /// <returns>Number of results added to the collection</returns>
-        private async Task<BackgroundQuote> Fetch(string url) {
+        private async Task<List<BackgroundQuote>> Fetch(string url) {
             string responseBodyAsText;
+            List<BackgroundQuote> fetchedQuotes = new List<BackgroundQuote>();
 
-            // If there's no internet connection
             if (!NetworkInterface.GetIsNetworkAvailable()) {
-                return new BackgroundQuote();
+                return fetchedQuotes;
             }
 
-            // Fetch the content from a web source
             HttpClient http = new HttpClient();
 
             try {
                 HttpResponseMessage message = await http.GetAsync(url);
                 responseBodyAsText = await message.Content.ReadAsStringAsync();
 
-                // HTML Document building
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(responseBodyAsText);
 
-                // Loop
                 var quotes = doc.DocumentNode.Descendants("article");
+
                 foreach (HtmlNode q in quotes) {
                     var content = q.Descendants("div").Where(x => x.GetAttributeValue("class", "") == "figsco__quote__text").FirstOrDefault();
                     var authorAndReference = q.Descendants("div").Where(x => x.GetAttributeValue("class", "") == "figsco__fake__col-9").FirstOrDefault();
 
                     if (content == null) continue; // check if this is a valid quote
-                    if (authorAndReference == null) continue; // ------------------------------
+                    if (authorAndReference == null) continue;
 
                     var authorNode = authorAndReference.Descendants("a").FirstOrDefault();
                     string authorName = "Anonyme";
@@ -109,18 +199,16 @@ namespace Tasks {
                         referenceName = authorAndReference.InnerText.Substring(separator + 2);
                     }
 
-                    string quote = DeleteHTMLTags(content.InnerText);
+                    string quoteContent = DeleteHTMLTags(content.InnerText);
                     authorName = DeleteHTMLTags(authorName);
-
-                    //return quote + " - " + authorName;
-                    return new BackgroundQuote(quote, authorName, authorLink, null, referenceName, quoteLink);
+                    
+                    fetchedQuotes.Add(new BackgroundQuote(quoteContent, authorName, authorLink, null, referenceName, quoteLink));
                 }
 
-                return new BackgroundQuote();
+                return fetchedQuotes;
 
             } catch (HttpRequestException hre) {
-                // The request failed
-                return new BackgroundQuote();
+                return fetchedQuotes; // the request failed
             }
         }
 

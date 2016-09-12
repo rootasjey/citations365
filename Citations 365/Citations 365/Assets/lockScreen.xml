@@ -7,9 +7,11 @@
   <Grid.ColumnDefinitions>
     <ColumnDefinition Width="*"/>
   </Grid.ColumnDefinitions>
-  <Image Grid.Row="0" Grid.Column="0" x:Name="Img0" Stretch="UniformToFill" />
-  <StackPanel x:Name="StackText" Margin="24,200,12,0">
-    <TextBlock x:Name="TbAuthor" Foreground="White" FontFamily="Segoe WP Black" Opacity=".6" TextWrapping="Wrap" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" />
-    <TextBlock x:Name="TbContent" Foreground="White" FontFamily="Segoe WP Black" Opacity=".6" TextWrapping="Wrap" FontSize="24" VerticalAlignment="Top" HorizontalAlignment="Left" />
-  </StackPanel>  
+  <Grid Background="Black" Grid.Row="0" Grid.Column="0">
+    <Image x:Name="ImgBackground" Stretch="UniformToFill" Opacity=".5" />
+    <StackPanel x:Name="StackText" Margin="24,200,12,0">
+      <TextBlock x:Name="TbAuthor" Foreground="White" FontFamily="Segoe WP Black" Opacity=".6" TextWrapping="Wrap" FontSize="14" VerticalAlignment="Top" HorizontalAlignment="Left" />
+      <TextBlock x:Name="TbContent" Foreground="White" FontFamily="Segoe WP Black" Opacity=".6" TextWrapping="Wrap" FontSize="24" VerticalAlignment="Top" HorizontalAlignment="Left" />
+    </StackPanel>
   </Grid>
+</Grid>
