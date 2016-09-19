@@ -20,31 +20,66 @@ namespace Tasks
         BackgroundTaskDeferral _deferral;
         volatile bool _cancelRequested = false;
         private string[] _links = {
-            "http://evene.lefigaro.fr/citations/citation-jour.php",
+            "http://evene.lefigaro.fr/citations/citation-jour.php?page=",
             "http://evene.lefigaro.fr/citations",
-            "http://evene.lefigaro.fr/citations/citation-jour.php?page="};
+            "http://evene.lefigaro.fr/citations/citation-jour.php" };
 
         private const string DAILY_QUOTE_CONTENT = "DailyQuoteContent";
         private const string DAILY_QUOTE_AUTHOR = "DailyQuoteAuthor";
         private const string DAILY_LIST_FILENAME = "dailyList.txt";
+        private const string LAST_REFRESHED_DATA = "LastRefreshedData";
+
+        private DateTime _lastRefheshedData;
 
         public async void Run(IBackgroundTaskInstance taskInstance) {
             _deferral = taskInstance.GetDeferral();
-
             taskInstance.Canceled += new BackgroundTaskCanceledEventHandler(OnCanceled);
 
-            List<BackgroundQuote> quotesList = null;
             Random random = new Random();
+            StorageFile savedQuotesFile = await RetrieveDailyList();
 
-            StorageFile savedQuotesFile = await ApplicationData.Current.LocalFolder.GetFileAsync(DAILY_LIST_FILENAME);
-            var timelapse = DateTime.Now.Subtract(savedQuotesFile.DateCreated.DateTime);
+            if (savedQuotesFile == null)
+            {
+                await GetFreshDataAndProcess(random);
+            }
+            else
+            {
+                await CheckTimeAndProcess(savedQuotesFile, random);
+            }
+
+            _deferral.Complete();
+        }
+
+        private async Task GetFreshDataAndProcess(Random random)
+        {
+            List<BackgroundQuote> quotesList = await GetFreshData(random);
+            await Process(quotesList, random);
+        }
+
+        private async Task<List<BackgroundQuote>> GetFreshData(Random random)
+        {
+            // Get new fresh data
+            var randomLinks = completeLinkAndRandomize(_links, random);
+            List<BackgroundQuote> quotesList = await MultipleFetchs(randomLinks);
+
+            if (quotesList.Count > 0)
+            {
+                await SaveDailyList(quotesList);
+            }            
+
+            return quotesList;
+        }
+
+        private async Task CheckTimeAndProcess(StorageFile savedQuotesFile, Random random)
+        {
+            List<BackgroundQuote> quotesList = null;
+            DateTime last = RetrieveTimeFreshData();
+            var timelapse = DateTime.Now.Subtract(last);
 
             if (timelapse.Hours > 6)
             {
-                // Get new fresh data
-                var randomLinks = completeLinkAndRandomize(_links, random);
-                quotesList = await MultipleFetchs(randomLinks);
-                await SaveDailyList(quotesList);
+                quotesList = await GetFreshData(random);
+                CaptureTimeFreshData();
             }
             else
             {
@@ -52,33 +87,57 @@ namespace Tasks
                 quotesList = await RetrieveDailyList(savedQuotesFile);
             }
 
+            await Process(quotesList, random);
+        }
+
+        private async Task Process(List<BackgroundQuote> quotesList, Random random)
+        {
             if (quotesList != null && quotesList.Count > 0)
             {
                 int pick = random.Next(quotesList.Count);
                 UpdateTile(quotesList[pick]);
-                SaveDailyQuote(quotesList[pick]);                
-            }            
-
-            _deferral.Complete();
+                SaveDailyQuote(quotesList[pick]);
+            }
         }
 
         private string[] completeLinkAndRandomize(string[] links, Random random)
         {
-            int length = links.Length;
+            //int length = links.Length;
+            //int pos = random.Next(length);
             int page = random.Next(333);
-            int pos = random.Next(length);
 
-            links[length - 1] = links.LastOrDefault() + page;
+            links[0] = links.First() + page;
 
-            string temp = (string)links.GetValue(pos);
-            links[pos] = links.LastOrDefault();
+            //string temp = (string)links.GetValue(pos);
+            //links[pos] = links.LastOrDefault();
 
-            if (pos != length - 1)
-            {
-                links[length - 1] = temp;
-            }            
+            //if (pos != length - 1)
+            //{
+            //    links[length - 1] = temp;
+            //}            
 
             return links;
+        }
+
+        private void CaptureTimeFreshData()
+        {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values[LAST_REFRESHED_DATA] = DateTime.Now.ToString();
+        }
+
+        private DateTime RetrieveTimeFreshData()
+        {
+            object last;
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            localSettings.Values.TryGetValue(LAST_REFRESHED_DATA, out last);
+
+            if (last != null)
+            {
+                DateTime time = DateTime.Parse((string)last);
+                return time;
+            }
+            return new DateTime(TimeSpan.FromHours(7).Ticks);
+
         }
 
         public string RetrieveDailyQuote() {
@@ -90,6 +149,22 @@ namespace Tasks
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
             localSettings.Values[DAILY_QUOTE_CONTENT] = dailyQuote.Content;
             localSettings.Values[DAILY_QUOTE_AUTHOR] = dailyQuote.Author;
+        }
+
+        /////////
+        // I/O //
+        /////////
+        private async Task<StorageFile> RetrieveDailyList()
+        {
+            try
+            {
+                StorageFile savedQuotesFile = await ApplicationData.Current.LocalFolder.GetFileAsync(DAILY_LIST_FILENAME);
+                return savedQuotesFile;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
 
         private async Task SaveDailyList(List<BackgroundQuote> quotesList)
@@ -140,12 +215,14 @@ namespace Tasks
         private async Task<List<BackgroundQuote>> MultipleFetchs(string[] links)
         {
             int attemps = 0;
+            bool isEmpty = true;
             List<BackgroundQuote> quotes = null;
 
-            while (quotes?.Count == null && attemps < links.Length)
+            while (isEmpty && attemps < links.Length)
             {
                 quotes = await Fetch(links[attemps]);
                 attemps++;
+                isEmpty = quotes.Count == 0;
             }
 
             return quotes;
@@ -268,11 +345,13 @@ namespace Tasks
             TileNotification tileNotification = new TileNotification(tileXml);
             TileUpdateManager.CreateTileUpdaterForApplication().Update(tileNotification);
         }
-
+        
+        /// <summary>
+        /// Indicate that the background task is canceled.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="reason"></param>
         private void OnCanceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason) {
-            //
-            // Indicate that the background task is canceled.
-            //
             _cancelRequested = true;
         }
     }
