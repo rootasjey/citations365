@@ -32,6 +32,8 @@ LockScreenUpdater::LockScreenUpdater()
 void LockScreenUpdater::OnRun(IBackgroundTaskInstance^ taskInstance)
 {
 	Agile<BackgroundTaskDeferral^> deferral = Agile<BackgroundTaskDeferral^>(taskInstance->GetDeferral());
+	taskInstance->Canceled += ref new BackgroundTaskCanceledEventHandler(this, &LockScreenUpdater::OnCanceled);
+
 
 	if (UserProfilePersonalizationSettings::Current->IsSupported) {
 		String^ prevName = RetrieveLockscreenBackgroundName();
@@ -132,6 +134,12 @@ void LockScreenUpdater::OnRun(IBackgroundTaskInstance^ taskInstance)
 		deferral->Complete();
 	}
 
+}
+
+void LockScreenUpdater::OnCanceled(Windows::ApplicationModel::Background::IBackgroundTaskInstance^ taskInstance, BackgroundTaskCancellationReason reason)
+{
+	// TODO: Add code to notify the background task that it is cancelled.
+	CancelRequested = true;
 }
 
 String^ LockScreenUpdater::RetrieveLockscreenBackgroundName()

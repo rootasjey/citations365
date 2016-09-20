@@ -80,6 +80,14 @@ namespace citations365 {
                     //TODO: Load state from previously suspended application
                 }
 
+                if (!e.PrelaunchActivated)
+                {
+                    // TODO: This is not a prelaunch activation. Perform operations which
+                    // assume that the user explicitly launched the app such as updating
+                    // the online presence of the user on a social network, updating a
+                    // what's new feed, etc.
+                }
+
                 // set the Shell as content
                 Window.Current.Content = shell;
 

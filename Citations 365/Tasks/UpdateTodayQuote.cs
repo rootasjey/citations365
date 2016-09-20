@@ -29,8 +29,6 @@ namespace Tasks
         private const string DAILY_LIST_FILENAME = "dailyList.txt";
         private const string LAST_REFRESHED_DATA = "LastRefreshedData";
 
-        private DateTime _lastRefheshedData;
-
         public async void Run(IBackgroundTaskInstance taskInstance) {
             _deferral = taskInstance.GetDeferral();
             taskInstance.Canceled += new BackgroundTaskCanceledEventHandler(OnCanceled);

@@ -26,9 +26,16 @@ namespace citations365.Views {
         
         public TodayPage() {
             InitializeComponent();
+            Window.Current.VisibilityChanged += WindowVisibilityChangedEventHandler;
+        }
+
+        void WindowVisibilityChangedEventHandler(System.Object sender, Windows.UI.Core.VisibilityChangedEventArgs e)
+        {
+            // Perform operations that should take place when the application becomes visible rather than
+            // when it is prelaunched, such as building a what's new feed
             PopulatePage();
         }
-        
+
         public async void PopulatePage() {
             ShowLoadingQuotesIndicator();
 

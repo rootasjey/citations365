@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="17924JrmieCorpinot.Citations365" Publisher="CN=08229696-E9AC-418B-A19C-5ECD19E1E58A" Version="1.2.6.0" />
+  <Identity Name="17924JrmieCorpinot.Citations365" Publisher="CN=08229696-E9AC-418B-A19C-5ECD19E1E58A" Version="1.5.0.0" />
   <mp:PhoneIdentity PhoneProductId="2456611c-a2cc-4135-a062-51ba35e9ea1d" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>Citations 365</DisplayName>
@@ -29,7 +29,7 @@
         </uap:InitialRotationPreference>
       </uap:VisualElements>
       <Extensions>
-        <Extension Category="windows.backgroundTasks" EntryPoint="OptimizedTasks.LockScreenUpdater">
+        <Extension Category="windows.backgroundTasks" EntryPoint="Tasks.UpdateTodayQuote">
           <BackgroundTasks>
             <Task Type="systemEvent" />
             <Task Type="timer" />
@@ -41,7 +41,7 @@
             <Task Type="timer" />
           </BackgroundTasks>
         </Extension>
-        <Extension Category="windows.backgroundTasks" EntryPoint="Tasks.UpdateTodayQuote">
+        <Extension Category="windows.backgroundTasks" EntryPoint="OptimizedTasks.LockScreenUpdater">
           <BackgroundTasks>
             <Task Type="systemEvent" />
             <Task Type="timer" />

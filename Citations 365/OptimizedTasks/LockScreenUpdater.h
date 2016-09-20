@@ -16,8 +16,12 @@ namespace OptimizedTasks
 
 		String^ RetrieveQuoteContent();
 		String^ RetrieveQuoteAuthor();
+
+		volatile bool CancelRequested;		
 	protected:
 		void OnRun(Windows::ApplicationModel::Background::IBackgroundTaskInstance^ taskInstance) override;
+		void OnCanceled(Windows::ApplicationModel::Background::IBackgroundTaskInstance^ taskInstance, 
+			Windows::ApplicationModel::Background::BackgroundTaskCancellationReason reason);
 	public:
 		LockScreenUpdater();
 	};
