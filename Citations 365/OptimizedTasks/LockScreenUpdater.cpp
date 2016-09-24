@@ -22,15 +22,15 @@ using namespace Windows::UI::Xaml::Media::Imaging;
 String^ _lockscreenBackgroundName = "LockscreenBackgroundName";
 String^ _lockscreenBackgroundPath = "LockscreenBackgroundPath";
 
-String^ _dailyQuoteContent = "DailyQuoteContent";
-String^ _dailyQuoteAuthor = "DailyQuoteAuthor";
+String^ DAILY_QUOTE = "DailyQuote"; // composite value
+String^ DAILY_QUOTE_CONTENT = "DailyQuoteContent";
+String^ DAILY_QUOTE_AUTHOR = "DailyQuoteAuthor";
+String^ DAILY_QUOTE_REFERENCE = "DailyQuoteReference";
 
-LockScreenUpdater::LockScreenUpdater()
-{
+LockScreenUpdater::LockScreenUpdater() {
 }
 
-void LockScreenUpdater::OnRun(IBackgroundTaskInstance^ taskInstance)
-{
+void LockScreenUpdater::OnRun(IBackgroundTaskInstance^ taskInstance) {
 	Agile<BackgroundTaskDeferral^> deferral = Agile<BackgroundTaskDeferral^>(taskInstance->GetDeferral());
 	taskInstance->Canceled += ref new BackgroundTaskCanceledEventHandler(this, &LockScreenUpdater::OnCanceled);
 
@@ -58,19 +58,17 @@ void LockScreenUpdater::OnRun(IBackgroundTaskInstance^ taskInstance)
 			}).then([this, newName, content](StorageFile^ file) {
 				SaveLockscreenBackground(file);
 
-				String^ quoteContent = RetrieveQuoteContent();
-				String^ quoteAuthor = RetrieveQuoteAuthor();
+				ApplicationDataCompositeValue^ quoteComposite = RetrieveQuote();
+				String^ quoteContent = safe_cast<String^>(quoteComposite->Lookup(DAILY_QUOTE_CONTENT));
+				String^ quoteAuthor = safe_cast<String^>(quoteComposite->Lookup(DAILY_QUOTE_AUTHOR));
 
 				std::wstringstream streamContent;
 				std::wstringstream croppedContent;
 				streamContent << quoteContent->Data();
 
-				if (streamContent.str().length() > 194) // max 194 chars
-				{
+				if (streamContent.str().length() > 194) { // max 194 chars
 					croppedContent << streamContent.str().substr(0, 191) << "...";
-				}
-				else
-				{
+				} else {
 					croppedContent << streamContent.str();
 				}
 
@@ -136,14 +134,14 @@ void LockScreenUpdater::OnRun(IBackgroundTaskInstance^ taskInstance)
 
 }
 
-void LockScreenUpdater::OnCanceled(Windows::ApplicationModel::Background::IBackgroundTaskInstance^ taskInstance, BackgroundTaskCancellationReason reason)
-{
+void LockScreenUpdater::OnCanceled(
+	Windows::ApplicationModel::Background::IBackgroundTaskInstance^ taskInstance, 
+	BackgroundTaskCancellationReason reason) {
 	// TODO: Add code to notify the background task that it is cancelled.
 	CancelRequested = true;
 }
 
-String^ LockScreenUpdater::RetrieveLockscreenBackgroundName()
-{
+String^ LockScreenUpdater::RetrieveLockscreenBackgroundName() {
 	ApplicationData^ current = ApplicationData::Current;
 	ApplicationDataContainer^ localSettings = current->LocalSettings;
 	String^ name = localSettings->Values->Lookup(_lockscreenBackgroundName)->ToString();
@@ -161,22 +159,38 @@ String^ LockScreenUpdater::GenerateAppBackgroundName(String ^ prevName)
 	return name1;
 }
 
-void LockScreenUpdater::SaveLockscreenBackground(StorageFile^ background)
-{
+void LockScreenUpdater::SaveLockscreenBackground(StorageFile^ background) {
 	ApplicationData^ current = ApplicationData::Current;
 	ApplicationDataContainer^ localSettings = current->LocalSettings;
 	localSettings->Values->Insert(_lockscreenBackgroundName, background->Name);
 	localSettings->Values->Insert(_lockscreenBackgroundPath, background->Path);
 }
 
+ApplicationDataCompositeValue^ LockScreenUpdater::RetrieveQuote() {
+	ApplicationData^ current = ApplicationData::Current;
+	ApplicationDataContainer^ localSettings = current->LocalSettings;
+
+	ApplicationDataCompositeValue^ composite =
+		safe_cast<ApplicationDataCompositeValue^>(localSettings->Values->Lookup(DAILY_QUOTE));
+
+	if (composite == nullptr) { // No data		
+		composite = ref new ApplicationDataCompositeValue();
+		composite->Insert(DAILY_QUOTE_CONTENT, dynamic_cast<PropertyValue^>(PropertyValue::CreateString("")));
+		composite->Insert(DAILY_QUOTE_AUTHOR, dynamic_cast<PropertyValue^>(PropertyValue::CreateString("")));
+		composite->Insert(DAILY_QUOTE_REFERENCE, dynamic_cast<PropertyValue^>(PropertyValue::CreateString("")));
+	}
+
+	return composite;
+}
+
 String^ LockScreenUpdater::RetrieveQuoteContent() {
 	ApplicationData^ current = ApplicationData::Current;
 	ApplicationDataContainer^ localSettings = current->LocalSettings;
-	return localSettings->Values->Lookup(_dailyQuoteContent)->ToString();
+	return localSettings->Values->Lookup(DAILY_QUOTE_CONTENT)->ToString();
 }
 
 String^ LockScreenUpdater::RetrieveQuoteAuthor() {
 	ApplicationData^ current = ApplicationData::Current;
 	ApplicationDataContainer^ localSettings = current->LocalSettings;
-	return localSettings->Values->Lookup(_dailyQuoteAuthor)->ToString();
+	return localSettings->Values->Lookup(DAILY_QUOTE_AUTHOR)->ToString();
 }

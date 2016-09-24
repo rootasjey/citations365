@@ -6,11 +6,9 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Media.Imaging;
 
-// Pour plus d'informations sur le modèle d'élément Page vierge, voir la page http://go.microsoft.com/fwlink/?LinkId=234238
+// Pour plus d'informations sur le modèle d'élément Page vierge, 
+// voir la page http://go.microsoft.com/fwlink/?LinkId=234238
 namespace citations365.Views {
-    /// <summary>
-    /// Une page vide peut être utilisée seule ou constituer une page de destination au sein d'un frame.
-    /// </summary>
     public sealed partial class TodayPage : Page
     {
         private static TodayController _Tcontroller;
@@ -19,6 +17,9 @@ namespace citations365.Views {
             get {
                 if (_Tcontroller == null) {
                     _Tcontroller = new TodayController();
+
+                    // Event will be added once
+                    Window.Current.VisibilityChanged += WindowVisibilityChangedEventHandler;
                 }
                 return _Tcontroller;
             }
@@ -26,14 +27,21 @@ namespace citations365.Views {
         
         public TodayPage() {
             InitializeComponent();
-            Window.Current.VisibilityChanged += WindowVisibilityChangedEventHandler;
+            PopulatePage();
         }
 
-        void WindowVisibilityChangedEventHandler(System.Object sender, Windows.UI.Core.VisibilityChangedEventArgs e)
-        {
-            // Perform operations that should take place when the application becomes visible rather than
-            // when it is prelaunched, such as building a what's new feed
-            PopulatePage();
+        /// <summary>
+        ///  Perform operations that should take place when the application becomes visible rather than
+        ///  when it is prelaunched, such as building a what's new feed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        static void WindowVisibilityChangedEventHandler(object sender, Windows.UI.Core.VisibilityChangedEventArgs e) {
+            if (!e.Visible) { // app losing focus
+                return;
+            }
+
+            TodayController.CheckHeroQuote();
         }
 
         public async void PopulatePage() {
@@ -41,12 +49,8 @@ namespace citations365.Views {
 
             await Tcontroller.LoadData();
             BindCollectionToView();
-
             HideLoadingQuotesIndicator();
-
             RefreshBackground();
-
-            //PopulateHeroQuote();
         }
 
         private void BindCollectionToView() {
@@ -92,9 +96,6 @@ namespace citations365.Views {
             }
         }
 
-        private void PopulateHeroQuote() {
-            var item = ListQuotes.Items[0];
-        }
 
         /* ***************
          * EVENTS HANDLERS
@@ -116,15 +117,6 @@ namespace citations365.Views {
                 if (result) {
                     quote.IsFavorite = true;
                 }
-            }
-        }
-
-        private void Quote_Tapped(object sender, TappedRoutedEventArgs e) {
-            StackPanel panel = (StackPanel)sender;
-            Quote quote = (Quote)panel.DataContext;
-
-            if (quote.AuthorLink != null && quote.AuthorLink.Length > 0) {
-                Frame.Navigate(typeof(DetailAuthorPage), quote, new DrillInNavigationTransitionInfo());
             }
         }
 
@@ -199,6 +191,29 @@ namespace citations365.Views {
             if (quote.AuthorLink != null && quote.AuthorLink.Length > 0) {
                 Frame.Navigate(typeof(DetailAuthorPage), quote, new DrillInNavigationTransitionInfo());
             }
+        }
+
+        /// <summary>
+        /// Initialize the Hero Quote
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void ListQuotes_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args) {
+            if (args.ItemIndex == 0) { // handle only the 1st item
+                InitializeHeroQuote(args);
+                ListQuotes.ContainerContentChanging -= ListQuotes_ContainerContentChanging;
+            }
+        }
+
+        private void InitializeHeroQuote(ContainerContentChangingEventArgs visual) {
+            if (Application.Current.Resources.ContainsKey("HeroQuoteTemplate")) {
+                DataTemplate heroTemplate = (DataTemplate)Application.Current.Resources["HeroQuoteTemplate"];
+                visual.ItemContainer.ContentTemplate = heroTemplate;
+            }
+        }
+
+        private void ParallaxImage_ImageOpened(object sender, RoutedEventArgs e) {
+
         }
     }
 }

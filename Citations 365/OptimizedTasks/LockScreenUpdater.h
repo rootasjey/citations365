@@ -1,7 +1,6 @@
 #pragma once
 
 using namespace Platform;
-//using namespace Windows::System;
 using namespace Windows::Storage;
 
 namespace OptimizedTasks
@@ -16,6 +15,8 @@ namespace OptimizedTasks
 
 		String^ RetrieveQuoteContent();
 		String^ RetrieveQuoteAuthor();
+
+		ApplicationDataCompositeValue^ RetrieveQuote();
 
 		volatile bool CancelRequested;		
 	protected:

@@ -71,14 +71,13 @@
             <PivotItem Header="à propos" Margin="10,20">
                 <ScrollViewer Margin="0,20,0,0">
                     <StackPanel>
-                        <RichTextBlock x:Name="DataBox" Margin="0,0,0,40">
-                            <Paragraph FontWeight="SemiLight" FontSize="24">données</Paragraph>
-                            <Paragraph>
-                                Les données des citations proviennent du site
-                                <Hyperlink NavigateUri="http://evene.lefigaro.fr/">Evene</Hyperlink>
-                                et cette application n'est aucunement liée à la marque Evene
+                        <RichTextBlock x:Name="FeedbackBox">
+                            <Paragraph FontWeight="SemiLight" FontSize="24">feedback</Paragraph>
+                            <Paragraph Margin="0,0,0,0">
+                                Envoyez un mail si vous rencontrez des problèmes ou si vous avez des remarques
                             </Paragraph>
                         </RichTextBlock>
+                        <Button x:Name="FeedbackButton" Content="envoyer un avis" Margin="0,12,0,40" Click="FeedbackButton_Click"/>
 
                         <RichTextBlock x:Name="NoteBox" Margin="0,0,0,0">
                             <Paragraph FontWeight="SemiLight" FontSize="24">notation</Paragraph>
@@ -88,14 +87,23 @@
                         </RichTextBlock>
                         <Button x:Name="NoteButton" Content="noter l'app" Margin="0,12,0,40" Click="NoteButton_Click"/>
 
-                        <RichTextBlock x:Name="FeedbackBox">
-                            <Paragraph FontWeight="SemiLight" FontSize="24">feedback</Paragraph>
-                            <Paragraph Margin="0,0,0,0">
-                                Envoyez un mail si vous rencontrez des problèmes ou si vous avez des remarques
+                        <RichTextBlock x:Name="DataBox" Margin="0,0,0,40">
+                            <Paragraph FontWeight="SemiLight" FontSize="24">données</Paragraph>
+                            <Paragraph>
+                                Les données des citations proviennent du site
+                                <Hyperlink NavigateUri="http://evene.lefigaro.fr/">Evene</Hyperlink>
+                                et cette application n'est aucunement liée à la marque Evene
                             </Paragraph>
                         </RichTextBlock>
-                        <Button x:Name="FeedbackButton" Content="envoyer un avis" Margin="0,12,0,40" Click="FeedbackButton_Click"/>
-                        <!--<FontIcon Glyph="&#xE120;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>-->
+                        
+                        <RichTextBlock x:Name="ImagesBox" Margin="0,0,0,40">
+                            <Paragraph FontWeight="SemiLight" FontSize="24">images</Paragraph>
+                            <Paragraph>
+                                Les images proviennent des sources
+                                <Hyperlink NavigateUri="https://unsplash.com/">Unsplash</Hyperlink> et
+                                <Hyperlink NavigateUri="http://apod.nasa.gov/apod/astropix.html">NASA</Hyperlink>
+                            </Paragraph>
+                        </RichTextBlock>
                     </StackPanel>
                 </ScrollViewer>
             </PivotItem>

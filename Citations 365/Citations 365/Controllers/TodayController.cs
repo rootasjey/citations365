@@ -16,6 +16,13 @@ namespace citations365.Controllers {
          * VARIABLES
          * **********
          */
+        private const string DAILY_QUOTE = "DailyQuote"; // composite value
+        private const string DAILY_QUOTE_CONTENT = "DailyQuoteContent";
+        private const string DAILY_QUOTE_AUTHOR = "DailyQuoteAuthor";
+        private const string DAILY_QUOTE_AUTHOR_LINK = "DailyQuoteAuthorLink";
+        private const string DAILY_QUOTE_REFERENCE = "DailyQuoteReference";
+        private const string DAILY_QUOTE_LINK = "DailyQuoteLink";
+
         /// <summary>
         /// Save a quote object which is in the viewport
         /// </summary>
@@ -86,14 +93,62 @@ namespace citations365.Controllers {
             }
 
             int added = await TodayCollection.BuildAndFetch();
+
+            Quote lockscreenQuote = GetLockScreenQuote();
+            if (lockscreenQuote != null) {
+                TodayCollection.Insert(0, lockscreenQuote);
+            }
+
             if (added > 0) {
                 return true;
             }
             return false;
         }
-        
+
+        public static Quote GetLockScreenQuote() {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            Windows.Storage.ApplicationDataCompositeValue composite =
+                (Windows.Storage.ApplicationDataCompositeValue)localSettings.Values[DAILY_QUOTE];
+
+            if (composite != null) {
+                Quote quote = new Quote();
+                quote.Content = (string)composite[DAILY_QUOTE_CONTENT];
+                quote.Author = (string)composite[DAILY_QUOTE_AUTHOR];
+                quote.AuthorLink = (string)composite[DAILY_QUOTE_AUTHOR_LINK];
+                quote.Reference = (string)composite[DAILY_QUOTE_REFERENCE];
+                quote.Link = (string)composite[DAILY_QUOTE_LINK];
+                return quote;
+            }
+            return null;
+        }
+
         /// <summary>
-        /// Delete old data and fetch new data
+        /// Check that the Hero Quote is the most recent
+        /// </summary>
+        public static void CheckHeroQuote() {
+            if (TodayCollection.Count == 0) {
+                return;
+            }
+
+            Quote lastFetchedQuote = GetLockScreenQuote();
+            Quote heroQuote = TodayCollection[0];
+
+            if (lastFetchedQuote.Link == heroQuote.Link) {
+                return; // the hero quote is the last fetched quote
+            }
+
+            // update the hero quote's value
+            // (inserting a new quote at 0 won't set it as hero quote)
+            heroQuote.Content       = lastFetchedQuote.Content;
+            heroQuote.Author        = lastFetchedQuote.Author;
+            heroQuote.AuthorLink    = lastFetchedQuote.AuthorLink;
+            heroQuote.Date          = lastFetchedQuote.Date;
+            heroQuote.IsFavorite    = lastFetchedQuote.IsFavorite;
+            heroQuote.Reference     = lastFetchedQuote.Reference;
+        }
+
+        /// <summary>
+        /// Delete old data and fetch new ones
         /// </summary>
         public async Task<bool> Reload() {
             if (IsDataLoaded()) {

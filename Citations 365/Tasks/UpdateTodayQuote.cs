@@ -24,8 +24,13 @@ namespace Tasks
             "http://evene.lefigaro.fr/citations",
             "http://evene.lefigaro.fr/citations/citation-jour.php" };
 
+        private const string DAILY_QUOTE = "DailyQuote"; // composite value
         private const string DAILY_QUOTE_CONTENT = "DailyQuoteContent";
         private const string DAILY_QUOTE_AUTHOR = "DailyQuoteAuthor";
+        private const string DAILY_QUOTE_AUTHOR_LINK = "DailyQuoteAuthorLink";
+        private const string DAILY_QUOTE_REFERENCE = "DailyQuoteReference";
+        private const string DAILY_QUOTE_LINK = "DailyQuoteLink";
+
         private const string DAILY_LIST_FILENAME = "dailyList.txt";
         private const string LAST_REFRESHED_DATA = "LastRefreshedData";
 
@@ -36,51 +41,42 @@ namespace Tasks
             Random random = new Random();
             StorageFile savedQuotesFile = await RetrieveDailyList();
 
-            if (savedQuotesFile == null)
-            {
+            if (savedQuotesFile == null) {
                 await GetFreshDataAndProcess(random);
             }
-            else
-            {
+            else {
                 await CheckTimeAndProcess(savedQuotesFile, random);
             }
 
             _deferral.Complete();
         }
 
-        private async Task GetFreshDataAndProcess(Random random)
-        {
+        private async Task GetFreshDataAndProcess(Random random) {
             List<BackgroundQuote> quotesList = await GetFreshData(random);
             await Process(quotesList, random);
         }
 
-        private async Task<List<BackgroundQuote>> GetFreshData(Random random)
-        {
-            // Get new fresh data
+        private async Task<List<BackgroundQuote>> GetFreshData(Random random) {
             var randomLinks = completeLinkAndRandomize(_links, random);
             List<BackgroundQuote> quotesList = await MultipleFetchs(randomLinks);
 
-            if (quotesList.Count > 0)
-            {
+            if (quotesList.Count > 0) {
                 await SaveDailyList(quotesList);
             }            
 
             return quotesList;
         }
 
-        private async Task CheckTimeAndProcess(StorageFile savedQuotesFile, Random random)
-        {
+        private async Task CheckTimeAndProcess(StorageFile savedQuotesFile, Random random) {
             List<BackgroundQuote> quotesList = null;
             DateTime last = RetrieveTimeFreshData();
             var timelapse = DateTime.Now.Subtract(last);
 
-            if (timelapse.Hours > 6)
-            {
+            if (timelapse.Hours > 6) {
                 quotesList = await GetFreshData(random);
                 CaptureTimeFreshData();
             }
-            else
-            {
+            else {
                 // Pick a random quote
                 quotesList = await RetrieveDailyList(savedQuotesFile);
             }
@@ -88,18 +84,15 @@ namespace Tasks
             await Process(quotesList, random);
         }
 
-        private async Task Process(List<BackgroundQuote> quotesList, Random random)
-        {
-            if (quotesList != null && quotesList.Count > 0)
-            {
+        private async Task Process(List<BackgroundQuote> quotesList, Random random) {
+            if (quotesList != null && quotesList.Count > 0) {
                 int pick = random.Next(quotesList.Count);
                 UpdateTile(quotesList[pick]);
                 SaveDailyQuote(quotesList[pick]);
             }
         }
 
-        private string[] completeLinkAndRandomize(string[] links, Random random)
-        {
+        private string[] completeLinkAndRandomize(string[] links, Random random) {
             //int length = links.Length;
             //int pos = random.Next(length);
             int page = random.Next(333);
@@ -117,8 +110,7 @@ namespace Tasks
             return links;
         }
 
-        private void CaptureTimeFreshData()
-        {
+        private void CaptureTimeFreshData() {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
             localSettings.Values[LAST_REFRESHED_DATA] = DateTime.Now.ToString();
         }
@@ -138,15 +130,32 @@ namespace Tasks
 
         }
 
-        public string RetrieveDailyQuote() {
+        public BackgroundQuote RetrieveDailyQuote() {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            return (string)localSettings.Values[DAILY_QUOTE_CONTENT];
+            ApplicationDataCompositeValue compositeQuote = (ApplicationDataCompositeValue)localSettings.Values[DAILY_QUOTE];
+
+            BackgroundQuote quote = new BackgroundQuote(
+                (string)compositeQuote[DAILY_QUOTE_CONTENT],
+                (string)compositeQuote[DAILY_QUOTE_AUTHOR],
+                (string)compositeQuote[DAILY_QUOTE_AUTHOR_LINK],
+                null,
+                (string)compositeQuote[DAILY_QUOTE_REFERENCE],
+                (string)compositeQuote[DAILY_QUOTE_LINK]);
+
+            return quote;
         }
 
         public void SaveDailyQuote(BackgroundQuote dailyQuote) {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            localSettings.Values[DAILY_QUOTE_CONTENT] = dailyQuote.Content;
-            localSettings.Values[DAILY_QUOTE_AUTHOR] = dailyQuote.Author;
+
+            ApplicationDataCompositeValue compositeQuote = new ApplicationDataCompositeValue();
+            compositeQuote[DAILY_QUOTE_CONTENT] = dailyQuote.Content;
+            compositeQuote[DAILY_QUOTE_AUTHOR] = dailyQuote.Author;
+            compositeQuote[DAILY_QUOTE_AUTHOR_LINK] = dailyQuote.AuthorLink;
+            compositeQuote[DAILY_QUOTE_REFERENCE] = dailyQuote.Reference;
+            compositeQuote[DAILY_QUOTE_LINK] = dailyQuote.Link;
+
+            localSettings.Values[DAILY_QUOTE] = compositeQuote;
         }
 
         /////////

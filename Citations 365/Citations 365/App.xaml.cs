@@ -12,8 +12,7 @@ namespace citations365 {
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>
-    sealed partial class App : Application
-    {
+    sealed partial class App : Application {
         // TODO: Check this external var doesn't create unexpected behavior
         // or memory leaks
         private static Shell _privateShell;
@@ -30,12 +29,11 @@ namespace citations365 {
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
         /// </summary>
-        public App()
-        {
+        public App() {
             InitializeComponent();
             Suspending += OnSuspending;
 
-            AppLoadSettings();            
+            AppLoadSettings();
         }
 
         private async void AppLoadSettings() {
@@ -52,8 +50,7 @@ namespace citations365 {
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
-        {
+        protected override void OnLaunched(LaunchActivatedEventArgs e) {
 
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached) {
@@ -76,17 +73,16 @@ namespace citations365 {
                 shell.RootFrame.NavigationFailed += OnNavigationFailed;
                 shell.RootFrame.Navigated += OnNavigated;
 
-                if (e.PreviousExecutionState == ApplicationExecutionState.Terminated) {
-                    //TODO: Load state from previously suspended application
-                }
+                //if (e.PreviousExecutionState == ApplicationExecutionState.Terminated) {
+                //    //TODO: Load state from previously suspended application
+                //}
 
-                if (!e.PrelaunchActivated)
-                {
-                    // TODO: This is not a prelaunch activation. Perform operations which
-                    // assume that the user explicitly launched the app such as updating
-                    // the online presence of the user on a social network, updating a
-                    // what's new feed, etc.
-                }
+                //if (!e.PrelaunchActivated) {
+                //    // TODO: This is not a prelaunch activation. Perform operations which
+                //    // assume that the user explicitly launched the app such as updating
+                //    // the online presence of the user on a social network, updating a
+                //    // what's new feed, etc.
+                //}
 
                 // set the Shell as content
                 Window.Current.Content = shell;
@@ -106,8 +102,7 @@ namespace citations365 {
         }
 
         // handle hardware back button press
-        void OnBackPressed(object sender, BackPressedEventArgs e)
-        {
+        void OnBackPressed(object sender, BackPressedEventArgs e) {
             var shell = (Shell)Window.Current.Content;
             if (shell.RootFrame.CanGoBack) {
                 e.Handled = true;
@@ -116,8 +111,7 @@ namespace citations365 {
         }
 
         // handle software back button press
-        void OnBackRequested(object sender, BackRequestedEventArgs e)
-        {
+        void OnBackRequested(object sender, BackRequestedEventArgs e) {
             var shell = (Shell)Window.Current.Content;
             if (shell.RootFrame.CanGoBack) {
                 e.Handled = true;
@@ -125,8 +119,7 @@ namespace citations365 {
             }
         }
 
-        void OnNavigated(object sender, NavigationEventArgs e)
-        {
+        void OnNavigated(object sender, NavigationEventArgs e) {
             UpdateBackButtonVisibility();
         }
 
@@ -135,8 +128,7 @@ namespace citations365 {
         /// </summary>
         /// <param name="sender">The Frame which failed navigation</param>
         /// <param name="e">Details about the navigation failure</param>
-        void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
-        {
+        void OnNavigationFailed(object sender, NavigationFailedEventArgs e) {
             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
         }
 
@@ -147,15 +139,13 @@ namespace citations365 {
         /// </summary>
         /// <param name="sender">The source of the suspend request.</param>
         /// <param name="e">Details about the suspend request.</param>
-        private void OnSuspending(object sender, SuspendingEventArgs e)
-        {
+        private void OnSuspending(object sender, SuspendingEventArgs e) {
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
         }
 
-        private void UpdateBackButtonVisibility()
-        {
+        private void UpdateBackButtonVisibility() {
             var shell = (Shell)Window.Current.Content;
 
             var visibility = AppViewBackButtonVisibility.Collapsed;

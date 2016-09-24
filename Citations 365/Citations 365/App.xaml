@@ -39,6 +39,26 @@
             </Grid>
         </DataTemplate>
 
+        <DataTemplate x:Key="HeroQuoteTemplate">
+            <Grid Margin="40,25,40,25">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="17"/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Column="0" Grid.Row="0">
+                    <TextBlock Text="{Binding Content}" FontWeight="Light" FontSize="44" TextWrapping="WrapWholeWords"/>
+                    <TextBlock Text="{Binding Author, Converter={StaticResource UpperText}}" FontWeight="Bold" FontSize="14" TextWrapping="Wrap"/>
+                    <TextBlock Text="{Binding Reference, Converter={StaticResource UpperText}}" FontWeight="Normal" FontSize="12" TextWrapping="WrapWholeWords"
+                                           Visibility="{Binding Reference, Converter={StaticResource TextVisibility}}"/>
+                </StackPanel>
+
+                <Rectangle Grid.Column="1" 
+                           Grid.Row="1" 
+                           Margin="0,7"
+                           Fill="{Binding IsFavorite, Converter={StaticResource FavoriteColor}}"/>
+            </Grid>
+        </DataTemplate>
+
         <Style x:Key="ListViewItemFill" TargetType="ListViewItem">
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="VerticalContentAlignment" Value="Stretch" />
