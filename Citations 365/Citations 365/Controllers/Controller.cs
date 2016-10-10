@@ -1,15 +1,12 @@
 ﻿using citations365.Models;
-using LLMListView;
+using LLM;
 using System;
 using System.Text.RegularExpressions;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Data.Xml.Dom;
 using Windows.Foundation;
-using Windows.UI;
 using Windows.UI.Notifications;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 
@@ -128,12 +125,10 @@ namespace citations365.Controllers {
         /// <param name="quote"></param>
         /// <returns></returns>
         public static Quote Normalize(Quote quote) {
-            // Delete HTML
             quote.Author    = DeleteHTMLTags(quote.Author);
             quote.Content   = DeleteHTMLTags(quote.Content);
             quote.Reference = DeleteHTMLTags(quote.Reference);
 
-            // Check values
             if (quote.Reference.Contains("Vos avis")) {
                 int index = quote.Reference.IndexOf("Vos avis");
                 quote.Reference = quote.Reference.Substring(0, index);

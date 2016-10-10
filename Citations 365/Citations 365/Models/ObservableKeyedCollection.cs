@@ -54,7 +54,7 @@ namespace citations365.Models {
         }
 
         
-        private int _page = 1; // TODO: Set back to 1
+        private int _page = 3; // TODO: Set back to 1
         /// <summary>
         /// Quote's Pagination (as all quotes are not fetched in the same time)
         /// </summary>
@@ -144,7 +144,7 @@ namespace citations365.Models {
         /// </summary>
         /// <param name="index"></param>
         protected override void RemoveItem(int index) {
-            var item = this.Items[index];
+            var item = Items[index];
             base.RemoveItem(index);
             NotifyCollectionChanged(NotifyCollectionChangedAction.Remove, item, index);
         }
@@ -213,14 +213,15 @@ namespace citations365.Models {
                     string authorLink = "";
 
                     if (authorNode != null) { // if the quote as an author
-                        authorName = authorNode.InnerText.StartsWith("Vos avis") ? authorName : authorNode.InnerText;
+                        authorName = authorNode.InnerText.Contains("Vos avis") ? authorName : authorNode.InnerText;
                         authorLink = "http://www.evene.fr" + authorNode.GetAttributeValue("href", "");
                     }
 
                     string quoteLink = content.ChildNodes.FirstOrDefault().GetAttributeValue("href", "");
 
                     string referenceName = "";
-                    int separator = authorAndReference.InnerText.LastIndexOf('/');
+                    int separator = authorAndReference.InnerText.IndexOf('/');
+                    
                     if (separator > -1) {
                         referenceName = authorAndReference.InnerText.Substring(separator + 2);
                     }
@@ -328,10 +329,7 @@ namespace citations365.Models {
         /// </summary>
         /// <param name="propertyName"></param>
         private void NotifyPropertyChanged(String propertyName) {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (null != handler) {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         /// <summary>
@@ -341,10 +339,7 @@ namespace citations365.Models {
         /// <param name="item">The item involved in the action</param>
         /// <param name="index">The index in the collection where the action took place</param>
         private void NotifyCollectionChanged(NotifyCollectionChangedAction action, Quote item, int index) {
-            NotifyCollectionChangedEventHandler handler = CollectionChanged;
-            if (null != handler) {
-                handler(this, new NotifyCollectionChangedEventArgs(action, item, index));
-            }
+            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(action, item, index));
         }
 
         /// <summary>
@@ -352,10 +347,7 @@ namespace citations365.Models {
         /// </summary>
         /// <param name="action">The corresponding action</param>
         private void NotifyCollectionChanged(NotifyCollectionChangedAction action) {
-            NotifyCollectionChangedEventHandler handler = CollectionChanged;
-            if (null != handler) {
-                handler(this, new NotifyCollectionChangedEventArgs(action));
-            }
+            CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(action));
         }
 
         IAsyncOperation<LoadMoreItemsResult> ISupportIncrementalLoading.LoadMoreItemsAsync(uint count) {

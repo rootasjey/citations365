@@ -46,7 +46,7 @@
                     <RowDefinition Height="17"/>
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Column="0" Grid.Row="0">
-                    <TextBlock Text="{Binding Content}" FontWeight="Light" FontSize="44" TextWrapping="WrapWholeWords"/>
+                    <TextBlock Text="{Binding Content}" FontWeight="Light" FontSize="38" TextWrapping="WrapWholeWords"/>
                     <TextBlock Text="{Binding Author, Converter={StaticResource UpperText}}" FontWeight="Bold" FontSize="14" TextWrapping="Wrap"/>
                     <TextBlock Text="{Binding Reference, Converter={StaticResource UpperText}}" FontWeight="Normal" FontSize="12" TextWrapping="WrapWholeWords"
                                            Visibility="{Binding Reference, Converter={StaticResource TextVisibility}}"/>

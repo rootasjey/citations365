@@ -1,10 +1,16 @@
 ﻿using citations365.Controllers;
 using citations365.Models;
+using Microsoft.Graphics.Canvas.Effects;
+using System;
+using System.Numerics;
+using Windows.UI.Composition;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Hosting;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Media.Imaging;
+using citations365.Helpers;
 
 // Pour plus d'informations sur le modèle d'élément Page vierge, 
 // voir la page http://go.microsoft.com/fwlink/?LinkId=234238
@@ -24,24 +30,15 @@ namespace citations365.Views {
                 return _Tcontroller;
             }
         }
-        
+
+        private Visual _backgroundVisual;
+        private Compositor _backgroundCompositor;
+        private ScrollViewer _ListQuotesScrollViewer;
+        private CompositionPropertySet _ListQuotesScrollerPropertySet;
+
         public TodayPage() {
             InitializeComponent();
             PopulatePage();
-        }
-
-        /// <summary>
-        ///  Perform operations that should take place when the application becomes visible rather than
-        ///  when it is prelaunched, such as building a what's new feed
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        static void WindowVisibilityChangedEventHandler(object sender, Windows.UI.Core.VisibilityChangedEventArgs e) {
-            if (!e.Visible) { // app losing focus
-                return;
-            }
-
-            TodayController.CheckHeroQuote();
         }
 
         public async void PopulatePage() {
@@ -90,17 +87,40 @@ namespace citations365.Views {
             string url = await Tcontroller.GetAppBackgroundURL();
 
             if (!string.IsNullOrEmpty(url)) {
-                var bitmap = new BitmapImage(new System.Uri(url));
-                //PageBackground.UriSource = new System.Uri(url);
+                var bitmap = new BitmapImage(new Uri(url));
                 ParallaxImage.Source = bitmap;
             }
         }
-
 
         /* ***************
          * EVENTS HANDLERS
          * ***************
          */
+        private void ParallaxImage_Loaded(object sender, RoutedEventArgs e) {
+            _backgroundVisual = ElementCompositionPreview.GetElementVisual(ParallaxImage);
+            _backgroundCompositor = _backgroundVisual.Compositor;
+        }
+
+        private void ListQuotes_Loaded(object sender, RoutedEventArgs e) {
+            _ListQuotesScrollViewer = ListQuotes.GetChildOfType<ScrollViewer>();
+            _ListQuotesScrollerPropertySet = ElementCompositionPreview.
+                    GetScrollViewerManipulationPropertySet(_ListQuotesScrollViewer);
+        }
+
+        /// <summary>
+        ///  Perform operations that should take place when the application becomes visible rather than
+        ///  when it is prelaunched, such as building a what's new feed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        static void WindowVisibilityChangedEventHandler(object sender, Windows.UI.Core.VisibilityChangedEventArgs e) {
+            if (!e.Visible) { // app losing focus
+                return;
+            }
+
+            TodayController.CheckHeroQuote();
+        }
+
         private async void Favorite_Tapped(object sender, TappedRoutedEventArgs e) {
             FontIcon icon = (FontIcon)sender;
             Quote quote = (Quote)icon.DataContext;
@@ -120,6 +140,50 @@ namespace citations365.Views {
             }
         }
 
+        private void ListQuotes_ItemClick(object sender, ItemClickEventArgs e) {
+            Quote quote = (Quote)e.ClickedItem;
+
+            if (quote.AuthorLink != null && quote.AuthorLink.Length > 0) {
+                Frame.Navigate(typeof(DetailAuthorPage), quote, new DrillInNavigationTransitionInfo());
+            }
+        }
+
+        /// <summary>
+        /// Initialize the Hero Quote
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void ListQuotes_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args) {
+            if (args.ItemIndex == 0) { // handle only the 1st item
+                InitializeHeroQuote(args);
+                ListQuotes.ContainerContentChanging -= ListQuotes_ContainerContentChanging;
+            }
+        }
+
+        /// <summary>
+        /// Attach animations to the background when it's been loaded
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ParallaxImage_ImageOpened(object sender, RoutedEventArgs e) {
+            var animation = _backgroundCompositor.CreateScalarKeyFrameAnimation();
+            var easing = _backgroundCompositor.CreateLinearEasingFunction();
+            animation.InsertKeyFrame(0.0f, 0.0f);
+            animation.InsertKeyFrame(1.0f, 0.5f, easing);
+            animation.Duration = TimeSpan.FromSeconds(3);
+
+            ParallaxImage.Opacity = 1; // to see the animation
+            _backgroundVisual.StartAnimation(nameof(_backgroundVisual.Opacity), animation);
+
+            //AttachBackgroundBlurAnimation();
+            AttachBackgroundParallax();
+        }
+
+
+        /* ************************
+         * VISUAL SWYPE (ITEM MOVE)
+         * ************************
+         */
         private async void ItemSwipeTriggerComplete(object sender, LLM.SwipeCompleteEventArgs args) {
             LLM.LLMListViewItem item = (LLM.LLMListViewItem)sender;
             Quote quote = (Quote)item.Content;
@@ -157,10 +221,6 @@ namespace citations365.Views {
             }
         }
 
-        /* ************************
-         * VISUAL SWYPE (ITEM MOVE)
-         * ************************
-         */
         private void ItemSwipeProgressInTouch(object sender, LLM.SwipeProgressEventArgs args) {
             if (args.SwipeDirection == LLM.SwipeDirection.None)
                 return;
@@ -185,26 +245,6 @@ namespace citations365.Views {
             Controller.SwipeReleasePanel(panel, args);
         }
 
-        private void ListQuotes_ItemClick(object sender, ItemClickEventArgs e) {
-            Quote quote = (Quote)e.ClickedItem;
-
-            if (quote.AuthorLink != null && quote.AuthorLink.Length > 0) {
-                Frame.Navigate(typeof(DetailAuthorPage), quote, new DrillInNavigationTransitionInfo());
-            }
-        }
-
-        /// <summary>
-        /// Initialize the Hero Quote
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        private void ListQuotes_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args) {
-            if (args.ItemIndex == 0) { // handle only the 1st item
-                InitializeHeroQuote(args);
-                ListQuotes.ContainerContentChanging -= ListQuotes_ContainerContentChanging;
-            }
-        }
-
         private void InitializeHeroQuote(ContainerContentChangingEventArgs visual) {
             if (Application.Current.Resources.ContainsKey("HeroQuoteTemplate")) {
                 DataTemplate heroTemplate = (DataTemplate)Application.Current.Resources["HeroQuoteTemplate"];
@@ -212,8 +252,47 @@ namespace citations365.Views {
             }
         }
 
-        private void ParallaxImage_ImageOpened(object sender, RoutedEventArgs e) {
+        /* ************
+         * Composition
+         * ************
+         */
+        private void AttachBackgroundParallax() {
+            double backgroundOffset = Math.Round(ParallaxImage.ActualHeight - ParallaxCanvas.ActualHeight);
+            string maxOffsetBottomToUp = backgroundOffset.ToString();
 
+            var expression = _backgroundCompositor.CreateExpressionAnimation();
+            expression.Expression = string.Format("Clamp(scroller.Translation.Y * parallaxFactor, -{0}, 999)", maxOffsetBottomToUp);
+            expression.SetScalarParameter("parallaxFactor", 0.03f);
+            expression.SetReferenceParameter("scroller", _ListQuotesScrollerPropertySet);
+
+            _backgroundVisual.StartAnimation("Offset.Y", expression);
+        }
+
+        private void AttachBackgroundBlurAnimation() {
+            GaussianBlurEffect blurEffect = new GaussianBlurEffect() {
+                Name = "Blur",
+                BlurAmount = 20.0f,
+                BorderMode = EffectBorderMode.Hard,
+                Optimization = EffectOptimization.Speed,
+                Source = new CompositionEffectSourceParameter("Backdrop")
+            };
+
+            var effectFactory = _backgroundCompositor.CreateEffectFactory(blurEffect, new[] { "Blur.BlurAmount" });
+            var effectBrush = effectFactory.CreateBrush();
+
+            var destinationBrush = _backgroundCompositor.CreateBackdropBrush();
+            effectBrush.SetSourceParameter("Backdrop", destinationBrush);
+
+            var blurSprite = _backgroundCompositor.CreateSpriteVisual();
+            blurSprite.Size = new Vector2((float)ParallaxCanvas.ActualWidth, (float)ParallaxCanvas.ActualHeight);
+            blurSprite.Brush = effectBrush;
+            ElementCompositionPreview.SetElementChildVisual(ParallaxCanvas, blurSprite);
+
+            ExpressionAnimation backgroundBlurAnimation = _backgroundCompositor.CreateExpressionAnimation(
+                "Clamp(-scroller.Translation.Y / 10,0,20)");
+            backgroundBlurAnimation.SetReferenceParameter("scroller", _ListQuotesScrollerPropertySet);
+
+            blurSprite.Brush.Properties.StartAnimation("Blur.BlurAmount", backgroundBlurAnimation);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using citations365.Controllers;
+using citations365.Helpers;
 using citations365.Presentation;
 using System.Linq;
 using Windows.UI.Xaml.Controls;
@@ -114,6 +115,16 @@ namespace citations365 {
         /// <param name="name">custom header's name</param>
         public void SetHeaderTitle(string name) {
             VisualHeader.Text = name;
+        }
+
+        private async void VisualHeader_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e) {
+            var listView = App._shell.GetChildOfType<ListViewBase>();
+
+            if (listView == null) {
+                return;
+            }
+            
+            await VisualTreeExtensions.ScrollToIndex(listView, 0);
         }
     }
 }

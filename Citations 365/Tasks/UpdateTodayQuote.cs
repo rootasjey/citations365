@@ -21,8 +21,9 @@ namespace Tasks
         volatile bool _cancelRequested = false;
         private string[] _links = {
             "http://evene.lefigaro.fr/citations/citation-jour.php?page=",
-            "http://evene.lefigaro.fr/citations",
-            "http://evene.lefigaro.fr/citations/citation-jour.php" };
+            "http://evene.lefigaro.fr/citations/citation-jour.php",
+            "http://evene.lefigaro.fr/citations/theme/proverbes-francais-france.php"
+        };
 
         private const string DAILY_QUOTE = "DailyQuote"; // composite value
         private const string DAILY_QUOTE_CONTENT = "DailyQuoteContent";
@@ -267,26 +268,26 @@ namespace Tasks
                     if (authorAndReference == null) continue;
 
                     var authorNode = authorAndReference.Descendants("a").FirstOrDefault();
+
                     string authorName = "Anonyme";
                     string authorLink = "";
+                    string quoteLink = content.ChildNodes.FirstOrDefault().GetAttributeValue("href", "");
+                    string quoteContent = DeleteHTMLTags(content.InnerText);
+                    string referenceName = "";
 
                     if (authorNode != null) { // if the quote as an author
-                        authorName = authorNode.InnerText;
+                        authorName = authorNode.InnerText.Contains("Vos avis") ? authorName : authorNode.InnerText;
                         authorLink = "http://www.evene.fr" + authorNode.GetAttributeValue("href", "");
-                    }
+                    }                    
 
-                    string quoteLink = content.ChildNodes.FirstOrDefault().GetAttributeValue("href", "");
-
-                    string referenceName = "";
-                    int separator = authorAndReference.InnerText.LastIndexOf('/');
+                    int separator = authorAndReference.InnerText.IndexOf('/');
                     if (separator > -1) {
                         referenceName = authorAndReference.InnerText.Substring(separator + 2);
                     }
-
-                    string quoteContent = DeleteHTMLTags(content.InnerText);
+                    
                     authorName = DeleteHTMLTags(authorName);
                     
-                    fetchedQuotes.Add(new BackgroundQuote(quoteContent, authorName, authorLink, null, referenceName, quoteLink));
+                    fetchedQuotes.Add(Normalize(new BackgroundQuote(quoteContent, authorName, authorLink, null, referenceName, quoteLink)));
                 }
 
                 return fetchedQuotes;
@@ -294,6 +295,23 @@ namespace Tasks
             } catch (HttpRequestException hre) {
                 return fetchedQuotes; // the request failed
             }
+        }
+
+        /// <summary>
+        /// Delete HTML tags from the quote props and checks values
+        /// </summary>
+        /// <param name="quote"></param>
+        /// <returns></returns>
+        public BackgroundQuote Normalize(BackgroundQuote quote) {
+            quote.Author = DeleteHTMLTags(quote.Author);
+            quote.Content = DeleteHTMLTags(quote.Content);
+            quote.Reference = DeleteHTMLTags(quote.Reference);
+
+            if (quote.Reference.Contains("Vos avis")) {
+                int index = quote.Reference.IndexOf("Vos avis");
+                quote.Reference = quote.Reference.Substring(0, index);
+            }
+            return quote;
         }
 
         /// <summary>

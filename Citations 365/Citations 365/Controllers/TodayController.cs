@@ -92,7 +92,7 @@ namespace citations365.Controllers {
                 return true;
             }
 
-            int added = await TodayCollection.BuildAndFetch();
+            int added = await FetchAndRecover();
 
             Quote lockscreenQuote = GetLockScreenQuote();
             if (lockscreenQuote != null) {
@@ -103,6 +103,23 @@ namespace citations365.Controllers {
                 return true;
             }
             return false;
+        }
+
+        public async Task<int> FetchAndRecover() {
+            int added = 0;
+
+            // Normal fetch
+            added = await TodayCollection.BuildAndFetch();
+            if (added > 0) return added;
+
+            // If failed, fetch from page 2
+            TodayCollection.Page++;
+            added = await TodayCollection.BuildAndFetch();
+            if (added > 0) return added;
+
+            // If failed, fetch a random category
+            added = await TodayCollection.BuildAndFetch("http://evene.lefigaro.fr/citations/mot.php?mot=absurde");
+            return added;
         }
 
         public static Quote GetLockScreenQuote() {
@@ -132,6 +149,10 @@ namespace citations365.Controllers {
 
             Quote lastFetchedQuote = GetLockScreenQuote();
             Quote heroQuote = TodayCollection[0];
+
+            if (lastFetchedQuote == null) {
+                return;
+            }
 
             if (lastFetchedQuote.Link == heroQuote.Link) {
                 return; // the hero quote is the last fetched quote

@@ -6,8 +6,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ctrl="using:LLM"
-    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
-    xmlns:winComposition="using:WinUX.Xaml.Behaviors.WinComposition"
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
@@ -15,10 +13,8 @@
 
         <Grid Margin="0,0,0,0">
             <Canvas x:Name="ParallaxCanvas">
-                <Image x:Name="ParallaxImage" Opacity=".5" ImageOpened="ParallaxImage_ImageOpened"/>
+                <Image x:Name="ParallaxImage" Opacity="0" ImageOpened="ParallaxImage_ImageOpened" Loaded="ParallaxImage_Loaded"/>
             </Canvas>
-            
-
 
             <StackPanel x:Name="NoContentView" Visibility="Collapsed" VerticalAlignment="Center" Canvas.ZIndex="2">
                 <FontIcon Glyph="&#xE706;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>
@@ -48,6 +44,7 @@
                               Canvas.ZIndex="1"
                               IncrementalLoadingTrigger="Edge"
                               SelectionMode="None"
+                              Loaded="ListQuotes_Loaded"
                               ContainerContentChanging="ListQuotes_ContainerContentChanging"
                               IsItemClickEnabled="True"
                               ItemClick="ListQuotes_ItemClick"
@@ -68,10 +65,6 @@
                                                  IsStaggeringEnabled="True"/>
                     </TransitionCollection>
                 </ctrl:LLMListView.ItemContainerTransitions>
-                <interactivity:Interaction.Behaviors>
-                    <winComposition:UIElementParallaxEffectBehavior 
-                        ParallaxElement="{Binding ElementName=ParallaxImage}" ParallaxMultiplier=".01" />
-                </interactivity:Interaction.Behaviors>
                 <ctrl:LLMListView.ItemLeftSwipeContentTemplate>
                     <DataTemplate>
                         <Grid Background="{Binding IsShared, Converter={StaticResource ShareSwypeColor}, ConverterParameter={StaticResource SharedColor}}">

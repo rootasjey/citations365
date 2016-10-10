@@ -22,6 +22,10 @@ namespace citations365.Models {
         /// </summary>
         /// <returns></returns>
         public override async Task<int> BuildAndFetch(string query = "") {
+            if (query.Length > 0) {
+                return await Fetch(query);
+            }
+
             string url = "http://evene.lefigaro.fr/citations/citation-jour.php?page=";
 
             if (Page < 2) {
