@@ -108,15 +108,16 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Factory\Data.cs" />
+    <Compile Include="Factory\Settings.cs" />
+    <Compile Include="Factory\TileDesigner.cs" />
     <Compile Include="Models\UserSettings.cs" />
     <Compile Include="UpdateBackground.cs" />
     <Compile Include="UpdateTodayQuote.cs" />
     <Compile Include="Models\BackgroundQuote.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Helpers\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

@@ -18,18 +18,17 @@
       <uap:VisualElements DisplayName="Citations 365" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" Description="Citations 365" BackgroundColor="transparent">
         <uap:LockScreen Notification="badgeAndTileText" BadgeLogo="Assets\BadgeLogo.png" />
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" Square71x71Logo="Assets\Square71x71Logo.png" Square310x310Logo="Assets\Square310x310Logo.png">
-          <uap:ShowNameOnTiles>
-            <uap:ShowOn Tile="square310x310Logo" />
-          </uap:ShowNameOnTiles>
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
         <uap:InitialRotationPreference>
           <uap:Rotation Preference="portrait" />
           <uap:Rotation Preference="landscape" />
+          <uap:Rotation Preference="portraitFlipped" />
+          <uap:Rotation Preference="landscapeFlipped" />
         </uap:InitialRotationPreference>
       </uap:VisualElements>
       <Extensions>
-        <Extension Category="windows.backgroundTasks" EntryPoint="Tasks.UpdateTodayQuote">
+        <Extension Category="windows.backgroundTasks" EntryPoint="OptimizedTasks.LockScreenUpdater">
           <BackgroundTasks>
             <Task Type="systemEvent" />
             <Task Type="timer" />
@@ -41,7 +40,7 @@
             <Task Type="timer" />
           </BackgroundTasks>
         </Extension>
-        <Extension Category="windows.backgroundTasks" EntryPoint="OptimizedTasks.LockScreenUpdater">
+        <Extension Category="windows.backgroundTasks" EntryPoint="Tasks.UpdateTodayQuote">
           <BackgroundTasks>
             <Task Type="systemEvent" />
             <Task Type="timer" />

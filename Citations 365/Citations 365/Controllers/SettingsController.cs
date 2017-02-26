@@ -120,14 +120,18 @@ namespace citations365.Controllers {
             return false;
         }
 
-        public void RegisterBackgroundTask(string taskName, string entryPoint) {
+        public async void RegisterBackgroundTask(string taskName, string entryPoint) {
             foreach (var task in BackgroundTaskRegistration.AllTasks) {
                 if (task.Value.Name == taskName) {
                     return;
                 }
             }
 
-            BackgroundExecutionManager.RequestAccessAsync();
+            BackgroundAccessStatus status = await BackgroundExecutionManager.RequestAccessAsync();
+            if (status == BackgroundAccessStatus.DeniedBySystemPolicy ||
+                status == BackgroundAccessStatus.DeniedByUser) {
+                return; // show message that task couldn't be registered
+            }
 
             var builder = new BackgroundTaskBuilder();
 

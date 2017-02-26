@@ -1,8 +1,5 @@
-﻿using System;
-using System.ComponentModel;
-
-namespace Tasks.Models {
-    public sealed class BackgroundQuote : INotifyPropertyChanged {
+﻿namespace Tasks.Models {
+    public sealed class Quote {
         private string _content;
         private string _author;
         private string _authorLink;
@@ -10,37 +7,6 @@ namespace Tasks.Models {
         private string _reference;
         private string _link;
         private char _isFavorite;
-        
-        /// <summary>
-        /// Full constructor
-        /// </summary>
-        /// <param name="content">content</param>
-        /// <param name="author">author</param>
-        /// <param name="authorLink">author's link biography</param>
-        /// <param name="date">quote's date</param>
-        /// <param name="reference">reference</param>
-        /// <param name="link">quote's link</param>
-        public BackgroundQuote(string content, 
-                     string author,
-                     string authorLink, 
-                     string date, 
-                     string reference, 
-                     string link) {
-
-            _content    = content;
-            _author     = author;
-            _authorLink = authorLink;
-            _date       = date;
-            _reference  = reference;
-            _link       = link;
-        }
-
-        /// <summary>
-        /// Empty constructor
-        /// </summary>
-        public BackgroundQuote() {
-
-        }
 
         public string Content {
             get {
@@ -115,16 +81,7 @@ namespace Tasks.Models {
             set {
                 if (_isFavorite != value) {
                     _isFavorite = value;
-                    NotifyPropertyChanged("IsFavorite");
                 }
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void NotifyPropertyChanged(String propertyName) {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (null != handler) {
-                handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }

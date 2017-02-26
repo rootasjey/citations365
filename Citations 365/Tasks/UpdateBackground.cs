@@ -11,7 +11,6 @@ using Windows.ApplicationModel.Background;
 using Windows.Graphics.Display;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
-using Windows.System;
 using Windows.System.UserProfile;
 using Windows.UI.Text;
 using Windows.UI.Xaml;
@@ -19,8 +18,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 
-namespace Tasks
-{
+namespace Tasks {
     public sealed class UpdateBackground : XamlRenderingBackgroundTask {
         BackgroundTaskDeferral _deferral;
         volatile bool _cancelRequested = false;
@@ -111,11 +109,15 @@ namespace Tasks
             return(string)localSettings.Values[_appBackgroundPath];
         }
 
-        public BackgroundQuote RetrieveDailyQuote() {
+        public Quote RetrieveDailyQuote() {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
             var content = (string)localSettings.Values[_dailyQuoteContent];
             var author = (string)localSettings.Values[_dailyQuoteAuthor];
-            return new BackgroundQuote(content, author, null, null, null, null);
+
+            return new Quote() {
+                Content = content,
+                Author = author
+            };
         }
 
         public void SaveAppBackground(StorageFile wall) {
@@ -233,7 +235,7 @@ namespace Tasks
             return "/Assets/Backgrounds/nasa.jpg";
         }
 
-        private async Task<StorageFile> TakeScreenshot(string url, string name, BackgroundQuote quote) {
+        private async Task<StorageFile> TakeScreenshot(string url, string name, Quote quote) {
             var bold = new FontWeight();
             bold.Weight = 700;
             TextBlock txtLine1 = new TextBlock() {
