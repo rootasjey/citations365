@@ -2,6 +2,7 @@
 using citations365.Helpers;
 using citations365.Presentation;
 using System.Linq;
+using Windows.UI.Core;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 

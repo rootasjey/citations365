@@ -18,7 +18,7 @@ namespace citations365.Controllers {
          */
         private static UserSettings _userSettings = null;
 
-        public static UserSettings userSettings {
+        public static UserSettings UserSettings {
             get {
                 if (_userSettings == null) {
                     _userSettings = new UserSettings();
@@ -77,7 +77,7 @@ namespace citations365.Controllers {
         /// <returns>True if the settings has been correctly saved. False if there was an error</returns>
         public static async Task<bool> SaveSettings() {
             try {
-                await DataSerializer<UserSettings>.SaveObjectsAsync(userSettings, "userSettings.xml");
+                await DataSerializer<UserSettings>.SaveObjectsAsync(UserSettings, "userSettings.xml");
                 return true;
             } catch (IsolatedStorageException exception) {
                 return false; // error
@@ -92,7 +92,7 @@ namespace citations365.Controllers {
             try {
                 UserSettings settings = await DataSerializer<UserSettings>.RestoreObjectsAsync("userSettings.xml");
                 if (settings != null) {
-                    userSettings = settings;
+                    UserSettings = settings;
                     return true;
                 }
                 return false;
@@ -133,10 +133,10 @@ namespace citations365.Controllers {
                 return; // show message that task couldn't be registered
             }
 
-            var builder = new BackgroundTaskBuilder();
-
-            builder.Name = taskName;
-            builder.TaskEntryPoint = entryPoint;
+            var builder = new BackgroundTaskBuilder() {
+                Name = taskName,
+                TaskEntryPoint = entryPoint
+            };
             builder.SetTrigger(new TimeTrigger(60, false));
             BackgroundTaskRegistration taskRegistered = builder.Register();
         }
@@ -168,7 +168,7 @@ namespace citations365.Controllers {
         }
 
         public void UpdateAppTheme(ApplicationTheme theme) {
-            userSettings.applicationTheme = theme;
+            UserSettings.applicationTheme = theme;
             SaveSettings();
 
             // TODO: change theme dynamically
@@ -177,19 +177,19 @@ namespace citations365.Controllers {
         }
 
         public bool IsApplicationThemeLight() {
-            return ApplicationTheme.Light == userSettings.applicationTheme;
+            return ApplicationTheme.Light == UserSettings.applicationTheme;
         }
 
         public ApplicationTheme GetAppTheme() {
-            return userSettings.applicationTheme;
+            return UserSettings.applicationTheme;
         }
 
         public bool IsAppBackgroundDynamic() {
-            return !string.IsNullOrEmpty(userSettings.AppBackground);
+            return !string.IsNullOrEmpty(UserSettings.AppBackground);
         }
 
         public static string GetAppBackground() {
-            return userSettings.AppBackground;
+            return UserSettings.AppBackground;
         }
 
         public static string GetAppBackgroundURL() {
@@ -200,21 +200,21 @@ namespace citations365.Controllers {
         }
 
         public async void UpdateAppBackground(string background) {
-            if (userSettings.AppBackground == background) {
+            if (UserSettings.AppBackground == background) {
                 return;
             }
 
             TodayController.backgroundChanged = true;
-            userSettings.AppBackground = background;
+            UserSettings.AppBackground = background;
             SaveSettings();
         }
 
         public static async void UpdateAppBackgroundURL(string url) {
-            if (userSettings.AppBackgroundURL == url) {
+            if (UserSettings.AppBackgroundURL == url) {
                 return;
             }
 
-            userSettings.AppBackgroundURL = url;
+            UserSettings.AppBackgroundURL = url;
             SaveSettings();
             
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
@@ -227,11 +227,11 @@ namespace citations365.Controllers {
         }
 
         public static async void UpdateAppBackgroundName(string name) {
-            if (userSettings.AppBackgroundName == name) {
+            if (UserSettings.AppBackgroundName == name) {
                 return;
             }
 
-            userSettings.AppBackgroundName = name;
+            UserSettings.AppBackgroundName = name;
             SaveSettings();
 
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
@@ -239,11 +239,11 @@ namespace citations365.Controllers {
         }
 
         public static string GetAppBackgroundName() {
-            return userSettings.AppBackgroundName;
+            return UserSettings.AppBackgroundName;
         }
 
         public static string GenerateAppBackgroundName() {
-            string previousName = userSettings.AppBackgroundName;
+            string previousName = UserSettings.AppBackgroundName;
 
             string name1 = "wall1.png";
             string name2 = "wall2.png";

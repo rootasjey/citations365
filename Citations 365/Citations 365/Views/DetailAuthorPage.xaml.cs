@@ -1,6 +1,6 @@
 ﻿using citations365.Controllers;
 using citations365.Models;
-using System;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -51,6 +51,19 @@ namespace citations365.Views {
 
                 GetPageData(name, url);
             }
+
+            CoreWindow.GetForCurrentThread().KeyDown += DetailAuthorPage_KeyDown;
+        }
+
+        private void DetailAuthorPage_KeyDown(CoreWindow sender, KeyEventArgs args) {
+            if (Controller.IsBackOrEscapeKey(args.VirtualKey) && Frame.CanGoBack) {
+                Frame.GoBack();
+            }
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e) {
+            base.OnNavigatedFrom(e);
+            CoreWindow.GetForCurrentThread().KeyDown -= DetailAuthorPage_KeyDown;
         }
 
         private async void GetPageData(string name, string url) {
@@ -80,8 +93,8 @@ namespace citations365.Views {
             ListQuotes.ItemsSource = DAuthorController.AuthorQuotesCollection;
         }
 
-        private async void PagePivot_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            if (PagePivot.SelectedIndex == 1) { // quotes pivot item
+        private void PagePivot_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (PagePivot.SelectedIndex == 1) {
                 PopulateQuotes();
             }
         }

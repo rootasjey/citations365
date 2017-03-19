@@ -6,6 +6,7 @@ using Windows.Foundation.Metadata;
 using Windows.Phone.UI.Input;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
 
 namespace citations365 {
@@ -42,7 +43,7 @@ namespace citations365 {
         }
 
         public void ChangeAppTheme() {
-            RequestedTheme = SettingsController.userSettings.applicationTheme;
+            RequestedTheme = SettingsController.UserSettings.applicationTheme;
         }
 
         /// <summary>
@@ -122,7 +123,7 @@ namespace citations365 {
         void OnNavigated(object sender, NavigationEventArgs e) {
             UpdateBackButtonVisibility();
         }
-
+        
         /// <summary>
         /// Invoked when Navigation to a certain page fails
         /// </summary>

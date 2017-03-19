@@ -1,25 +1,16 @@
 ﻿using citations365.Controllers;
 using citations365.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
 // Pour plus d'informations sur le modèle d'élément Page vierge, voir la page http://go.microsoft.com/fwlink/?LinkId=234238
 
-namespace citations365.Views
-{
+namespace citations365.Views {
     /// <summary>
     /// Une page vide peut être utilisée seule ou constituer une page de destination au sein d'un frame.
     /// </summary>
@@ -36,19 +27,33 @@ namespace citations365.Views
             }
         }
 
-        public AuthorsPage()
-        {
+        public AuthorsPage() {
             InitializeComponent();
             Populate();
         }
 
-        private async void Populate() {
-            bool result = await AuthorsController.LoadData();
+        protected override void OnNavigatedFrom(NavigationEventArgs e) {
+            CoreWindow.GetForCurrentThread().KeyDown -= AuthorsPage_KeyDown;
+            base.OnNavigatedFrom(e);
+        }
 
-            if (result) {
-                HideLoading();
-                BindCollectionToView();
+        protected override void OnNavigatedTo(NavigationEventArgs e) {
+            CoreWindow.GetForCurrentThread().KeyDown += AuthorsPage_KeyDown;
+            base.OnNavigatedTo(e);
+        }
+
+        private void AuthorsPage_KeyDown(CoreWindow sender, KeyEventArgs args) {
+            if (Controller.IsBackOrEscapeKey(args.VirtualKey) && Frame.CanGoBack) {
+                Frame.GoBack();
             }
+        }
+
+        private async void Populate() {
+            bool loaded = await AuthorsController.LoadData();
+            if (!loaded) return;
+
+            HideLoading();
+            BindCollectionToView();
         }
 
         private void ShowLoading() {
@@ -62,7 +67,13 @@ namespace citations365.Views
         }
 
         private void BindCollectionToView() {
-            AuthorsGrid.ItemsSource = AuthorsController.AuthorsCollection;
+            var groupedAuthors = from author in AuthorsController.AuthorsCollection
+                                 group author by author.Name.First() into firstLetter
+                                 orderby firstLetter.Key
+                                 select firstLetter;
+
+            this.groupedAuthors.Source = groupedAuthors;
+            AuthorsKeys.ItemsSource = this.groupedAuthors.View.CollectionGroups;
         }
 
         private void Authors_Tapped(object sender, TappedRoutedEventArgs e) {

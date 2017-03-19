@@ -1,6 +1,7 @@
 ﻿using citations365.Controllers;
 using citations365.Models;
 using System.Collections.Generic;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -40,8 +41,22 @@ namespace citations365.Views {
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             ShowSearchResults();
+            CoreWindow.GetForCurrentThread().KeyDown += SearchPage_KeyDown;
             base.OnNavigatedTo(e);
         }
+
+        private void SearchPage_KeyDown(CoreWindow sender, KeyEventArgs args) {
+            if (InputSearch.FocusState != FocusState.Unfocused) return;
+            if (Controller.IsBackOrEscapeKey(args.VirtualKey) && Frame.CanGoBack) {
+                Frame.GoBack();
+            }
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e) {
+            CoreWindow.GetForCurrentThread().KeyDown -= SearchPage_KeyDown;
+            base.OnNavigatedFrom(e);
+        }
+        
 
         public async void PopulatePage() {
             await Scontroller.LoadData();
@@ -160,8 +175,6 @@ namespace citations365.Views {
             FocusSearchInput();
         }
 
-        private void InputSearch_LostFocus(object sender, RoutedEventArgs e) {
-        }
         private void InputSearch_KeyDown(object sender, KeyRoutedEventArgs e) {
             if (e.Key == Windows.System.VirtualKey.Enter && !_performingSearch) {
                 _performingSearch = true;
@@ -169,6 +182,7 @@ namespace citations365.Views {
                 string query = InputSearch.Text;
                 RunSearch(query);
             }
+            //e.Handled = true;
         }
 
         private void ResultsButton_Click(object sender, RoutedEventArgs e) {

@@ -1,9 +1,11 @@
 ﻿using citations365.Controllers;
 using citations365.Models;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media.Animation;
+using Windows.UI.Xaml.Navigation;
 
 namespace citations365.Views {
     public sealed partial class FavoritesPage : Page
@@ -15,6 +17,22 @@ namespace citations365.Views {
                     _FController = new FavoritesController();
                 }
                 return _FController;
+            }
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e) {
+            CoreWindow.GetForCurrentThread().KeyDown -= FavoritesPage_KeyDown;
+            base.OnNavigatedFrom(e);
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e) {
+            CoreWindow.GetForCurrentThread().KeyDown += FavoritesPage_KeyDown;
+            base.OnNavigatedTo(e);
+        }
+
+        private void FavoritesPage_KeyDown(CoreWindow sender, KeyEventArgs args) {
+            if (Controller.IsBackOrEscapeKey(args.VirtualKey) && Frame.CanGoBack) {
+                Frame.GoBack();
             }
         }
 

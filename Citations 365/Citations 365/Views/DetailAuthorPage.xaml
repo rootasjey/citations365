@@ -8,7 +8,7 @@
     xmlns:ctrl="using:LLM"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
         <Pivot x:Name="PagePivot" Margin="0,0,0,0" SelectionChanged="PagePivot_SelectionChanged">
             <PivotItem Header="BIOGRAPHIE">
                 <ScrollViewer>

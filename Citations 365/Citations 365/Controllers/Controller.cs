@@ -206,5 +206,10 @@ namespace citations365.Controllers {
             story.Children.Add(Utils.CreateDoubleAnimation(transform, "X", args.EasingFunc, args.ItemToX, args.Duration - 10));
             story.Begin();
         }
+
+        public static bool IsBackOrEscapeKey(Windows.System.VirtualKey key) {
+            return key == Windows.System.VirtualKey.Back ||
+                key == Windows.System.VirtualKey.Escape;
+        }
     }
 }

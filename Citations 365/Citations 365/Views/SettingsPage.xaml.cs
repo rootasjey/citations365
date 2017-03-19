@@ -1,6 +1,7 @@
 ﻿using citations365.Controllers;
 using System;
 using Windows.ApplicationModel.Email;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -38,6 +39,19 @@ namespace citations365.Views {
             UpdateWallTaskSwitcher();
             UpdateThemeSwitcher();
             UpdateAppBackgroundSwitcher();
+
+            CoreWindow.GetForCurrentThread().KeyDown += SettingsPage_KeyDown;
+        }
+
+        private void SettingsPage_KeyDown(CoreWindow sender, KeyEventArgs args) {
+            if (Controller.IsBackOrEscapeKey(args.VirtualKey) && Frame.CanGoBack) {
+                Frame.GoBack();
+            }
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e) {
+            CoreWindow.GetForCurrentThread().KeyDown -= SettingsPage_KeyDown;
+            base.OnNavigatedFrom(e);
         }
 
         private void UpdateQuoteTaskSwitcher() {

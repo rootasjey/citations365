@@ -11,6 +11,8 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Media.Imaging;
 using citations365.Helpers;
+using Windows.UI.Xaml.Navigation;
+using Windows.UI.Core;
 
 // Pour plus d'informations sur le modèle d'élément Page vierge, 
 // voir la page http://go.microsoft.com/fwlink/?LinkId=234238
@@ -35,6 +37,22 @@ namespace citations365.Views {
         private Compositor _backgroundCompositor;
         private ScrollViewer _ListQuotesScrollViewer;
         private CompositionPropertySet _ListQuotesScrollerPropertySet;
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e) {
+            CoreWindow.GetForCurrentThread().KeyDown -= TodayPage_KeyDown;
+            base.OnNavigatedFrom(e);
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e) {
+            CoreWindow.GetForCurrentThread().KeyDown += TodayPage_KeyDown;
+            base.OnNavigatedTo(e);
+        }
+
+        private void TodayPage_KeyDown(CoreWindow sender, KeyEventArgs args) {
+            if (Controller.IsBackOrEscapeKey(args.VirtualKey) && Frame.CanGoBack) {
+                Frame.GoBack();
+            }
+        }
 
         public TodayPage() {
             InitializeComponent();
@@ -175,7 +193,7 @@ namespace citations365.Views {
             ParallaxImage.Opacity = 1; // to see the animation
             _backgroundVisual.StartAnimation(nameof(_backgroundVisual.Opacity), animation);
 
-            //AttachBackgroundBlurAnimation();
+            AttachBackgroundBlurAnimation();
             AttachBackgroundParallax();
         }
 

@@ -87,6 +87,23 @@
                         </RichTextBlock>
                         <Button x:Name="NoteButton" Content="noter l'app" Margin="0,12,0,40" Click="NoteButton_Click"/>
 
+                        <RichTextBlock x:Name="ContributeBox" Margin="0,0,0,40">
+                            <Paragraph FontWeight="SemiLight" FontSize="24">contributing</Paragraph>
+                            <Paragraph>
+                                This project is open source and you can contribute in many ways:
+                                <LineBreak/>
+                                - signal a bug
+                                <LineBreak/>
+                                - suggest a feature
+                                <LineBreak/>
+                                - edit the code
+                                <LineBreak/>
+                                First visit the
+                                <Hyperlink NavigateUri="https://github.com/rootasjey/citations365">GitHub repository</Hyperlink>
+                                and be involved in this nice project!
+                            </Paragraph>
+                        </RichTextBlock>
+                        
                         <RichTextBlock x:Name="DataBox" Margin="0,0,0,40">
                             <Paragraph FontWeight="SemiLight" FontSize="24">données</Paragraph>
                             <Paragraph>
