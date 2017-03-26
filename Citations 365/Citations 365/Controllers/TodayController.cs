@@ -41,13 +41,13 @@ namespace citations365.Controllers {
             }
         }
 
-        private string unsplashURL {
+        private static string UnsplashURL {
             get {
                 return "https://unsplash.it/1500?random";
             }
         }
 
-        private string nasaURL {
+        private static string NasaURL {
             get {
                 return "http://apod.nasa.gov/apod/";
             }
@@ -88,9 +88,7 @@ namespace citations365.Controllers {
         public async Task<bool> LoadData() {
             await FavoritesController.Initialize();
 
-            if (IsDataLoaded()) {
-                return true;
-            }
+            if (IsDataLoaded()) return true;
 
             int added = await FetchAndRecover();
 
@@ -99,9 +97,7 @@ namespace citations365.Controllers {
                 TodayCollection.Insert(0, lockscreenQuote);
             }
 
-            if (added > 0) {
-                return true;
-            }
+            if (added > 0) return true;
             return false;
         }
 
@@ -124,16 +120,17 @@ namespace citations365.Controllers {
 
         public static Quote GetLockScreenQuote() {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
-            Windows.Storage.ApplicationDataCompositeValue composite =
-                (Windows.Storage.ApplicationDataCompositeValue)localSettings.Values[DAILY_QUOTE];
+            ApplicationDataCompositeValue composite =
+                (ApplicationDataCompositeValue)localSettings.Values[DAILY_QUOTE];
 
             if (composite != null) {
-                Quote quote = new Quote();
-                quote.Content = (string)composite[DAILY_QUOTE_CONTENT];
-                quote.Author = (string)composite[DAILY_QUOTE_AUTHOR];
-                quote.AuthorLink = (string)composite[DAILY_QUOTE_AUTHOR_LINK];
-                quote.Reference = (string)composite[DAILY_QUOTE_REFERENCE];
-                quote.Link = (string)composite[DAILY_QUOTE_LINK];
+                Quote quote = new Quote() {
+                    Content     = (string)composite[DAILY_QUOTE_CONTENT],
+                    Author      = (string)composite[DAILY_QUOTE_AUTHOR],
+                    AuthorLink  = (string)composite[DAILY_QUOTE_AUTHOR_LINK],
+                    Reference   = (string)composite[DAILY_QUOTE_REFERENCE],
+                    Link        = (string)composite[DAILY_QUOTE_LINK]
+                };
                 return quote;
             }
             return null;
@@ -234,7 +231,7 @@ namespace citations365.Controllers {
 
         }
 
-        public async Task<string> GetAppBackgroundURL() {
+        public static async Task<string> GetAppBackgroundURL() {
             if (!backgroundChanged) {
                 return SettingsController.GetAppBackgroundURL();
             }
@@ -248,7 +245,7 @@ namespace citations365.Controllers {
                     backgroundURL = await GetNasaImage();
                     break;
                 case "unsplash":
-                    backgroundURL = unsplashURL;
+                    backgroundURL = UnsplashURL;
                     break;
                 default:
                     backgroundURL = "";
@@ -265,11 +262,11 @@ namespace citations365.Controllers {
             return wallpaper.Path;
         }
 
-        private async Task<string> GetNasaImage() {
+        private static async Task<string> GetNasaImage() {
             HttpClient httpClient = new HttpClient();
             HttpResponseMessage response = null;
             try {
-                response = await httpClient.GetAsync(nasaURL);
+                response = await httpClient.GetAsync(NasaURL);
                 response.EnsureSuccessStatusCode();
                 string responseBodyAsText = await response.Content.ReadAsStringAsync();
 
@@ -292,7 +289,7 @@ namespace citations365.Controllers {
             }
         }
 
-        private string GetDefaultNasaImage() {
+        private static string GetDefaultNasaImage() {
             return "/Assets/Backgrounds/nasa.jpg";
         }
     }

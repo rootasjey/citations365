@@ -12,8 +12,7 @@ namespace citations365.Views {
     /// <summary>
     /// Une page vide peut être utilisée seule ou constituer une page de destination au sein d'un frame.
     /// </summary>
-    public sealed partial class SettingsPage : Page
-    {
+    public sealed partial class SettingsPage : Page {
         private static SettingsController _Scontroller;
 
         public static SettingsController Scontroller {
@@ -28,8 +27,7 @@ namespace citations365.Views {
         /// <summary>
         /// Constructor
         /// </summary>
-        public SettingsPage()
-        {
+        public SettingsPage() {
             InitializeComponent();
         }
 
@@ -75,7 +73,7 @@ namespace citations365.Views {
             var toggle = (ToggleSwitch)sender;
             if (toggle.IsOn) {
                 Scontroller.RegisterBackgroundTask(
-                    Scontroller.GetTaskQuoteName(), 
+                    Scontroller.GetTaskQuoteName(),
                     Scontroller.GetTaskQuoteEntryPoint());
             } else {
                 Scontroller.UnregisterBackgroundTask(Scontroller.GetTaskQuoteName());
@@ -86,7 +84,7 @@ namespace citations365.Views {
             var toggle = (ToggleSwitch)sender;
             if (toggle.IsOn) {
                 Scontroller.RegisterBackgroundTask(
-                    Scontroller.GetTaskBackgroundName(), 
+                    Scontroller.GetTaskBackgroundName(),
                     Scontroller.GetTaskBackgroundEntryPoint());
             } else {
                 Scontroller.UnregisterBackgroundTask(Scontroller.GetTaskBackgroundName());
@@ -94,9 +92,11 @@ namespace citations365.Views {
         }
 
         private void FeedbackButton_Click(object sender, RoutedEventArgs e) {
-            EmailMessage email = new EmailMessage();
-            email.Subject = "[Citations 365] Feedback";
-            email.Body = "send this email to metrodevapp@outlook.com";
+            EmailMessage email = new EmailMessage() {
+                Subject = "[Citations 365] Feedback",
+                Body = "send this email to metrodevapp@outlook.com"
+            };
+
             // TODO : add app infos
             EmailManager.ShowComposeNewEmailAsync(email);
         }
@@ -170,19 +170,15 @@ namespace citations365.Views {
             Scontroller.SetWallpaperAsync();
         }
 
-        private void StackPanel_ToggleHeight_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
-        {
+        private void StackPanel_ToggleHeight_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e) {
             StackPanel stack = (StackPanel)sender;
             string shrinked = "Shrinked";
             string expended = "Expended";
 
-            if (stack.Tag.ToString() == shrinked)
-            {
+            if (stack.Tag.ToString() == shrinked) {
                 stack.Tag = expended;
                 stack.Height = double.NaN;
-            }
-            else
-            {
+            } else {
                 stack.Tag = shrinked;
                 stack.Height = stack.MinHeight;
             }

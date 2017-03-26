@@ -7,8 +7,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 
 namespace citations365 {
-    public sealed partial class Shell : UserControl
-    {
+    public sealed partial class Shell : UserControl {
         private static string _header;
         public string Header {
             get {
@@ -24,8 +23,7 @@ namespace citations365 {
             }
         }
 
-        public Shell()
-        {
+        public Shell() {
             InitializeComponent();
 
             Controller.RegisterForShare();
@@ -58,8 +56,9 @@ namespace citations365 {
                 PageType = typeof(Views.SettingsPage)
             });
 
-            // select the first menu item
-            vm.SelectedMenuItem = vm.MenuItems.First();
+            // Prevent automatic navigation to 1st page
+            // Navigation will be done in ExtendedSplash.xaml.cs
+            // vm.SelectedMenuItem = vm.MenuItems.First();
             ViewModel = vm;
 
             // add entry animations
@@ -71,14 +70,12 @@ namespace citations365 {
 
         public ShellViewModel ViewModel { get; private set; }
 
-        public Frame RootFrame
-        {
-            get
-            {
+        public Frame RootFrame {
+            get {
                 if (Frame.SourcePageType != null) {
                     SetPageHeaderTitle(Frame.SourcePageType.Name);
                 }
-                
+
                 return Frame;
             }
         }
@@ -124,7 +121,8 @@ namespace citations365 {
             if (listView == null) {
                 return;
             }
-            
+
+            // TODO: sure await?
             await VisualTreeExtensions.ScrollToIndex(listView, 0);
         }
     }

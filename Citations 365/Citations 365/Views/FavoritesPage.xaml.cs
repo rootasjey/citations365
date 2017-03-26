@@ -8,8 +8,7 @@ using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
 namespace citations365.Views {
-    public sealed partial class FavoritesPage : Page
-    {
+    public sealed partial class FavoritesPage : Page {
         private static FavoritesController _FController;
         public static FavoritesController FController {
             get {

@@ -13,9 +13,6 @@ namespace OptimizedTasks
 		String^ GenerateAppBackgroundName(String^ prevName);
 		void SaveLockscreenBackground(StorageFile^ background);
 
-		String^ RetrieveQuoteContent();
-		String^ RetrieveQuoteAuthor();
-
 		ApplicationDataCompositeValue^ RetrieveQuote();
 
 		volatile bool CancelRequested;		

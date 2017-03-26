@@ -2,11 +2,10 @@
     x:Class="citations365.Views.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:citations365.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-    
+
     <Page.Resources>
         <Style x:Key="SettingsTitle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="24"/>
@@ -20,7 +19,7 @@
             <Setter Property="Tag" Value="Shrinked"/>
         </Style>
     </Page.Resources>
-    
+
     <Grid x:Name="SettingsGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
           EntranceNavigationTransitionInfo.IsTargetElement="True">
         <Pivot x:Name="PivotSettings" Margin="40,0">
@@ -83,7 +82,7 @@
                             <Paragraph FontWeight="SemiLight" FontSize="24">notation</Paragraph>
                             <Paragraph>
                                 N'hésitez pas à noter l'app sur le store si l'application vous plaît
-                            </Paragraph>                        
+                            </Paragraph>
                         </RichTextBlock>
                         <Button x:Name="NoteButton" Content="noter l'app" Margin="0,12,0,40" Click="NoteButton_Click"/>
 
@@ -103,7 +102,7 @@
                                 and be involved in this nice project!
                             </Paragraph>
                         </RichTextBlock>
-                        
+
                         <RichTextBlock x:Name="DataBox" Margin="0,0,0,40">
                             <Paragraph FontWeight="SemiLight" FontSize="24">données</Paragraph>
                             <Paragraph>
@@ -112,7 +111,7 @@
                                 et cette application n'est aucunement liée à la marque Evene
                             </Paragraph>
                         </RichTextBlock>
-                        
+
                         <RichTextBlock x:Name="ImagesBox" Margin="0,0,0,40">
                             <Paragraph FontWeight="SemiLight" FontSize="24">images</Paragraph>
                             <Paragraph>

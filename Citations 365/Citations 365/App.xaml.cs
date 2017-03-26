@@ -43,20 +43,21 @@ namespace citations365 {
         }
 
         public void ChangeAppTheme() {
-            RequestedTheme = SettingsController.UserSettings.applicationTheme;
+            try {
+                RequestedTheme = SettingsController.UserSettings.applicationTheme;
+            } catch (Exception e) {}
         }
 
         /// <summary>
-        /// Invoked when the application is launched normally by the end user.  Other entry points
-        /// will be used such as when the application is launched to open a specific file.
+        /// Invoked when the application is launched normally by the end user.
+        /// Other entry points will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e) {
 
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached) {
-                // disabled, obscures the hamburger button, enable if you need it
-                this.DebugSettings.EnableFrameRateCounter = true;
+                DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
 
@@ -65,9 +66,7 @@ namespace citations365 {
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
             if (shell == null) {
-                // Create a Shell which navigates to the first page
                 shell = new Shell();
-
                 _shell = shell; // keep an external ref
 
                 // hook-up shell root frame navigation events
@@ -85,14 +84,18 @@ namespace citations365 {
                 //    // what's new feed, etc.
                 //}
 
-                // set the Shell as content
                 Window.Current.Content = shell;
-
-                // listen for back button clicks (both soft- and hardware)
                 SystemNavigationManager.GetForCurrentView().BackRequested += OnBackRequested;
 
                 if (ApiInformation.IsTypePresent("Windows.Phone.UI.Input.HardwareButtons")) {
                     HardwareButtons.BackPressed += OnBackPressed;
+                }
+
+                //  Display an extended splash screen if app was not previously running.
+                if (e.PreviousExecutionState != ApplicationExecutionState.Running) {
+                    bool loadState = (e.PreviousExecutionState == ApplicationExecutionState.Terminated);
+                    ExtendedSplash extendedSplash = new ExtendedSplash(e.SplashScreen, loadState, shell, shell.Content);
+                    shell.Content = extendedSplash;
                 }
 
                 UpdateBackButtonVisibility();

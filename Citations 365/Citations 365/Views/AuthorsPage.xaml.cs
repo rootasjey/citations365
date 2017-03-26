@@ -14,8 +14,7 @@ namespace citations365.Views {
     /// <summary>
     /// Une page vide peut être utilisée seule ou constituer une page de destination au sein d'un frame.
     /// </summary>
-    public sealed partial class AuthorsPage : Page
-    {
+    public sealed partial class AuthorsPage : Page {
         private static AuthorsController _authorController;
 
         public static AuthorsController AuthorsController {

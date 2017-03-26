@@ -10,7 +10,7 @@
         <Grid.Resources>
             <CollectionViewSource x:Name="groupedAuthors" IsSourceGrouped="True"/>
         </Grid.Resources>
-        
+
         <StackPanel x:Name="LoadingView" VerticalAlignment="Center">
             <FontIcon Glyph="&#xE2AD;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>
             <TextBlock 

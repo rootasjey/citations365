@@ -9,8 +9,7 @@ using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
 namespace citations365.Views {
-    public sealed partial class SearchPage : Page
-    {
+    public sealed partial class SearchPage : Page {
         private static SearchController _Scontroller;
 
         public static SearchController Scontroller {
@@ -21,7 +20,7 @@ namespace citations365.Views {
                 return _Scontroller;
             }
         }
-        
+
         private static IDictionary<string, string> _tips =
             new Dictionary<string, string>();
 
@@ -33,8 +32,7 @@ namespace citations365.Views {
         /// </summary>
         private bool _performingSearch = false;
 
-        public SearchPage()
-        {
+        public SearchPage() {
             InitializeComponent();
             PopulatePage();
         }
@@ -56,12 +54,12 @@ namespace citations365.Views {
             CoreWindow.GetForCurrentThread().KeyDown -= SearchPage_KeyDown;
             base.OnNavigatedFrom(e);
         }
-        
+
 
         public async void PopulatePage() {
             await Scontroller.LoadData();
             BindCollectionToView();
-            PopulateTextInfos();            
+            PopulateTextInfos();
         }
 
         private void PopulateTextInfos() {
@@ -128,8 +126,8 @@ namespace citations365.Views {
         }
 
         private void ShowSearchResults() {
-            bool alreadyVisible = 
-                NoContentView.Visibility == Visibility.Collapsed && 
+            bool alreadyVisible =
+                NoContentView.Visibility == Visibility.Collapsed &&
                 ListQuotes.Visibility == Visibility.Visible;
             bool noResults = SearchController.SearchCollection.Count < 1;
 

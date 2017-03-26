@@ -30,6 +30,7 @@ String^ DAILY_QUOTE_REFERENCE = "DailyQuoteReference";
 LockScreenUpdater::LockScreenUpdater() {
 }
 
+// TODO: Beak into tiny functions
 void LockScreenUpdater::OnRun(IBackgroundTaskInstance^ taskInstance) {
 	Agile<BackgroundTaskDeferral^> deferral = Agile<BackgroundTaskDeferral^>(taskInstance->GetDeferral());
 	taskInstance->Canceled += ref new BackgroundTaskCanceledEventHandler(this, &LockScreenUpdater::OnCanceled);
@@ -181,16 +182,4 @@ ApplicationDataCompositeValue^ LockScreenUpdater::RetrieveQuote() {
 	}
 
 	return composite;
-}
-
-String^ LockScreenUpdater::RetrieveQuoteContent() {
-	ApplicationData^ current = ApplicationData::Current;
-	ApplicationDataContainer^ localSettings = current->LocalSettings;
-	return localSettings->Values->Lookup(DAILY_QUOTE_CONTENT)->ToString();
-}
-
-String^ LockScreenUpdater::RetrieveQuoteAuthor() {
-	ApplicationData^ current = ApplicationData::Current;
-	ApplicationDataContainer^ localSettings = current->LocalSettings;
-	return localSettings->Values->Lookup(DAILY_QUOTE_AUTHOR)->ToString();
 }

@@ -13,12 +13,10 @@ using Windows.UI.Xaml.Media.Imaging;
 using citations365.Helpers;
 using Windows.UI.Xaml.Navigation;
 using Windows.UI.Core;
+using Windows.Foundation;
 
-// Pour plus d'informations sur le modèle d'élément Page vierge, 
-// voir la page http://go.microsoft.com/fwlink/?LinkId=234238
 namespace citations365.Views {
-    public sealed partial class TodayPage : Page
-    {
+    public sealed partial class TodayPage : Page {
         private static TodayController _Tcontroller;
 
         public static TodayController Tcontroller {
@@ -38,12 +36,15 @@ namespace citations365.Views {
         private ScrollViewer _ListQuotesScrollViewer;
         private CompositionPropertySet _ListQuotesScrollerPropertySet;
 
+        private Point _heroQuoteCoords;
+
         protected override void OnNavigatedFrom(NavigationEventArgs e) {
             CoreWindow.GetForCurrentThread().KeyDown -= TodayPage_KeyDown;
             base.OnNavigatedFrom(e);
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
+            //_heroQuoteCoords = (Point)e.Parameter;
             CoreWindow.GetForCurrentThread().KeyDown += TodayPage_KeyDown;
             base.OnNavigatedTo(e);
         }
@@ -61,22 +62,21 @@ namespace citations365.Views {
 
         public async void PopulatePage() {
             ShowLoadingQuotesIndicator();
+            RefreshBackground();
 
             await Tcontroller.LoadData();
             BindCollectionToView();
             HideLoadingQuotesIndicator();
-            RefreshBackground();
         }
 
         private void BindCollectionToView() {
             if (Tcontroller.IsDataLoaded()) {
                 ListQuotes.ItemsSource = TodayController.TodayCollection;
                 ShowListQuotes();
-                //Controller.UpdateTile(TodayController.TodayCollection[0]);
-
-            } else {
-                ShowNoQuotesView();
+                return;
             }
+
+            ShowNoQuotesView();
         }
 
         private void ShowLoadingQuotesIndicator() {
@@ -102,7 +102,7 @@ namespace citations365.Views {
         }
 
         private async void RefreshBackground() {
-            string url = await Tcontroller.GetAppBackgroundURL();
+            string url = await TodayController.GetAppBackgroundURL();
 
             if (!string.IsNullOrEmpty(url)) {
                 var bitmap = new BitmapImage(new Uri(url));
@@ -123,6 +123,32 @@ namespace citations365.Views {
             _ListQuotesScrollViewer = ListQuotes.GetChildOfType<ScrollViewer>();
             _ListQuotesScrollerPropertySet = ElementCompositionPreview.
                     GetScrollViewerManipulationPropertySet(_ListQuotesScrollViewer);
+
+            //AnimateHeroQuote();
+        }
+
+        void AnimateHeroQuote() {
+            LLM.LLMListViewItem item = (LLM.LLMListViewItem)ListQuotes.ItemsPanelRoot.Children[0];
+            StackPanel stack = item.ContentTemplateRoot.GetChildOfType<StackPanel>();
+
+            var heroVisual = ElementCompositionPreview.GetElementVisual(stack);
+            var heroCompositor = heroVisual.Compositor;
+
+            var matrice = stack.TransformToVisual(Window.Current.Content);
+            Point destCoords = matrice.TransformPoint(new Point(0, 0));
+
+            var initX = (float)_heroQuoteCoords.X;
+            var initY = (float)_heroQuoteCoords.Y;
+
+            var destX = (float)destCoords.X;
+            var destY = (float)destCoords.Y;
+
+            var animation = heroCompositor.CreateVector3KeyFrameAnimation();
+            animation.InsertKeyFrame(0.0f, new Vector3(0.5f, 0.5f, 0));
+            animation.InsertKeyFrame(1.0f, new Vector3(1, 1, 1));
+            animation.Duration = TimeSpan.FromSeconds(1);
+
+            heroVisual.StartAnimation("Scale", animation);
         }
 
         /// <summary>
@@ -178,6 +204,18 @@ namespace citations365.Views {
             }
         }
 
+        private void InitializeHeroQuote(ContainerContentChangingEventArgs visual) {
+            if (Application.Current.Resources.ContainsKey("HeroQuoteTemplate")) {
+                DataTemplate heroTemplate = (DataTemplate)Application.Current.Resources["HeroQuoteTemplate"];
+                visual.ItemContainer.ContentTemplate = heroTemplate;
+            }
+
+            //var animation = ConnectedAnimationService.GetForCurrentView().GetAnimation("heroQuote");
+            //if (animation != null) {
+            //    animation.TryStart(visual.ItemContainer.ContentTemplateRoot.GetChildOfType<StackPanel>());
+            //}
+        }
+
         /// <summary>
         /// Attach animations to the background when it's been loaded
         /// </summary>
@@ -209,34 +247,34 @@ namespace citations365.Views {
             if (args.SwipeDirection == LLM.SwipeDirection.Left) {
                 quote.IsShared = false;
                 Controller.share(quote);
-
-            } else {
-                // Favorite/Un-Favorite
-                if (FavoritesController.IsFavorite(quote.Link)) {
-                    // Remove from favorites
-                    bool result = await FavoritesController.RemoveFavorite(quote);
-                    if (result) {
-                        quote.IsFavorite = false;
-                    }
-                } else {
-                    // Add to favorites
-                    bool result = await FavoritesController.AddFavorite(quote);
-                    if (result) {
-                        quote.IsFavorite = true;
-                    }
-                }
+                return;
             }
+
+            ToggleFavorite(quote);
         }
-        
+
+        async void ToggleFavorite(Quote quote) {
+            bool result = false;
+
+            if (FavoritesController.IsFavorite(quote.Link)) {
+                result = await FavoritesController.RemoveFavorite(quote);
+                if (result) quote.IsFavorite = false;
+                return;
+            }
+
+            result = await FavoritesController.AddFavorite(quote);
+            if (result) quote.IsFavorite = true;
+        }
+
         private void ItemSwipeTriggerInTouch(object sender, LLM.SwipeTriggerEventArgs args) {
             var quote = (sender as LLM.LLMListViewItem).Content as Quote;
 
             if (args.SwipeDirection == LLM.SwipeDirection.Left) {
                 quote.IsShared = args.IsTrigger;
-
-            } else {
-                quote.IsFavorite = FavoritesController.IsFavorite(quote) ? !args.IsTrigger : args.IsTrigger;
+                return;
             }
+
+            quote.IsFavorite = FavoritesController.IsFavorite(quote) ? !args.IsTrigger : args.IsTrigger;
         }
 
         private void ItemSwipeProgressInTouch(object sender, LLM.SwipeProgressEventArgs args) {
@@ -261,13 +299,6 @@ namespace citations365.Views {
 
             var panel = Controller.Getpanel(sender, args.SwipeDirection);
             Controller.SwipeReleasePanel(panel, args);
-        }
-
-        private void InitializeHeroQuote(ContainerContentChangingEventArgs visual) {
-            if (Application.Current.Resources.ContainsKey("HeroQuoteTemplate")) {
-                DataTemplate heroTemplate = (DataTemplate)Application.Current.Resources["HeroQuoteTemplate"];
-                visual.ItemContainer.ContentTemplate = heroTemplate;
-            }
         }
 
         /* ************

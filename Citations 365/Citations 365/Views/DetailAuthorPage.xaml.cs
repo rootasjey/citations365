@@ -30,8 +30,8 @@ namespace citations365.Views {
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
-            string name      = "", 
-                   url       = "", 
+            string name = "",
+                   url = "",
                    imageLink = "";
 
             base.OnNavigatedTo(e);
@@ -43,8 +43,7 @@ namespace citations365.Views {
                 imageLink = author.ImageLink;
 
                 GetPageData(name, url);
-            } 
-            else if (e.Parameter.GetType() == typeof(Quote)) {
+            } else if (e.Parameter.GetType() == typeof(Quote)) {
                 Quote quote = (Quote)e.Parameter;
                 name = quote.Author;
                 url = quote.AuthorLink;
