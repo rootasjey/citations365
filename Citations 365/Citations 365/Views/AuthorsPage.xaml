@@ -47,22 +47,25 @@
                            Margin="0,0,0,0" 
                            HorizontalAlignment="Center"
                            Visibility="Collapsed">
-                    <GridView.ItemContainerTransitions>
-                        <TransitionCollection>
-                            <EntranceThemeTransition FromVerticalOffset="100" IsStaggeringEnabled="True"/>
-                        </TransitionCollection>
-                    </GridView.ItemContainerTransitions>
 
                     <GridView.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Margin="40" Tapped="Authors_Tapped" 
-                                Height="150" Width="150" 
-                                Orientation="Vertical">
-                                <Ellipse Height="110" Width="110">
+                            <StackPanel Margin="40">
+                            <StackPanel
+                                        Height="150" Width="150" 
+                                        Orientation="Vertical"
+                                        Loaded="Author_Loaded"
+                                        Tapped="Authors_Tapped">
+                                
+                                <Ellipse x:Name="EllipseAuthor" 
+                                         Height="110" Width="110"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center">
                                     <Ellipse.Fill>
                                         <ImageBrush Stretch="UniformToFill">
                                             <ImageBrush.ImageSource>
-                                                <BitmapImage UriSource="{Binding ImageLink}"/>
+                                                <!--<BitmapImage UriSource="{Binding ImageLink}"/>-->
+                                                <BitmapImage UriSource="/Assets/Icons/gray.png"/>
                                             </ImageBrush.ImageSource>
                                         </ImageBrush>
                                     </Ellipse.Fill>
@@ -72,6 +75,7 @@
                                            FontWeight="Light" 
                                            Style="{StaticResource BaseTextBlockStyle}" 
                                            TextAlignment="Center"/>
+                            </StackPanel>
                             </StackPanel>
                         </DataTemplate>
                     </GridView.ItemTemplate>

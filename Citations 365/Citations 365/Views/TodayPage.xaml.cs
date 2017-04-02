@@ -36,7 +36,7 @@ namespace citations365.Views {
         private ScrollViewer _ListQuotesScrollViewer;
         private CompositionPropertySet _ListQuotesScrollerPropertySet;
 
-        private Point _heroQuoteCoords;
+        private int _animationDelay = 500;
 
         protected override void OnNavigatedFrom(NavigationEventArgs e) {
             CoreWindow.GetForCurrentThread().KeyDown -= TodayPage_KeyDown;
@@ -44,7 +44,6 @@ namespace citations365.Views {
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
-            //_heroQuoteCoords = (Point)e.Parameter;
             CoreWindow.GetForCurrentThread().KeyDown += TodayPage_KeyDown;
             base.OnNavigatedTo(e);
         }
@@ -102,6 +101,9 @@ namespace citations365.Views {
         }
 
         private async void RefreshBackground() {
+            string background = SettingsController.GetAppBackground();
+            if (string.IsNullOrEmpty(background)) return;
+
             string url = await TodayController.GetAppBackgroundURL();
 
             if (!string.IsNullOrEmpty(url)) {
@@ -137,18 +139,12 @@ namespace citations365.Views {
             var matrice = stack.TransformToVisual(Window.Current.Content);
             Point destCoords = matrice.TransformPoint(new Point(0, 0));
 
-            var initX = (float)_heroQuoteCoords.X;
-            var initY = (float)_heroQuoteCoords.Y;
-
-            var destX = (float)destCoords.X;
-            var destY = (float)destCoords.Y;
-
-            var animation = heroCompositor.CreateVector3KeyFrameAnimation();
-            animation.InsertKeyFrame(0.0f, new Vector3(0.5f, 0.5f, 0));
-            animation.InsertKeyFrame(1.0f, new Vector3(1, 1, 1));
+            var animation = heroCompositor.CreateVector2KeyFrameAnimation();
+            animation.InsertKeyFrame(0.0f, new Vector2(0, -50f));
+            animation.InsertKeyFrame(1.0f, new Vector2(0, 0));
             animation.Duration = TimeSpan.FromSeconds(1);
 
-            heroVisual.StartAnimation("Scale", animation);
+            heroVisual.StartAnimation("Offset.xy", animation);
         }
 
         /// <summary>
@@ -342,6 +338,22 @@ namespace citations365.Views {
             backgroundBlurAnimation.SetReferenceParameter("scroller", _ListQuotesScrollerPropertySet);
 
             blurSprite.Brush.Properties.StartAnimation("Blur.BlurAmount", backgroundBlurAnimation);
+        }
+
+ 
+        private void Quote_Loaded(object sender, RoutedEventArgs e) {
+            var panel = (StackPanel)sender;
+
+            var visual = ElementCompositionPreview.GetElementVisual(panel);
+            var compositor = visual.Compositor;
+
+            var slideUpAnimation = compositor.CreateVector2KeyFrameAnimation();
+            slideUpAnimation.InsertKeyFrame(0.0f, new Vector2(0f, 100f));
+            slideUpAnimation.InsertKeyFrame(1.0f, new Vector2(0, 0));
+            slideUpAnimation.Duration = TimeSpan.FromMilliseconds(_animationDelay);
+            visual.StartAnimation("Offset.xy", slideUpAnimation);
+
+            _animationDelay += 200;
         }
     }
 }

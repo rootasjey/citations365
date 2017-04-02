@@ -5,59 +5,71 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ctrl="using:LLM"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:behaviors="using:Microsoft.Toolkit.Uwp.UI.Animations.Behaviors"
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
-        <Pivot x:Name="PagePivot" Margin="0,0,0,0" SelectionChanged="PagePivot_SelectionChanged">
+        <Pivot x:Name="PagePivot" SelectionChanged="PagePivot_SelectionChanged">
             <PivotItem Header="BIOGRAPHIE">
                 <ScrollViewer>
-                    <StackPanel x:Name="AuthorInfos">
-                        <StackPanel Margin="0,0,0,36">
-                            <Ellipse Height="110" Width="110" Margin="0,40,0,0">
+                    <StackPanel x:Name="AuthorInfos" Padding="0,100">
+                        <StackPanel>
+                            <Ellipse x:Name="EllipseAuthor" Height="110" Width="110">
                                 <Ellipse.Fill>
                                     <ImageBrush Stretch="UniformToFill">
                                         <ImageBrush.ImageSource>
-                                            <BitmapImage x:Name="AuthorImage" UriSource="{Binding Picture}"/>
+                                            <!--<BitmapImage x:Name="AuthorImage" UriSource="{Binding Picture}"/>-->
+                                            <BitmapImage x:Name="AuthorImage" UriSource="/Assets/Icons/gray.png"/>
                                         </ImageBrush.ImageSource>
                                     </ImageBrush>
                                 </Ellipse.Fill>
                             </Ellipse>
                             <FontIcon Margin="0,-110,0,0" Glyph="&#xE13D;"
-                                  FontSize="46"
-                                  FontFamily="Segoe MDL2 Assets"
-                                  Foreground="White"
-                                  Canvas.ZIndex="2"/>
+                                      FontSize="46"
+                                      FontFamily="Segoe MDL2 Assets"
+                                      Foreground="White"
+                                      Canvas.ZIndex="2"/>
 
-                            <TextBlock x:Name="LifeTime" Text="{Binding LifeTime, Converter={StaticResource UpperText}}" TextAlignment="Center" Margin="0,12,0,0"
+                            <TextBlock x:Name="LifeTime" 
+                                       Text="{Binding LifeTime, Converter={StaticResource UpperText}}" 
+                                       TextAlignment="Center" 
                                        Visibility="{Binding Quote, Converter={StaticResource TextVisibility}}"/>
-                            <TextBlock x:Name="Job" Text="{Binding Job}" TextAlignment="Center" TextWrapping="Wrap"
+                            
+                            <TextBlock x:Name="Job" 
+                                       Text="{Binding Job}" 
+                                       TextAlignment="Center" 
+                                       TextWrapping="Wrap"
                                        Visibility="{Binding Quote, Converter={StaticResource TextVisibility}}"/>
+                            
                             <TextBlock x:Name="MainQuote" 
                                        Text="{Binding Quote, Converter={StaticResource UpperText}}" 
-                                       FontSize="24" TextAlignment="Center" 
+                                       FontSize="24" 
+                                       TextAlignment="Center" 
                                        FontWeight="Bold"
-                                       Margin="0,36" TextWrapping="Wrap"
+                                       Padding="40,0"
+                                       Margin="0,36" 
+                                       TextWrapping="Wrap"
                                        Visibility="{Binding Quote, Converter={StaticResource TextVisibility}}"/>
                         </StackPanel>
 
-                        <TextBlock x:Name="ContentBio" 
-                                    Text="{Binding Biography}"
-                                    FontSize="21" 
-                                    FontWeight="Light" 
-                                    TextWrapping="Wrap"
-                                    Visibility="{Binding Biography, Converter={StaticResource TextVisibility}}"
-                                    Margin="0,0,0,80"/>
+                        <TextBlock x:Name="Biography" 
+                                   Text="{Binding Biography}"
+                                   FontSize="21" 
+                                   FontWeight="Light"
+                                   Padding="60,0"
+                                   Visibility="{Binding Biography, Converter={StaticResource TextVisibility}}"
+                                   TextWrapping="Wrap" />
 
                         <ItemsControl x:Name="NoContentViewBio"
                                     Visibility="{Binding Biography, Converter={StaticResource EmptyViewVisibility}}">
                             <FontIcon Glyph="&#xE7BC;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>
-                            <TextBlock 
-                                Margin="40,0,40,0"
-                                FontSize="24"
-                                FontWeight="Light"
-                                TextWrapping="Wrap"
-                                HorizontalAlignment="Center"
-                                Text="Cet auteur n'a pas de biographie :|"/>
+                            <TextBlock Margin="40,0,40,0"
+                                       FontSize="24"
+                                       FontWeight="Light"
+                                       TextWrapping="Wrap"
+                                       HorizontalAlignment="Center"
+                                       Text="Cet auteur n'a pas de biographie :|"/>
                         </ItemsControl>
 
                         <ProgressRing x:Name="RingLoadingAuthorBio" 
@@ -74,13 +86,12 @@
                 <Grid>
                     <StackPanel x:Name="NoContentViewQuotes" VerticalAlignment="Center" Margin="0,60,0,0">
                         <FontIcon Glyph="&#xE90A;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>
-                        <TextBlock 
-                            Margin="40,0,40,0"
-                            FontSize="24"
-                            FontWeight="Light"
-                            TextWrapping="Wrap"
-                            HorizontalAlignment="Center"
-                            Text="Cet auteur n'a pas de célèbres citations :/"/>
+                        <TextBlock Margin="40,0,40,0"
+                                   FontSize="24"
+                                   FontWeight="Light"
+                                   TextWrapping="Wrap"
+                                   HorizontalAlignment="Center"
+                                   Text="Cet auteur n'a pas de célèbres citations :/"/>
                     </StackPanel>
 
                     <ProgressRing x:Name="RingLoadingQuotes" 
@@ -98,7 +109,6 @@
                               IsItemClickEnabled="True"
                               ItemClick="ListQuotes_ItemClick"
                               ItemContainerStyle="{StaticResource ListViewItemFill}"
-                              ItemTemplate="{StaticResource QuoteTemplate}"
                               ItemLeftSwipeMode="Collapse"
                               ItemRightSwipeMode="Collapse"
                               ItemLeftActionRateForSwipeLength="0.4"
@@ -108,12 +118,6 @@
                               ItemSwipeTriggerInTouch="ItemSwipeTriggerInTouch"
                               ItemSwipeBeginTrigger="ItemSwipeBeginTrigger"
                               ItemSwipeBeginRestore="ItemSwipeBeginRestore">
-                        <ctrl:LLMListView.ItemContainerTransitions>
-                            <TransitionCollection>
-                                <EntranceThemeTransition FromVerticalOffset="100" 
-                                                 IsStaggeringEnabled="True"/>
-                            </TransitionCollection>
-                        </ctrl:LLMListView.ItemContainerTransitions>
                         <ctrl:LLMListView.ItemLeftSwipeContentTemplate>
                             <DataTemplate>
                                 <Grid Background="{Binding IsShared, Converter={StaticResource ShareSwypeColor}, ConverterParameter={StaticResource SharedColor}}">
@@ -147,6 +151,27 @@
                                 </Grid>
                             </DataTemplate>
                         </ctrl:LLMListView.ItemRightSwipeContentTemplate>
+                        <ctrl:LLMListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="40,25,40,25">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="17"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Grid.Column="0" Grid.Row="0" Loaded="Quote_Loaded">
+                                        <TextBlock Text="{Binding Content}" FontWeight="Light" FontSize="20" TextWrapping="WrapWholeWords"/>
+                                        <TextBlock Text="{Binding Author, Converter={StaticResource UpperText}}" FontWeight="Bold" FontSize="14" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Reference, Converter={StaticResource UpperText}}" FontWeight="Normal" FontSize="12" TextWrapping="WrapWholeWords"
+                                           Visibility="{Binding Reference, Converter={StaticResource TextVisibility}}"/>
+                                    </StackPanel>
+
+                                    <Rectangle Grid.Column="1" 
+                           Grid.Row="1" 
+                           Margin="0,7"
+                           Fill="{Binding IsFavorite, Converter={StaticResource FavoriteColor}}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ctrl:LLMListView.ItemTemplate>
                     </ctrl:LLMListView>
                 </Grid>
             </PivotItem>

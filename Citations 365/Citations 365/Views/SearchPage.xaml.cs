@@ -1,9 +1,12 @@
 ﻿using citations365.Controllers;
 using citations365.Models;
+using System;
 using System.Collections.Generic;
+using System.Numerics;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Hosting;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
@@ -20,6 +23,8 @@ namespace citations365.Views {
                 return _Scontroller;
             }
         }
+
+        private int _animationDelay = 500;
 
         private static IDictionary<string, string> _tips =
             new Dictionary<string, string>();
@@ -299,6 +304,21 @@ namespace citations365.Views {
             if (quote.AuthorLink != null && quote.AuthorLink.Length > 0) {
                 Frame.Navigate(typeof(DetailAuthorPage), quote, new DrillInNavigationTransitionInfo());
             }
+        }
+
+        private void Quote_Loaded(object sender, RoutedEventArgs e) {
+            var grid = (StackPanel)sender;
+
+            var visual = ElementCompositionPreview.GetElementVisual(grid);
+            var compositor = visual.Compositor;
+
+            var slideUpAnimation = compositor.CreateVector2KeyFrameAnimation();
+            slideUpAnimation.InsertKeyFrame(0.0f, new Vector2(0f, 100f));
+            slideUpAnimation.InsertKeyFrame(1.0f, new Vector2(0, 0));
+            slideUpAnimation.Duration = TimeSpan.FromMilliseconds(_animationDelay);
+            visual.StartAnimation("Offset.xy", slideUpAnimation);
+
+            _animationDelay += 200;
         }
     }
 }

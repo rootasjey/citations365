@@ -159,5 +159,9 @@ namespace citations365 {
 
             SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = visibility;
         }
+
+        private void Grid_Loaded(object sender, RoutedEventArgs e) {
+
+        }
     }
 }

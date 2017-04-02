@@ -248,8 +248,7 @@ namespace citations365.Controllers {
                     backgroundURL = UnsplashURL;
                     break;
                 default:
-                    backgroundURL = "";
-                    break;
+                    return "";
             }
 
             string name = SettingsController.GenerateAppBackgroundName();

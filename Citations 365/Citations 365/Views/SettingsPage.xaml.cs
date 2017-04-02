@@ -156,6 +156,7 @@ namespace citations365.Views {
             } else {
                 BackgroundChooser.Visibility = Visibility.Collapsed;
                 Scontroller.UpdateAppBackground("");
+                SettingsController.UpdateAppBackgroundURL("");
             }
         }
 

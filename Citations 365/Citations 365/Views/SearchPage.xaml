@@ -37,7 +37,6 @@
                               IsItemClickEnabled="True"
                               ItemClick="ListQuotes_ItemClick"
                               ItemContainerStyle="{StaticResource ListViewItemFill}"
-                              ItemTemplate="{StaticResource QuoteTemplate}"
                               ItemLeftSwipeMode="Collapse"
                               ItemRightSwipeMode="Collapse"
                               CanPullToRefresh="False"
@@ -48,12 +47,6 @@
                               ItemSwipeTriggerInTouch="ItemSwipeTriggerInTouch"
                               ItemSwipeBeginTrigger="ItemSwipeBeginTrigger"
                               ItemSwipeBeginRestore="ItemSwipeBeginRestore">
-                <ctrl:LLMListView.ItemContainerTransitions>
-                    <TransitionCollection>
-                        <EntranceThemeTransition FromVerticalOffset="100" 
-                                                 IsStaggeringEnabled="True"/>
-                    </TransitionCollection>
-                </ctrl:LLMListView.ItemContainerTransitions>
                 <ctrl:LLMListView.ItemLeftSwipeContentTemplate>
                     <DataTemplate>
                         <Grid Background="{Binding IsShared, Converter={StaticResource ShareSwypeColor}, ConverterParameter={StaticResource SharedColor}}">
@@ -87,6 +80,27 @@
                         </Grid>
                     </DataTemplate>
                 </ctrl:LLMListView.ItemRightSwipeContentTemplate>
+                <ctrl:LLMListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="40,25,40,25">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="17"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Column="0" Grid.Row="0" Loaded="Quote_Loaded">
+                                <TextBlock Text="{Binding Content}" FontWeight="Light" FontSize="20" TextWrapping="WrapWholeWords"/>
+                                <TextBlock Text="{Binding Author, Converter={StaticResource UpperText}}" FontWeight="Bold" FontSize="14" TextWrapping="Wrap"/>
+                                <TextBlock Text="{Binding Reference, Converter={StaticResource UpperText}}" FontWeight="Normal" FontSize="12" TextWrapping="WrapWholeWords"
+                                           Visibility="{Binding Reference, Converter={StaticResource TextVisibility}}"/>
+                            </StackPanel>
+
+                            <Rectangle Grid.Column="1" 
+                           Grid.Row="1" 
+                           Margin="0,7"
+                           Fill="{Binding IsFavorite, Converter={StaticResource FavoriteColor}}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ctrl:LLMListView.ItemTemplate>
             </ctrl:LLMListView>
         </Grid>
 

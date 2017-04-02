@@ -37,23 +37,11 @@ namespace citations365.Controllers {
         private AuthorInfos _lastAuthor { get; set; }
 
         private bool _isSameRequest { get; set; }
-        /*
-         * ***********
-         * CONSTRUCTOR
-         * ***********
-         */
-        /// <summary>
-        /// Initialize the controller
-        /// </summary>
+
         public DetailAuthorController() {
 
         }
 
-        /*
-         * ********
-         * METHODS
-         * ********
-         */
         public async Task<AuthorInfos> LoadData(string url) {
             if (isSameRequest(url)) {
                 return _lastAuthor;
@@ -81,12 +69,10 @@ namespace citations365.Controllers {
         }
 
         public async Task<AuthorInfos> FetchBio(string url) {
-            // If there's no internet connection
             if (!NetworkInterface.GetIsNetworkAvailable()) {
                 return null;
             }
 
-            // Fetch the content from a web source
             HttpClient http = new HttpClient();
             string responseBodyAsText;
 
@@ -94,7 +80,6 @@ namespace citations365.Controllers {
                 HttpResponseMessage message = await http.GetAsync(url);
                 responseBodyAsText = await message.Content.ReadAsStringAsync();
 
-                // HTML Document building
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(responseBodyAsText);
 

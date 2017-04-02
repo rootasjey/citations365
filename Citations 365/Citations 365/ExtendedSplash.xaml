@@ -7,7 +7,7 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource SystemControlHighlightAccentBrush}">
-        <Canvas>
+        <Canvas x:Name="PageCanvas">
             <Image x:Name="splashImage" Source="Assets/SplashScreen.png"
                    Stretch="Fill"/>
             <StackPanel x:Name="stack"

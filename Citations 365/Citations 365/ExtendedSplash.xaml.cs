@@ -9,6 +9,8 @@ using citations365.Models;
 using citations365.Controllers;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Media.Animation;
+using Windows.UI.Xaml.Hosting;
+using System.Numerics;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 namespace citations365 {
@@ -88,14 +90,42 @@ namespace citations365 {
             //ConnectedAnimationService.GetForCurrentView().PrepareToAnimate("heroQuote", stackQuote);
             //var matrice = stackQuote.TransformToVisual(Window.Current.Content);
             //Point heroQuoteCoords = matrice.TransformPoint(new Point(0, 0));
+
+            //var visual = ElementCompositionPreview.GetElementVisual(PageCanvas);
+            //var compositor = visual.Compositor;
+
+            //var duration = TimeSpan.FromMilliseconds(500);
+
+            //var slideUpAnimation = compositor.CreateVector2KeyFrameAnimation();
+            //slideUpAnimation.InsertKeyFrame(0.0f, new Vector2(0f, 0f));
+            //slideUpAnimation.InsertKeyFrame(1.0f, new Vector2(0, -500));
+            //slideUpAnimation.Duration = duration;
+
+            //var fadeOutAnimation = compositor.CreateScalarKeyFrameAnimation();
+            //fadeOutAnimation.InsertKeyFrame(1, 0);
+            //fadeOutAnimation.Duration = duration;
+
+            //var batch = compositor.CreateScopedBatch(Windows.UI.Composition.CompositionBatchTypes.Animation);
+            //batch.Completed += (sender, args) => {
+            //    rootFrame.Content = _shellContent;
+            //    App._shell.RootFrame.Navigate(typeof(TodayPage));
+            //};
+
+            //visual.StartAnimation("Opacity", fadeOutAnimation);
+            //visual.StartAnimation("Offset.xy", slideUpAnimation);
+            //batch.End();
+
             rootFrame.Content = _shellContent;
             App._shell.RootFrame.Navigate(typeof(TodayPage));
+
             //rootFrame.RootFrame.Navigate(typeof(TodayPage));
             //Window.Current.Content = rootFrame;
         }
 
         void LoadSplashQuote() {
             Quote lockscreenQuote = TodayController.GetLockScreenQuote();
+            if (lockscreenQuote == null) return;
+
             quoteContent.Text = lockscreenQuote.Content;
             quoteAuthor.Text = lockscreenQuote.Author;
         }
