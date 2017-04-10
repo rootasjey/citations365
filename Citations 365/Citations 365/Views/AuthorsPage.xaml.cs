@@ -14,11 +14,11 @@ using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 using Windows.UI.Xaml.Shapes;
 
-// Pour plus d'informations sur le modèle d'élément Page vierge, voir la page http://go.microsoft.com/fwlink/?LinkId=234238
-
 namespace citations365.Views {
     public sealed partial class AuthorsPage : Page {
         private static AuthorsController _authorController;
+
+        private static Author _LastSelectedAuthor { get; set; }
 
         public static AuthorsController AuthorsController {
             get {
@@ -53,8 +53,11 @@ namespace citations365.Views {
         }
 
         private async void Populate() {
-            bool loaded = await AuthorsController.LoadData();
-            if (!loaded) return;
+            AuthorsGrid.Loaded += (s, v) => {
+                RestorViewPosition();
+            };
+
+            await AuthorsController.LoadData();
 
             HideLoading();
             BindCollectionToView();
@@ -80,22 +83,31 @@ namespace citations365.Views {
             AuthorsKeys.ItemsSource = this.groupedAuthors.View.CollectionGroups;
         }
 
+        void RestorViewPosition() {
+            var animation = ConnectedAnimationService.GetForCurrentView().GetAnimation("EllipseAuthor");
+            if (animation == null || _LastSelectedAuthor == null) return;
+
+            AuthorsGrid.ScrollIntoView(_LastSelectedAuthor);
+            AuthorsGrid.UpdateLayout();
+
+            var container = (GridViewItem)AuthorsGrid.ContainerFromItem(_LastSelectedAuthor);
+            var root = (StackPanel)container.ContentTemplateRoot;
+            var ellipse = (Ellipse)root.FindName("EllipseAuthor");
+
+            animation.TryStart(ellipse);
+        }
+
         private void Authors_Tapped(object sender, TappedRoutedEventArgs e) {
             StackPanel panel = (StackPanel)sender;
             Author author = (Author)panel.DataContext;
 
+            _LastSelectedAuthor = author;
+
             var EllipseAuthor = (UIElement)panel.FindName("EllipseAuthor");
 
-            var matrice = EllipseAuthor.TransformToVisual(Window.Current.Content);
-            Point EllipseAuthorCoords = matrice.TransformPoint(new Point(0, 0));
+            ConnectedAnimationService.GetForCurrentView().PrepareToAnimate("EllipseAuthor", EllipseAuthor);
 
-            //ConnectedAnimationService.GetForCurrentView().PrepareToAnimate("EllipseAuthor", EllipseAuthor);
-            //Frame.Navigate(typeof(DetailAuthorPage), author, new DrillInNavigationTransitionInfo());
-            var payload = new Dictionary<string, object>() {
-                { "AuthorPayload", author },
-                { "EllipseAuthorCoords", EllipseAuthorCoords }
-            };
-            Frame.Navigate(typeof(DetailAuthorPage), payload, new DrillInNavigationTransitionInfo());
+            Frame.Navigate(typeof(DetailAuthorPage), author);
         }
 
         private void Author_Loaded(object sender, RoutedEventArgs e) {

@@ -1,4 +1,5 @@
 ﻿using citations365.Controllers;
+using citations365.Views;
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
@@ -6,7 +7,6 @@ using Windows.Foundation.Metadata;
 using Windows.Phone.UI.Input;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
-using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
 
 namespace citations365 {
@@ -92,11 +92,11 @@ namespace citations365 {
                 }
 
                 //  Display an extended splash screen if app was not previously running.
-                if (e.PreviousExecutionState != ApplicationExecutionState.Running) {
-                    bool loadState = (e.PreviousExecutionState == ApplicationExecutionState.Terminated);
-                    ExtendedSplash extendedSplash = new ExtendedSplash(e.SplashScreen, loadState, shell, shell.Content);
-                    shell.Content = extendedSplash;
-                }
+                //if (e.PreviousExecutionState != ApplicationExecutionState.Running) {
+                //    bool loadState = (e.PreviousExecutionState == ApplicationExecutionState.Terminated);
+                //}
+
+                //shell.RootFrame.Navigate(typeof(TodayPage));
 
                 UpdateBackButtonVisibility();
             }

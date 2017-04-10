@@ -55,10 +55,9 @@ namespace citations365 {
                 Label = "Settings",
                 PageType = typeof(Views.SettingsPage)
             });
-
-            // Prevent automatic navigation to 1st page
-            // Navigation will be done in ExtendedSplash.xaml.cs
-            // vm.SelectedMenuItem = vm.MenuItems.First();
+            
+            // Comment the next line to avoid auto navigation
+            vm.SelectedMenuItem = vm.MenuItems.First();
             ViewModel = vm;
 
             // add entry animations

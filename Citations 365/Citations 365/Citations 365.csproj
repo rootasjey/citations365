@@ -119,9 +119,6 @@
     <Compile Include="Converters\ShareSwypeColor.cs" />
     <Compile Include="Converters\TextVisibility.cs" />
     <Compile Include="Converters\UpperText.cs" />
-    <Compile Include="ExtendedSplash.xaml.cs">
-      <DependentUpon>ExtendedSplash.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\VisualTreeExtensions.cs" />
     <Compile Include="Presentation\Extensions.cs" />
@@ -230,10 +227,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="ExtendedSplash.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Shell.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

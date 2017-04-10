@@ -39,59 +39,35 @@ namespace citations365.Views {
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             CoreWindow.GetForCurrentThread().KeyDown += DetailAuthorPage_KeyDown;
 
-            string name = "",
-                   url = "",
-                   imageLink = "";
-
-            base.OnNavigatedTo(e);
-
             if (e.Parameter.GetType() == typeof(Author)) {
                 Author author = (Author)e.Parameter;
-                name = author.Name;
-                url = author.Link;
-                imageLink = author.ImageLink;
+                GetPageData(author.Name, author.Link);
 
-                GetPageData(name, url);
             } else if (e.Parameter.GetType() == typeof(Quote)) {
                 Quote quote = (Quote)e.Parameter;
-                name = quote.Author;
-                url = quote.AuthorLink;
-
-                GetPageData(name, url);
-            } else if (e.Parameter.GetType() == typeof(Dictionary<string, object>)) {
-                var payload = (Dictionary<string, object>)e.Parameter;
-                if (payload["AuthorPayload"].GetType() == typeof(Author)) {
-                    Author author = (Author)payload["AuthorPayload"];
-                    name = author.Name;
-                    url = author.Link;
-                    //imageLink = author.ImageLink;
-
-                    GetPageData(name, url);
-                }
-
-                var EllipseAuthorCoords = (Point)payload["EllipseAuthorCoords"];
-                EllipseAuthor.Offset((float)EllipseAuthorCoords.X, (float)EllipseAuthorCoords.Y, 0, 0).Start();
+                GetPageData(quote.Author, quote.AuthorLink);
             }
 
-            //var animation = ConnectedAnimationService.GetForCurrentView().GetAnimation("EllipseAuthor");
-            //if (animation != null) {
-            //    //EllipseAuthor.Opacity = 0;
-            //    EllipseAuthor.Loaded += (sender, ev) => {
-            //        //EllipseAuthor.Opacity = 1;
-            //        animation.TryStart(EllipseAuthor);
-            //    };
-            //}
+            var animation = ConnectedAnimationService.GetForCurrentView().GetAnimation("EllipseAuthor");
+            if (animation != null) {
+                animation.TryStart(EllipseAuthor);
+            }
+
+            base.OnNavigatedTo(e);
         }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e) {
+            CoreWindow.GetForCurrentThread().KeyDown -= DetailAuthorPage_KeyDown;
+
+            ConnectedAnimationService.GetForCurrentView().PrepareToAnimate("EllipseAuthor", EllipseAuthor);
+            base.OnNavigatedFrom(e);
+        }
+
 
         private void DetailAuthorPage_KeyDown(CoreWindow sender, KeyEventArgs args) {
             if (Controller.IsBackOrEscapeKey(args.VirtualKey) && Frame.CanGoBack) {
                 Frame.GoBack();
             }
-        }
-
-        protected override void OnNavigatedFrom(NavigationEventArgs e) {
-            base.OnNavigatedFrom(e);
-            CoreWindow.GetForCurrentThread().KeyDown -= DetailAuthorPage_KeyDown;
         }
 
         private async void GetPageData(string name, string url) {
@@ -119,7 +95,7 @@ namespace citations365.Views {
             LifeTime.Offset(offsetX: 0, offsetY: 20, duration: 500, delay: 0).Start();
             MainQuote.Offset(offsetX: 0, offsetY: 20, duration: 800, delay: 0).Start();
             Biography.Offset(offsetX: 0, offsetY: 50, duration: 1000, delay: 0).Start();
-            EllipseAuthor.Offset(offsetX: 0, offsetY: 0, duration: 1000, delay: 0).Start();
+            //EllipseAuthor.Offset(offsetX: 0, offsetY: 0, duration: 1000, delay: 0).Start();
         }
 
         private void BindCollectionToView() {

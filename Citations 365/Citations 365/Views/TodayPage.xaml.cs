@@ -45,6 +45,9 @@ namespace citations365.Views {
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             CoreWindow.GetForCurrentThread().KeyDown += TodayPage_KeyDown;
+
+            var animation = ConnectedAnimationService.GetForCurrentView().GetAnimation("EllipseAuthor");
+            if (animation != null) { animation.Cancel(); }
             base.OnNavigatedTo(e);
         }
 
