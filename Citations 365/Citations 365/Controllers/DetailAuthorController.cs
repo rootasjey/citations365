@@ -1,13 +1,16 @@
-﻿using citations365.Models;
+﻿using citations365.Data;
+using citations365.Models;
 using HtmlAgilityPack;
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace citations365.Controllers {
-    public class DetailAuthorController {
+    public class DetailAuthorController : INotifyPropertyChanged {
         /*
          * ************
          * COLLECTIONS
@@ -23,52 +26,63 @@ namespace citations365.Controllers {
             }
         }
 
-        /*
-         * ***********
-         * VARIABLES
-         * ***********
-         */
-        private Author _author { get; set; }
-
+        #region variables
         private string _quotesLink { get; set; }
 
         private string _lastURL { get; set; }
 
-        private AuthorInfos _lastAuthor { get; set; }
+        public Author _lastAuthor { get; set; }
 
         private bool _isSameRequest { get; set; }
 
-        public DetailAuthorController() {
+        public static bool IsLoaded { get; set; }
 
+        public static bool IsLoading { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(String propertyName) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public async Task<AuthorInfos> LoadData(string url) {
-            if (isSameRequest(url)) {
+        #endregion variables
+
+        public async Task<Author> LoadData(string url) {
+            IsLoading = true;
+
+            if (IsSameRequest(url)) {
+                IsLoading = false;
+                IsLoaded = true;
+                NotifyPropertyChanged("Loaded");
+
                 return _lastAuthor;
             }
 
             SaveURL(url);
-            return _lastAuthor = await FetchBio(url);
+            _lastAuthor = await FetchInformation(url);
+
+            IsLoading = false;
+            IsLoaded = true;
+
+            NotifyPropertyChanged("Loaded");
+
+            return _lastAuthor;
         }
 
         private void SaveURL(string url) {
             _lastURL = url;
         }
 
-        public bool isSameRequest(string url) {
+        public bool IsSameRequest(string url) {
             _isSameRequest = _lastURL == url;
             return _isSameRequest;
         }
 
-        public bool isSameRequest() {
+        public bool IsSameRequest() {
             return _isSameRequest;
         }
 
-        public async Task<bool> Reload() {
-            return false;
-        }
-
-        public async Task<AuthorInfos> FetchBio(string url) {
+        public async Task<Author> FetchInformation(string url) {
             if (!NetworkInterface.GetIsNetworkAvailable()) {
                 return null;
             }
@@ -83,32 +97,68 @@ namespace citations365.Controllers {
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(responseBodyAsText);
 
-                string job = doc.DocumentNode.Descendants("div").Where(x => x.GetAttributeValue("itemprop", "") == "jobTitle").Select(y => y.InnerHtml).ToArray().FirstOrDefault();
-                string bio = doc.DocumentNode.Descendants("div").Where(x => x.GetAttributeValue("itemprop", "") == "description").Select(y => y.InnerHtml).ToArray().FirstOrDefault();
-                string birth = doc.DocumentNode.Descendants("time").Where(x => x.GetAttributeValue("property", "") == "birthDate").Select(y => y.InnerHtml).ToArray().FirstOrDefault();
-                string death = doc.DocumentNode.Descendants("time").Where(x => x.GetAttributeValue("property", "") == "deathDate").Select(y => y.InnerHtml).ToArray().FirstOrDefault();
-                string quote = doc.DocumentNode.Descendants("p").Where(x => x.GetAttributeValue("class", "") == "figsco__artist__quote").Select(y => y.InnerHtml).ToArray().FirstOrDefault();
-                _quotesLink = doc.DocumentNode.Descendants("a").Where(x => x.GetAttributeValue("class", "") == "figsco__quote__link").Select(y => y.GetAttributeValue("href", "")).ToArray().FirstOrDefault();
+                string job = doc.DocumentNode
+                                .Descendants("div")
+                                .Where(x => x.GetAttributeValue("itemprop", "") == "jobTitle")
+                                .Select(y => y.InnerHtml)
+                                .ToArray()
+                                .FirstOrDefault();
 
-                job         = job   != null ? job   : "";
-                bio         = bio   != null ? bio   : "";
-                birth       = birth != null ? birth : "";
-                death       = death != null ? death : "";
-                quote       = quote != null ? quote : "";
+                string bio = doc.DocumentNode
+                                .Descendants("div")
+                                .Where(x => x.GetAttributeValue("itemprop", "") == "description")
+                                .Select(y => y.InnerHtml)
+                                .ToArray()
+                                .FirstOrDefault();
 
-                _quotesLink = _quotesLink != null ? _quotesLink : "";
+                string birth = doc.DocumentNode
+                                .Descendants("time")
+                                .Where(x => x.GetAttributeValue("property", "") == "birthDate")
+                                .Select(y => y.InnerHtml)
+                                .ToArray()
+                                .FirstOrDefault();
 
-                AuthorInfos infos = new AuthorInfos() {
-                    Biography = Controller.DeleteHTMLTags(bio),
+                string death = doc.DocumentNode
+                                .Descendants("time")
+                                .Where(x => x.GetAttributeValue("property", "") == "deathDate")
+                                .Select(y => y.InnerHtml)
+                                .ToArray()
+                                .FirstOrDefault();
+
+                string quote = doc.DocumentNode
+                                .Descendants("p")
+                                .Where(x => x.GetAttributeValue("class", "") == "figsco__artist__quote")
+                                .Select(y => y.InnerHtml)
+                                .ToArray()
+                                .FirstOrDefault();
+
+                _quotesLink = doc.DocumentNode
+                                .Descendants("a")
+                                .Where(x => x.GetAttributeValue("class", "") == "figsco__quote__link")
+                                .Select(y => y.GetAttributeValue("href", ""))
+                                .ToArray()
+                                .FirstOrDefault();
+
+
+                job         = job ?? "";
+                bio         = bio ?? "";
+                birth       = birth ?? "";
+                death       = death ?? "";
+                quote       = quote ?? "";
+
+                _quotesLink = _quotesLink ?? "";
+
+                var author = new Author() {
+                    Biography = Evene.DeleteHTMLTags(bio),
                     Birth = birth,
                     Death = death,
-                    Picture = new Uri("ms-appx:///Assets/Icons/gray.png"),
+                    Picture = "ms-appx:///Assets/Icons/gray.png",
                     Job = job,
                     LifeTime = birth + " - " + death,
                     Quote = quote
                 };
 
-                return infos;
+                return author;
 
             } catch (HttpRequestException hre) {
                 return null;
@@ -130,15 +180,30 @@ namespace citations365.Controllers {
         public bool QuotesLoaded() {
             return AuthorQuotesCollection.Count > 0;
         }
-    }
 
-    public class AuthorInfos {
-        public string Biography { get; set; }
-        public string Birth { get; set; }
-        public string Death { get; set; }
-        public string Job { get; set; }
-        public string Quote { get; set; }
-        public string LifeTime { get; set; }
-        public Uri Picture { get; set; }
+        public static bool IsAWoman(Author author) {
+            if (author == null) return true;
+
+            var woman = CountWomanPronums(author.Biography);
+            var man = CountManPronums(author.Biography);
+
+            return woman > man;
+
+            int CountWomanPronums(string biography)
+            {
+                var womanRegex = new Regex(@"(\s+)(elle)(\s+)");
+                var womanCount = womanRegex.Matches(biography);
+
+                return womanCount.Count;
+            }
+
+            int CountManPronums(string biography)
+            {
+                var manRegex = new Regex(@"(\s+)(il)(\s+)");
+                var manCount = manRegex.Matches(biography);
+
+                return manCount.Count;
+            }
+        }
     }
 }

@@ -1,12 +1,15 @@
 ﻿using citations365.Controllers;
+using citations365.Services;
 using citations365.Views;
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation.Metadata;
 using Windows.Phone.UI.Input;
+using Windows.Storage;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
 namespace citations365 {
@@ -14,18 +17,6 @@ namespace citations365 {
     /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>
     sealed partial class App : Application {
-        // TODO: Check this external var doesn't create unexpected behavior
-        // or memory leaks
-        private static Shell _privateShell;
-        public static Shell _shell {
-            get {
-                return _privateShell;
-            }
-            set {
-                _privateShell = value;
-            }
-        }
-
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -33,19 +24,6 @@ namespace citations365 {
         public App() {
             InitializeComponent();
             Suspending += OnSuspending;
-
-            AppLoadSettings();
-        }
-
-        private async void AppLoadSettings() {
-            await SettingsController.LoadSettings();
-            ChangeAppTheme();
-        }
-
-        public void ChangeAppTheme() {
-            try {
-                RequestedTheme = SettingsController.UserSettings.applicationTheme;
-            } catch (Exception e) {}
         }
 
         /// <summary>
@@ -60,66 +38,86 @@ namespace citations365 {
                 DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
+            Frame rootFrame = Window.Current.Content as Frame;
 
-            var shell = Window.Current.Content as Shell;
+            //var shell = Window.Current.Content as Shell;
 
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
-            if (shell == null) {
-                shell = new Shell();
-                _shell = shell; // keep an external ref
+            if (rootFrame == null) {
+                // Create a Frame to act as the navigation context and navigate to the first page
+                rootFrame = new Frame();
 
-                // hook-up shell root frame navigation events
-                shell.RootFrame.NavigationFailed += OnNavigationFailed;
-                shell.RootFrame.Navigated += OnNavigated;
+                rootFrame.NavigationFailed += OnNavigationFailed;
+                rootFrame.Navigated += OnNavigated;
 
-                //if (e.PreviousExecutionState == ApplicationExecutionState.Terminated) {
-                //    //TODO: Load state from previously suspended application
-                //}
-
-                //if (!e.PrelaunchActivated) {
-                //    // TODO: This is not a prelaunch activation. Perform operations which
-                //    // assume that the user explicitly launched the app such as updating
-                //    // the online presence of the user on a social network, updating a
-                //    // what's new feed, etc.
-                //}
-
-                Window.Current.Content = shell;
                 SystemNavigationManager.GetForCurrentView().BackRequested += OnBackRequested;
 
                 if (ApiInformation.IsTypePresent("Windows.Phone.UI.Input.HardwareButtons")) {
                     HardwareButtons.BackPressed += OnBackPressed;
                 }
 
-                //  Display an extended splash screen if app was not previously running.
-                //if (e.PreviousExecutionState != ApplicationExecutionState.Running) {
-                //    bool loadState = (e.PreviousExecutionState == ApplicationExecutionState.Terminated);
-                //}
+                if (e.PreviousExecutionState == ApplicationExecutionState.Terminated) {
+                    //TODO: Load state from previously suspended application
+                }
 
-                //shell.RootFrame.Navigate(typeof(TodayPage));
+                // Place the frame in the current Window
+                Window.Current.Content = rootFrame;
 
-                UpdateBackButtonVisibility();
+                DataTransfer.RegisterForShare();
             }
+
+            if (e.PrelaunchActivated == false) {
+                if (rootFrame.Content == null) {
+                    // When the navigation stack isn't restored navigate to the first page,
+                    // configuring the new page by passing required information as a navigation
+                    // parameter
+                    if (Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily == "Windows.Mobile") {
+                        rootFrame.Navigate(typeof(HomePage_Mobile), e.Arguments);
+                    } else {
+                        rootFrame.Navigate(typeof(HomePage_Desktop), e.Arguments);
+                    }
+                    
+                }
+                // Ensure the current window is active
+                Window.Current.Activate();
+            }
+
+            UpdateAppTheme();
 
             // Ensure the current window is active
             Window.Current.Activate();
         }
 
+        public static void UpdateAppTheme() {
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            var theme = localSettings.Values.ContainsKey("Theme") ?
+                (string)localSettings.Values["Theme"] : "Dark";
+            
+            var frame = (Frame)Window.Current.Content;
+            if (theme == ApplicationTheme.Light.ToString()) {
+                frame.RequestedTheme = ElementTheme.Light;
+                return;
+            }
+
+            frame.RequestedTheme = ElementTheme.Dark;
+        }
+
         // handle hardware back button press
         void OnBackPressed(object sender, BackPressedEventArgs e) {
-            var shell = (Shell)Window.Current.Content;
-            if (shell.RootFrame.CanGoBack) {
+            var frame = (Frame)Window.Current.Content;
+            if (frame.CanGoBack) {
                 e.Handled = true;
-                shell.RootFrame.GoBack();
+                frame.GoBack();
             }
         }
 
         // handle software back button press
         void OnBackRequested(object sender, BackRequestedEventArgs e) {
-            var shell = (Shell)Window.Current.Content;
-            if (shell.RootFrame.CanGoBack) {
+            var frame = (Frame)Window.Current.Content;
+            if (frame.CanGoBack) {
                 e.Handled = true;
-                shell.RootFrame.GoBack();
+                frame.GoBack();
             }
         }
 
@@ -150,18 +148,14 @@ namespace citations365 {
         }
 
         private void UpdateBackButtonVisibility() {
-            var shell = (Shell)Window.Current.Content;
+            var frame = (Frame)Window.Current.Content;
 
             var visibility = AppViewBackButtonVisibility.Collapsed;
-            if (shell.RootFrame.CanGoBack) {
+            if (frame.CanGoBack) {
                 visibility = AppViewBackButtonVisibility.Visible;
             }
 
             SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = visibility;
-        }
-
-        private void Grid_Loaded(object sender, RoutedEventArgs e) {
-
         }
     }
 }

@@ -2,33 +2,21 @@
 
 namespace citations365.Models {
     public class UserSettings {
-        /// <summary>
-        /// Tells if the app is on offline mode
-        /// </summary>
         private bool _offline = false;
-
-        /// <summary>
-        /// Tells if the text to speech is ON
-        /// </summary>
+        
         private bool _TTSIsActivated = false;
-
-        /// <summary>
-        /// Tells which background style the user chosed
-        /// </summary>
+        
         private string _appBackground = "";
 
         private string _appBackgroundURL = "";
 
         private string _appBackgroundName = "";
-
-        /// <summary>
-        /// Bing Search secret key
-        /// </summary>
+        
         private const string _bingSearchKey = "pCzCBMoEJtZ76ni+ge9sbAYr5PXDfe2ksLPW63wxcVs= ";
 
         private ApplicationTheme _applicationTheme = ApplicationTheme.Dark;
 
-        public ApplicationTheme applicationTheme {
+        public ApplicationTheme ApplicationTheme {
             get {
                 return _applicationTheme;
             }
@@ -39,10 +27,7 @@ namespace citations365.Models {
                 }
             }
         }
-
-        /// <summary>
-        /// Tells if the app is on offline mode
-        /// </summary>
+        
         public bool Offline {
             get {
                 return _offline;
@@ -67,10 +52,7 @@ namespace citations365.Models {
                 }
             }
         }
-
-        /// <summary>
-        /// Tells which background style the user chosed
-        /// </summary>
+        
         public string AppBackground {
             get {
                 return _appBackground;
@@ -103,10 +85,7 @@ namespace citations365.Models {
                 }
             }
         }
-
-        /// <summary>
-        /// Tells which background style the user chosed
-        /// </summary>
+        
         public string BingSearchKey {
             get {
                 return _bingSearchKey;

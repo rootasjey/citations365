@@ -22,37 +22,6 @@ namespace citations365.Models {
         /// </summary>
         public static char UnFavoriteIcon = '\uE006';
 
-        /// <summary>
-        /// Full constructor
-        /// </summary>
-        /// <param name="content">content</param>
-        /// <param name="author">author</param>
-        /// <param name="authorLink">author's link biography</param>
-        /// <param name="date">quote's date</param>
-        /// <param name="reference">reference</param>
-        /// <param name="link">quote's link</param>
-        public Quote(string content     = "", 
-                     string author      = "",
-                     string authorLink  = "", 
-                     string date        = "", 
-                     string reference   = "", 
-                     string link        = "") {
-
-            _content    = content;
-            _author     = author;
-            _authorLink = authorLink;
-            _date       = date;
-            _reference  = reference;
-            _link       = link;
-        }
-
-        /// <summary>
-        /// Empty constructor
-        /// </summary>
-        public Quote() {
-
-        }
-
         public string Content {
             get {
                 return _content;
@@ -145,10 +114,7 @@ namespace citations365.Models {
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged(String propertyName) {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (null != handler) {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

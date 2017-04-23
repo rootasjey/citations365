@@ -3,10 +3,6 @@ using System.Threading.Tasks;
 
 namespace citations365.Models {
     public class TodayCollection : ObservableKeyedCollection {
-        /// <summary>
-        /// Collection's name 
-        /// (used to save the collection as a file in the IO)
-        /// </summary>
         public override string Name {
             get {
                 return "TodayCollection.xml";
@@ -16,11 +12,7 @@ namespace citations365.Models {
         public TodayCollection() {
             HasMoreItems = true; // initially to false
         }
-
-        /// <summary>
-        /// Build the url and run the fetch method
-        /// </summary>
-        /// <returns></returns>
+        
         public override async Task<int> BuildAndFetch(string query = "") {
             if (query.Length > 0) {
                 return await Fetch(query);
@@ -40,13 +32,9 @@ namespace citations365.Models {
         public override bool IsFavorite(Quote quote) {
             return FavoritesController.IsFavorite(quote);
         }
-
-        /// <summary>
-        /// Get the collection from the IO if the fetch failed
-        /// </summary>
-        /// <returns></returns>
-        public override Task<bool> handleFailedFetch() {
-            return base.handleFailedFetch();
+        
+        public override Task<int> HandleFailedFetch() {
+            return base.HandleFailedFetch();
         }
     }
 }

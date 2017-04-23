@@ -1,112 +1,92 @@
 ﻿using citations365.Models;
+using citations365.Services;
 using HtmlAgilityPack;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO.IsolatedStorage;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace citations365.Controllers
-{
-    public class AuthorsController
-    {
-        /*
-         * ***********
-         * VARIABLES
-         * ***********
-         */
-        /// <summary>
-        /// Authors list url
-        /// </summary>
-        private const string _url = "http://www.evene.fr/citations/dictionnaire-citations-auteurs.php";
+namespace citations365.Controllers {
+    public class AuthorsController : INotifyPropertyChanged {
+        private static string _url {
+            get {
+                return "http://www.evene.fr/citations/dictionnaire-citations-auteurs.php";
+            }
+        }
+
+        private static bool _IsLoading { get; set; }
         
         /*
          * ************
          * COLLECTIONS
          * ************
          */
-        /// <summary>
-        /// Private authors collection
-        /// </summary>
         private static ObservableCollection<Author> _authorsCollection { get; set; }
-
-        /// <summary>
-        /// Authors Collection
-        /// </summary>
+        
         public static ObservableCollection<Author> AuthorsCollection {
             get {
                 if (_authorsCollection == null) {
                     _authorsCollection = new ObservableCollection<Author>();
                 }   return _authorsCollection;
             }
+            set { _authorsCollection = value; }
         }
 
-        /*
-         * ***********
-         * CONSTRUCTOR
-         * ***********
-         */
-        /// <summary>
-        /// Initialize the controller
-        /// </summary>
         public AuthorsController() {
-            //LoadData();
         }
 
-        /*
-         * ********
-         * METHODS
-         * ********
-         */
-        /// <summary>
-        /// Populate authors collection
-        /// </summary>
-        /// <returns>True if data was successfully loaded</returns>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void NotifyPropertyChanged(string propertyName) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        
         public async Task<bool> LoadData() {
             if (!IsDataLoaded()) {
-                return await GetAuthors();
-            }   return true;
-        }
+                _IsLoading = true;
 
-        /// <summary>
-        /// Delete old data and fetch new data
-        /// </summary>
+                bool result = await GetAuthors();
+
+                _IsLoading = false;
+
+                return result;
+            } 
+            else {
+                _IsLoading = false;
+                return true;
+            }            
+        }
+        
         public async Task<bool> Reload() {
+            _IsLoading = true;
+
             if (IsDataLoaded()) {
                 AuthorsCollection.Clear();
             }
-            return await LoadAuthors();
-        }
 
-        /// <summary>
-        /// Return true if the data is already loaded
-        /// </summary>
-        /// <returns>True if data is already loaded</returns>
-        public bool IsDataLoaded() {
-            return AuthorsCollection.Count > 0;
+            bool result = await LoadAuthors();
+            _IsLoading = false;
+
+            return result;
+        }
+        
+        public static bool IsDataLoaded() {
+            return AuthorsCollection.Count > 0 || _IsLoading;
         }
 
         public async Task<bool> GetAuthors() {
-            // Try in IO first
-            bool ioAvailable = await LoadAuthorsIO();
+            AuthorsCollection = await Settings.LoadAuthorsAsync();
 
-            // Try from the web
-            if (ioAvailable) {
-                //return await UpdateAuthors();
+            if (AuthorsCollection.Count > 0) {
+                NotifyPropertyChanged("Loaded");
                 return true;
             }
 
             return await LoadAuthors();
         }
-
-        /// <summary>
-        /// Fetch authors from the web
-        /// </summary>
-        /// <returns>True if the data was successfully retrieved from the web</returns>
+        
         public async Task<bool> LoadAuthors() {
             if (NetworkInterface.GetIsNetworkAvailable()) {
                 HttpClient http = new HttpClient();
@@ -129,10 +109,13 @@ namespace citations365.Controllers
                         AuthorsCollection.Add(author);
                     }
 
-                    SaveAuthors();
+                    Settings.SaveAuthorsAsync(AuthorsCollection);
+
+                    NotifyPropertyChanged("Loaded");
                     return true;
 
                 } catch (HttpRequestException hre) {
+                    NotifyPropertyChanged("Loaded");
                     return false;
                 }
 
@@ -140,49 +123,6 @@ namespace citations365.Controllers
                 return false;
             }
         }
-
-        public async Task<bool> UpdateAuthors() {
-            foreach (Author author in AuthorsCollection) {
-                author.ImageLink = "ms-appx:///Assets/Icons/gray.png";
-            }
-            return await SaveAuthors();
-        }
-
-        /// <summary>
-        /// Load authors from IO
-        /// </summary>
-        /// <returns>True if the data was successfully loaded</returns>
-        public async Task<bool> LoadAuthorsIO() {
-            try {
-                ObservableCollection<Author> collection = await DataSerializer<ObservableCollection<Author>>.RestoreObjectsAsync("AuthorsCollection.xml");
-                if (collection != null) {
-                    foreach (Author author in collection) {
-                        //author.ImageLink = "ms-appx:///Assets/Icons/Contacts_Filled.png";
-                        AuthorsCollection.Add(author);
-                    }
-                    return true;
-                }
-                return false;
-            } catch (IsolatedStorageException exception) {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Save authors to IO
-        /// </summary>
-        /// <returns>True if the data was successfully saved</returns>
-        public async Task<bool> SaveAuthors() {
-            if (AuthorsCollection.Count < 1) {
-                return true;
-            } else {
-                try {
-                    await DataSerializer<ObservableCollection<Author>>.SaveObjectsAsync(AuthorsCollection, "AuthorsCollection.xml");
-                    return true;
-                } catch (IsolatedStorageException exception) {
-                    return false;
-                }
-            }
-        }
+        
     }
 }

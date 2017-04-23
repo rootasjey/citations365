@@ -1,10 +1,8 @@
 ﻿using citations365.Controllers;
 using citations365.Models;
+using citations365.Services;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using Windows.Foundation;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -15,7 +13,7 @@ using Windows.UI.Xaml.Navigation;
 using Windows.UI.Xaml.Shapes;
 
 namespace citations365.Views {
-    public sealed partial class AuthorsPage : Page {
+    public sealed partial class ListAuthorsPage : Page {
         private static AuthorsController _authorController;
 
         private static Author _LastSelectedAuthor { get; set; }
@@ -31,7 +29,7 @@ namespace citations365.Views {
 
         private float _animationDelay = 0.5f;
 
-        public AuthorsPage() {
+        public ListAuthorsPage() {
             InitializeComponent();
             Populate();
         }
@@ -47,7 +45,7 @@ namespace citations365.Views {
         }
 
         private void AuthorsPage_KeyDown(CoreWindow sender, KeyEventArgs args) {
-            if (Controller.IsBackOrEscapeKey(args.VirtualKey) && Frame.CanGoBack) {
+            if (Events.IsBackOrEscapeKey(args.VirtualKey) && Frame.CanGoBack) {
                 Frame.GoBack();
             }
         }
@@ -107,7 +105,7 @@ namespace citations365.Views {
 
             ConnectedAnimationService.GetForCurrentView().PrepareToAnimate("EllipseAuthor", EllipseAuthor);
 
-            Frame.Navigate(typeof(DetailAuthorPage), author);
+            Frame.Navigate(typeof(AuthorPage_Desktop), author);
         }
 
         private void Author_Loaded(object sender, RoutedEventArgs e) {

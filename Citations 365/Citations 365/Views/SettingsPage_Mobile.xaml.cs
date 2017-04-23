@@ -8,11 +8,10 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
 namespace citations365.Views {
-    public sealed partial class SettingsPage : Page {
-        public SettingsPage() {
+    public sealed partial class SettingsPage_Mobile : Page {
+        public SettingsPage_Mobile() {
             InitializeComponent();
         }
-
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
             CoreWindow.GetForCurrentThread().KeyDown += SettingsPage_KeyDown;
@@ -39,17 +38,14 @@ namespace citations365.Views {
         }
 
         private void UpdateQuoteTaskSwitcher() {
-            var TaskSwitch = (ToggleSwitch)UI.FindChildControl<ToggleSwitch>(TasksSection, "TaskSwitch");
-            TaskSwitch.IsOn = BackgroundTasks.IsQuoteTaskActivated();
+            QuotesTaskSwitch.IsOn = BackgroundTasks.IsQuoteTaskActivated();
         }
 
         private void UpdateWallTaskSwitcher() {
-            var LockscreenSwitch = (ToggleSwitch)UI.FindChildControl<ToggleSwitch>(TasksSection, "LockscreenSwitch");
-            LockscreenSwitch.IsOn = BackgroundTasks.IsLockscreenTaskActivated();
+            LockTaskSwitch.IsOn = BackgroundTasks.IsLockscreenTaskActivated();
         }
 
         private void UpdateThemeSwitcher() {
-            var ThemeSwitch = (ToggleSwitch)UI.FindChildControl<ToggleSwitch>(PersonalizationSection, "ThemeSwitch");
             ThemeSwitch.IsOn = Settings.IsApplicationThemeLight();
         }
 
@@ -58,14 +54,14 @@ namespace citations365.Views {
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void TaskSwitch_Toggled(object sender, RoutedEventArgs e) {
+        private void QuotesTaskSwitch_Toggled(object sender, RoutedEventArgs e) {
             var toggle = (ToggleSwitch)sender;
 
             if (toggle.IsOn) BackgroundTasks.RegisterQuoteTask();
             else BackgroundTasks.UnregisterQuoteTask();
         }
 
-        private void LockscreenSwitch_Toggled(object sender, RoutedEventArgs e) {
+        private void LockTaskSwitch_Toggled(object sender, RoutedEventArgs e) {
             var toggle = (ToggleSwitch)sender;
 
             if (toggle.IsOn) BackgroundTasks.RegisterLockscreenTask();
@@ -98,23 +94,12 @@ namespace citations365.Views {
 
         private void ThemeSwitch_Toggled(object sender, RoutedEventArgs e) {
             var toggle = (ToggleSwitch)sender;
-            if (toggle.IsOn) {
-                ChangeTheme(ApplicationTheme.Light);
-            } else {
-                ChangeTheme(ApplicationTheme.Dark);
-            }
-        }
 
-        private void Background_Choosed(object sender, RoutedEventArgs e) {
-            var radioButton = (RadioButton)sender;
-            string background = radioButton.Name;
-
-            //Scontroller.UpdateAppBackground(background);
+            if (toggle.IsOn) ChangeTheme(ApplicationTheme.Light);
+            else ChangeTheme(ApplicationTheme.Dark);
         }
 
         void UpdateSelectedLanguage() {
-            var FrenchLanguageItem = 
-                (ToggleMenuFlyoutItem)UI.FindChildControl<ToggleMenuFlyoutItem>(PersonalizationSection, "FrenchLanguageItem");
             FrenchLanguageItem.IsChecked = true;
         }
 
@@ -133,9 +118,6 @@ namespace citations365.Views {
         }
 
         void UnselectOtherLanguages(ToggleMenuFlyoutItem selectedItem) {
-            var LanguageButton = (Button)UI.FindChildControl<Button>(PersonalizationSection, "LanguageButton");
-            var LanguageFlyout = (MenuFlyout)LanguageButton.Flyout;
-
             foreach (ToggleMenuFlyoutItem item in LanguageFlyout.Items) {
                 item.IsChecked = false;
             }

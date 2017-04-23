@@ -3,10 +3,6 @@ using System.Threading.Tasks;
 
 namespace citations365.Models {
     public class SearchCollection : ObservableKeyedCollection{
-        /// <summary>
-        /// Collection's name 
-        /// (used to save the collection as a file in the IO)
-        /// </summary>
         public override string Name {
             get {
                 return "SearchCollection.xml";
@@ -28,11 +24,7 @@ namespace citations365.Models {
         public SearchCollection() {
             HasMoreItems = true; // initially to false
         }
-
-        /// <summary>
-        /// Build the url and run the fetch method
-        /// </summary>
-        /// <returns></returns>
+        
         public override async Task<int> BuildAndFetch(string query = "") {
             string url = "http://evene.lefigaro.fr/citations/mot.php?mot=";
             string _pageQuery = "&p=";

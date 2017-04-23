@@ -364,10 +364,11 @@
     </ReservedNames>
   </ProductReservedInfo>
   <AccountPackageIdentityNames>
+    <MainPackageIdentityName>17924JrmieCorpinot.UVSQHUB</MainPackageIdentityName>
     <MainPackageIdentityName>17924JrmieCorpinot.Dailytee</MainPackageIdentityName>
     <MainPackageIdentityName>17924JrmieCorpinot.Imagine</MainPackageIdentityName>
     <MainPackageIdentityName>17924JrmieCorpinot.Octopull</MainPackageIdentityName>
-    <MainPackageIdentityName>17924JrmieCorpinot.UVSQHUB</MainPackageIdentityName>
+    <MainPackageIdentityName>17924JrmieCorpinot.splashpaper</MainPackageIdentityName>
   </AccountPackageIdentityNames>
-  <PackageInfoList LandingUrl="https://dev.windows.com/dashboard/Application?appId=9NBLGGH68CV1" />
+  <PackageInfoList LandingUrl="https://developer.microsoft.com/dashboard/Application?appId=9NBLGGH68CV1" />
 </StoreAssociation>

@@ -1,4 +1,6 @@
 ﻿using citations365.Controllers;
+using citations365.Data;
+using citations365.Services;
 using HtmlAgilityPack;
 using System;
 using System.Collections.ObjectModel;
@@ -16,48 +18,26 @@ using Windows.UI.Xaml.Data;
 namespace citations365.Models {
     public class ObservableKeyedCollection : KeyedCollection<string, Quote>,
         INotifyCollectionChanged, INotifyPropertyChanged, ISupportIncrementalLoading {
-
-        /* ******
-         * EVENTS
-         * ******
-         */
+        
         public event NotifyCollectionChangedEventHandler CollectionChanged;
         public event PropertyChangedEventHandler PropertyChanged;
-
-        /* *********
-         * VARIABLES
-         * *********
-         */
-        /// <summary>
-        /// Collection's name
-        /// Useful to save it to the app storage
-        /// </summary>
+        
         public virtual string Name { get; }
-
-        /// <summary>
-        /// Specifies the number of items to load
-        /// for the LoadMoreItemsAsync method (not necessary in our scenario)
-        /// </summary>
+        
         public virtual uint ItemsToLoad {
             get {
                 return 15;
             }
         }
 
-        /// <summary>
-        /// If true, last most recent quotes will be saved to Isolated Storage
-        /// </summary>
         public virtual bool AllowOffline {
             get {
-                return false;
+                return true;
             }
         }
 
         
         private int _page = 3; // TODO: Set back to 1
-        /// <summary>
-        /// Quote's Pagination (as all quotes are not fetched in the same time)
-        /// </summary>
         public virtual int Page {
             get {
                 return _page;
@@ -86,9 +66,6 @@ namespace citations365.Models {
 
         
         private bool _hasMoreItems = false;
-        /// <summary>
-        /// Tells if more items can be fetched
-        /// </summary>
         public virtual bool HasMoreItems {
             get {
                 return _hasMoreItems;
@@ -100,94 +77,44 @@ namespace citations365.Models {
             }
         }
 
-        /* ***********
-         * CONSTRUCTOR
-         * ***********
-         */
-        public ObservableKeyedCollection() {
-
-        }
-
-        /* *********
-         * OVERRIDES
-         * *********
-         */
-        /// <summary>
-        /// Specifies the key value for the dictionnary
-        /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
         protected override string GetKeyForItem(Quote item) {
             return item.Link;
         }
-
-        /// <summary>
-        /// Delete all item from the collection
-        /// </summary>
+        
         protected override void ClearItems() {
             base.ClearItems();
             NotifyCollectionChanged(NotifyCollectionChangedAction.Reset);
         }
 
-        /// <summary>
-        /// Add an item to the collection with its associated key
-        /// </summary>
-        /// <param name="index"></param>
-        /// <param name="item"></param>
         protected override void InsertItem(int index, Quote item) {
             base.InsertItem(index, item);
             NotifyCollectionChanged(NotifyCollectionChangedAction.Add, item, index);
         }
-
-        /// <summary>
-        /// Delete an item from the collection with its associated key
-        /// </summary>
-        /// <param name="index"></param>
+        
         protected override void RemoveItem(int index) {
             var item = Items[index];
             base.RemoveItem(index);
             NotifyCollectionChanged(NotifyCollectionChangedAction.Remove, item, index);
         }
-
-        /// <summary>
-        /// Replace the item at the specified index by the new on passed to the method
-        /// </summary>
-        /// <param name="index"></param>
-        /// <param name="item"></param>
+        
         protected override void SetItem(int index, Quote item) {
             base.SetItem(index, item);
             NotifyCollectionChanged(NotifyCollectionChangedAction.Replace, item, index);
         }
-
-        /* *******
-         * METHODS
-         * *******
-         */
-        /// <summary>
-        /// Build the url and fetch quotes
-        /// </summary>
+        
         public virtual async Task<int> BuildAndFetch(string query = "") {
-            // URL building
             string url = "";
             return await Fetch(url);
         }
-
-        /// <summary>
-        /// Get online data (quotes) from the url
-        /// </summary>
-        /// <param name="url">URL string to request</param>
-        /// <returns>Number of results added to the collection</returns>
+        
         public async Task<int> Fetch(string url) {
             int quotesAdded = 0;
             string responseBodyAsText;
 
-            // If there's no internet connection
             if (!NetworkInterface.GetIsNetworkAvailable()) {
-                await handleFailedFetch(); // Load data from IO
-                return 0;
+                return await HandleFailedFetch();
             }
 
-            // Fetch the content from a web source
             HttpClient http = new HttpClient();
 
             try {
@@ -226,14 +153,15 @@ namespace citations365.Models {
                         referenceName = authorAndReference.InnerText.Substring(separator + 2);
                     }
 
-                    Quote quote         = new Quote();
-                    quote.Content       = content.InnerText;
-                    quote.Author        = authorName;
-                    quote.AuthorLink    = authorLink;
-                    quote.Reference     = referenceName;
-                    quote.Link          = quoteLink;
+                    Quote quote = new Quote() {
+                        Content = content.InnerText,
+                        Author = authorName,
+                        AuthorLink = authorLink,
+                        Reference = referenceName,
+                        Link = quoteLink
+                    };
 
-                    quote               = Controller.Normalize(quote);
+                    quote               = Evene.Normalize(quote);
                     quote.IsFavorite    = IsFavorite(quote);
 
                     if (!Contains(quote.Link)) {
@@ -242,7 +170,7 @@ namespace citations365.Models {
                     }
                 }
 
-                if (quotesAdded == 0) { // If true, we've reached the end of the search
+                if (quotesAdded == 0) {
                     HasMoreItems = false;
                     Page = 0;
 
@@ -250,29 +178,22 @@ namespace citations365.Models {
                     HasMoreItems = true;
                 }
 
-                if (AllowOffline && Page == 1) { // save the first quotes to IO
+                if (AllowOffline && Count > 0 && Count < 100) {
                     SaveIO();
                 }
 
-                Page++; // fetch the next quotes' page the next time
+                Page++;
 
-                // Test that we've got at least one piece of data
                 return quotesAdded;
 
             } catch (HttpRequestException hre) {
-                // The request failed, load quotes from IO
                 HasMoreItems = false;
-                await handleFailedFetch();
-                return Count;
+                return await HandleFailedFetch();
             }
         }
-
-        /// <summary>
-        /// Fired when the Fetch method fail to get data
-        /// </summary>
-        /// <returns></returns>
-        public virtual async Task<bool> handleFailedFetch() {
-            return true;
+        
+        public virtual async Task<int> HandleFailedFetch() {
+            return await LoadIO();
         }
         
         public virtual bool IsFavorite(Quote quote) {
@@ -282,41 +203,23 @@ namespace citations365.Models {
         public bool IsDataLoaded() {
             return Count > 0;
         }
-
-        /// <summary>
-        /// Save the collection to the isolated storage
-        /// </summary>
-        /// <returns></returns>
+        
         public async Task<bool> SaveIO() {
-            if (Count < 1) {
-                return true;
-            } else {
-                try {
-                    await DataSerializer<ObservableKeyedCollection>.SaveObjectsAsync(this, Name);
-                    return true;
-                } catch (IsolatedStorageException exception) {
-                    return false; // error
-                }
-            }
+            if (Count == 0) return true;
+            await Settings.SaveQuotesAsync(this);
+            return false;
         }
 
-        /// <summary>
-        /// Load the collection from the IO
-        /// </summary>
-        /// <returns></returns>
-        public async Task<bool> LoadIO() {
+        public async Task<int> LoadIO() {
             try {
-                ObservableKeyedCollection collection = await DataSerializer<ObservableKeyedCollection>.RestoreObjectsAsync(Name);
-                if (collection != null) {
-                    foreach (Quote quote in collection) {
-                        Add(quote);
-                    }
-                    return true;
+                var savedQuotes = await Settings.LoadQuotesAsync(Name + ".json");
+                foreach (var q in savedQuotes) {
+                    Add(q);
                 }
-                return false;
-            } catch (IsolatedStorageException exception) {
-                return false;
-            }
+
+                return Count;
+            } 
+            catch { return Count; }
         }
 
 
@@ -324,28 +227,14 @@ namespace citations365.Models {
          * EVENTS HANDLERS
          * ***************
          */
-        /// <summary>
-        /// Notifies when an collection's property has changed
-        /// </summary>
-        /// <param name="propertyName"></param>
         private void NotifyPropertyChanged(String propertyName) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
-        /// <summary>
-        /// Notifies when an action has been performed on the collection
-        /// </summary>
-        /// <param name="action">The corresponding action</param>
-        /// <param name="item">The item involved in the action</param>
-        /// <param name="index">The index in the collection where the action took place</param>
+        
         private void NotifyCollectionChanged(NotifyCollectionChangedAction action, Quote item, int index) {
             CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(action, item, index));
         }
-
-        /// <summary>
-        /// Notifies when an action has been performed on the collection
-        /// </summary>
-        /// <param name="action">The corresponding action</param>
+        
         private void NotifyCollectionChanged(NotifyCollectionChangedAction action) {
             CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(action));
         }
@@ -353,13 +242,7 @@ namespace citations365.Models {
         IAsyncOperation<LoadMoreItemsResult> ISupportIncrementalLoading.LoadMoreItemsAsync(uint count) {
             return LoadMoreItemsAsync(count).AsAsyncOperation();
         }
-
-        /// <summary>
-        /// Fires when we reached the end of the ListView
-        /// and more items can be fetched
-        /// </summary>
-        /// <param name="count">Number of items to get</param>
-        /// <returns>Number of items fetched</returns>
+        
         public async Task<LoadMoreItemsResult> LoadMoreItemsAsync(uint count) {
             int itemsCount = await BuildAndFetch();
             return new LoadMoreItemsResult { Count = (uint)itemsCount };
@@ -370,11 +253,6 @@ namespace citations365.Models {
          * HELPERS METHODS
          * ***************
          */
-        /// <summary>
-        /// Delete HTML tags from the quote props and checks values
-        /// </summary>
-        /// <param name="quote"></param>
-        /// <returns></returns>
         public Quote Normalize(Quote quote) {
             // Delete HTML
             quote.Author = DeleteHTMLTags(quote.Author);
@@ -387,12 +265,7 @@ namespace citations365.Models {
             }
             return quote;
         }
-
-        /// <summary>
-        /// Normalize the text:
-        /// Remove the html tags (<h1></h1>, ...), ans special chars (&amp;)
-        /// </summary>
-        /// <param name="text">Normalize</param>
+        
         public string DeleteHTMLTags(string text) {
             if (text == null) {
                 return null;

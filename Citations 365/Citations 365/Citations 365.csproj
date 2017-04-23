@@ -98,65 +98,65 @@
     <None Include="Citations 365_StoreKey.pfx" />
     <None Include="citations365_TemporaryKey.pfx" />
     <None Include="project.json" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controllers\AuthorsController.cs" />
-    <Compile Include="Controllers\Controller.cs" />
-    <Compile Include="Controllers\Converters.cs" />
     <Compile Include="Controllers\DetailAuthorController.cs" />
     <Compile Include="Controllers\FavoritesController.cs" />
     <Compile Include="Controllers\SearchController.cs" />
-    <Compile Include="Controllers\SettingsController.cs" />
     <Compile Include="Controllers\TodayController.cs" />
     <Compile Include="Converters\EmptyViewVisibility.cs" />
     <Compile Include="Converters\FavoriteColor.cs" />
     <Compile Include="Converters\FavoriteColorIcon.cs" />
     <Compile Include="Converters\FavoriteIcon.cs" />
     <Compile Include="Converters\FavoriteSwypeColor.cs" />
+    <Compile Include="Converters\LoadingVisibility.cs" />
     <Compile Include="Converters\ShareSwypeColor.cs" />
     <Compile Include="Converters\TextVisibility.cs" />
     <Compile Include="Converters\UpperText.cs" />
+    <Compile Include="Data\Evene.cs" />
+    <Compile Include="Data\Quotes.cs" />
+    <Compile Include="Data\SourceModel.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\VisualTreeExtensions.cs" />
-    <Compile Include="Presentation\Extensions.cs" />
+    <Compile Include="HomePage_Mobile.xaml.cs">
+      <DependentUpon>HomePage_Mobile.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="HomePage_Desktop.xaml.cs">
+      <DependentUpon>HomePage_Desktop.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Models\Author.cs" />
     <Compile Include="Models\AuthorQuotesCollection.cs" />
-    <Compile Include="Models\DataSerializer.cs" />
     <Compile Include="Models\ObservableKeyedCollection.cs" />
     <Compile Include="Models\Quote.cs" />
     <Compile Include="Models\SearchCollection.cs" />
     <Compile Include="Models\TodayCollection.cs" />
     <Compile Include="Models\UserSettings.cs" />
-    <Compile Include="Shell.xaml.cs">
-      <DependentUpon>Shell.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="Services\Events.cs" />
+    <Compile Include="Services\Wallpaper.cs" />
+    <Compile Include="Services\BackgroundTasks.cs" />
+    <Compile Include="Services\DataTransfer.cs" />
+    <Compile Include="Services\Settings.cs" />
+    <Compile Include="Services\UI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Presentation\Command.cs" />
-    <Compile Include="Presentation\MenuItem.cs" />
-    <Compile Include="Presentation\NotifyPropertyChanged.cs" />
-    <Compile Include="Presentation\ObjectToMenuItemConverter.cs" />
-    <Compile Include="Presentation\ShellViewModel.cs" />
-    <Compile Include="Presentation\SwipeableSplitView.cs" />
-    <Compile Include="Views\AuthorsPage.xaml.cs">
-      <DependentUpon>AuthorsPage.xaml</DependentUpon>
+    <Compile Include="Views\AuthorPage_Mobile.xaml.cs">
+      <DependentUpon>AuthorPage_Mobile.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\DetailAuthorPage.xaml.cs">
-      <DependentUpon>DetailAuthorPage.xaml</DependentUpon>
+    <Compile Include="Views\ListAuthorsPage.xaml.cs">
+      <DependentUpon>ListAuthorsPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\FavoritesPage.xaml.cs">
-      <DependentUpon>FavoritesPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\SearchPage.xaml.cs">
-      <DependentUpon>SearchPage.xaml</DependentUpon>
+    <Compile Include="Views\AuthorPage_Desktop.xaml.cs">
+      <DependentUpon>AuthorPage_Desktop.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SettingsPage.xaml.cs">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\TodayPage.xaml.cs">
-      <DependentUpon>TodayPage.xaml</DependentUpon>
+    <Compile Include="Views\SettingsPage_Mobile.xaml.cs">
+      <DependentUpon>SettingsPage_Mobile.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -166,8 +166,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\acorn.png" />
-    <Content Include="Assets\Backgrounds\1280.jpg" />
+    <Content Include="Assets\Backgrounds\colored_moutains.jpg" />
+    <Content Include="Assets\Backgrounds\man.jpg" />
     <Content Include="Assets\Backgrounds\nasa.jpg" />
+    <Content Include="Assets\Backgrounds\woman.jpg" />
     <Content Include="Assets\BadgeLogo.scale-100.png" />
     <Content Include="Assets\BadgeLogo.scale-125.png" />
     <Content Include="Assets\BadgeLogo.scale-150.png" />
@@ -227,27 +229,27 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="Shell.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="HomePage_Mobile.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="HomePage_Desktop.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\AuthorsPage.xaml">
+    <Page Include="Views\AuthorPage_Mobile.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\DetailAuthorPage.xaml">
+    <Page Include="Views\ListAuthorsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\FavoritesPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\SearchPage.xaml">
+    <Page Include="Views\AuthorPage_Desktop.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -255,7 +257,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\TodayPage.xaml">
+    <Page Include="Views\SettingsPage_Mobile.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -1,22 +1,12 @@
 ﻿using citations365.Models;
+using citations365.Services;
 using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.IO.IsolatedStorage;
 using System.Threading.Tasks;
 
 namespace citations365.Controllers {
     public class FavoritesController {
-        /*
-         * ***********
-         * VARIABLES
-         * ***********
-         */
-        /// <summary>
-        /// Quote's Pagination (as all quotes are not fetched in the same time)
-        /// </summary>
-        private static int _page = 0;
-
         /// <summary>
         /// Describes the collection's type which fired the Add/Remove method 
         /// to update others collections
@@ -28,75 +18,25 @@ namespace citations365.Controllers {
             today
         }
         
-        /*
-         * ************
-         * COLLECTIONS
-         * ************
-         */
-        /// <summary>
-        /// Today quotes collection
-        /// </summary>
         private static ObservableKeyedCollection _favoritesCollection { get; set; }
 
         public static ObservableKeyedCollection FavoritesCollection {
             get {
                 return _favoritesCollection;
             }
+            set {
+                _favoritesCollection = value;
+            }
         }
-
-        /*
-         * ***********
-         * CONSTRUCTOR
-         * ***********
-         */
-        /// <summary>
-        /// Initialize the controller
-        /// </summary>
-        public FavoritesController() {
-        }
-
-        /*
-         * ********
-         * METHODS
-         * ********
-         */
+        
         public static async Task<bool> Initialize() {
             if (!IsDataLoaded()) {
-                _favoritesCollection = await LoadFavoritesCollection();
+                _favoritesCollection = await Settings.LoadFavoritesAsync();
+                if (_favoritesCollection == null) _favoritesCollection = new ObservableKeyedCollection();
+
                 _favoritesCollection.CollectionChanged += CollectionChanged;
             }
             return true;
-        }
-
-        /// <summary>
-        /// Load Favorites quotes from IO
-        /// </summary>
-        /// <returns>True if the data has been loaded</returns>
-        public static async Task<ObservableKeyedCollection> LoadFavoritesCollection() {
-            try {
-                ObservableKeyedCollection collection = await DataSerializer<ObservableKeyedCollection>.RestoreObjectsAsync("FavoritesCollection.xml");
-                if (collection != null) {
-                    return collection;
-
-                } else {
-                    return new ObservableKeyedCollection(); ;
-                }
-            } catch (IsolatedStorageException exception) {
-                return new ObservableKeyedCollection();
-            }
-        }
-
-        /// <summary>
-        /// Save to IO the favortites quotes
-        /// </summary>
-        /// <returns>True if the save succededreturns>
-        public static async Task<bool> SaveFavoritesCollection() {
-            try {
-                await DataSerializer<ObservableKeyedCollection>.SaveObjectsAsync(FavoritesCollection, "FavoritesCollection.xml");
-                return true;
-            } catch (IsolatedStorageException exception) {
-                return false;
-            }
         }
 
         /// <summary>
@@ -104,7 +44,6 @@ namespace citations365.Controllers {
         /// </summary>
         public static async Task<bool> Reload() {
             if (IsDataLoaded()) {
-                _page = 0;
                 FavoritesCollection.Clear();
             }
             return await Initialize();
@@ -119,6 +58,7 @@ namespace citations365.Controllers {
         }
 
         public static bool HasItems() {
+            if (FavoritesCollection == null) return false;
             return FavoritesCollection.Count > 0;
         }
 
@@ -134,9 +74,12 @@ namespace citations365.Controllers {
 
             if (!_favoritesCollection.Contains(quote.Link)) {
                 quote.IsFavorite = true;
-                FavoritesCollection.Add(quote);            // Add quote to favorites collection
-                return await SaveFavoritesCollection();     // Save the collection to storage
-            }   return false;
+                FavoritesCollection.Add(quote);
+
+                await Settings.SaveFavoritesAsync(FavoritesCollection);
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -150,10 +93,13 @@ namespace citations365.Controllers {
             }
 
             if (_favoritesCollection.Contains(quote.Link)) {
-                //quote.IsFavorite = GetFavoriteIcon(quote.Link);
                 FavoritesCollection.Remove(quote.Link);
-                return await SaveFavoritesCollection();
-            }   return false;
+                SyncAllFavorites(quote.Link, CollectionType.favorites);
+
+                await Settings.SaveFavoritesAsync(FavoritesCollection);
+                return true;
+            }
+            return false;
         }
 
         public static async Task<bool> RemoveFavorite(Quote quote, CollectionType collectionType) {
@@ -165,7 +111,9 @@ namespace citations365.Controllers {
             if (FavoritesCollection.Contains(key)) {
                 FavoritesCollection.Remove(key);
                 SyncAllFavorites(key, collectionType);
-                return await SaveFavoritesCollection();
+
+                await Settings.SaveFavoritesAsync(FavoritesCollection);
+                return true;
             }
             return false;
         }
@@ -200,19 +148,19 @@ namespace citations365.Controllers {
         /// <param name="quote">The quote to be tested</param>
         /// <returns>True if he quote is in favorites</returns>
         public static bool IsFavorite(Quote quote) {
-            if (quote == null) {
-                return false;
-            }
+            if (quote == null) return false;
+            if (_favoritesCollection == null) return false;
 
             if (_favoritesCollection.Contains(quote.Link)) {
                 return true;
-            }   return false;
+            }
+
+            return false;
         }
 
         public static bool IsFavorite(string key) {
-            if (key == null) {
-                return false;
-            }
+            if (key == null) return false;
+            if (_favoritesCollection == null) return false;
 
             if (_favoritesCollection.Contains(key)) {
                 return true;

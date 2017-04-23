@@ -100,7 +100,7 @@ namespace citations365.Controllers {
             }
         }
 
-        public async Task<bool> Search(string query) {
+        public static async Task<bool> Search(string query) {
             int found = await SearchCollection.BuildAndFetch(query);
             if (found >0) {
                 return true;
