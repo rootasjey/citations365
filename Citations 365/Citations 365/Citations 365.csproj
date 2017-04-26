@@ -18,7 +18,7 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PackageCertificateKeyFile>Citations 365_StoreKey.pfx</PackageCertificateKeyFile>
-    <PackageCertificateThumbprint>130D4F6EE72BADDE638C82859F8B01FCA2BF375F</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>27EB4FDC73F1BB23CC82F03ADAC487E160D04148</PackageCertificateThumbprint>
     <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
     <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
@@ -96,9 +96,10 @@
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
     <None Include="Citations 365_StoreKey.pfx" />
-    <None Include="citations365_TemporaryKey.pfx" />
     <None Include="project.json" />
     <None Include="README.md" />
+    <PRIResource Include="Strings\fr-FR\Resources.resw" />
+    <PRIResource Include="Strings\en-US\Resources.resw" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs">
@@ -119,7 +120,6 @@
     <Compile Include="Converters\TextVisibility.cs" />
     <Compile Include="Converters\UpperText.cs" />
     <Compile Include="Data\Evene.cs" />
-    <Compile Include="Data\Quotes.cs" />
     <Compile Include="Data\SourceModel.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\VisualTreeExtensions.cs" />
@@ -137,6 +137,7 @@
     <Compile Include="Models\TodayCollection.cs" />
     <Compile Include="Models\UserSettings.cs" />
     <Compile Include="Services\Events.cs" />
+    <Compile Include="Services\Formatter.cs" />
     <Compile Include="Services\Wallpaper.cs" />
     <Compile Include="Services\BackgroundTasks.cs" />
     <Compile Include="Services\DataTransfer.cs" />

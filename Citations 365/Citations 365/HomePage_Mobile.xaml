@@ -21,6 +21,7 @@
             <PivotItem x:Name="RecentPivot">
                 <PivotItem.Header>
                     <TextBlock x:Name="RecentPivotHeader" 
+                               x:Uid="RecentHeader"
                                Text="récent" Margin="12,0,0,0" 
                                Tapped="RecentPivotHeader_Tapped"/>
                 </PivotItem.Header>
@@ -117,7 +118,7 @@
             
             <PivotItem x:Name="FavoritesPivot" >
                 <PivotItem.Header>
-                    <TextBlock Text="favoris" Margin="12,0,0,0"
+                    <TextBlock x:Uid="FavoritesHeader" Text="favoris" Margin="12,0,0,0"
                                Tapped="FavoritesPivotHeader_Tapped"/>
                 </PivotItem.Header>
                 
@@ -164,8 +165,12 @@
                                         </Button.Content>
                                         <Button.Flyout>
                                             <MenuFlyout>
-                                                <MenuFlyoutItem Text="Partager" Tapped="ShareCommand_Tapped"/>
-                                                <MenuFlyoutItem Text="Favori" Tapped="FavCommand_Tapped"/>
+                                                <MenuFlyoutItem x:Name="ShareCommand" Text="Partager" 
+                                                                Tapped="ShareCommand_Tapped"/>
+                                                <MenuFlyoutItem x:Name="FavCommand" Text="Favori" 
+                                                                Tapped="FavCommand_Tapped"/>
+                                                <MenuFlyoutItem x:Name="CopyCommand" Text="Copier"
+                                                                Tapped="CopyCommand_Tapped"/>
                                             </MenuFlyout>
                                         </Button.Flyout>
                                     </Button>
@@ -196,7 +201,7 @@
                         <TextBlock FontSize="20"
                                    TextWrapping="Wrap"
                                    FontWeight="SemiLight"
-                                   Text="Chargement des citations favoris"/>
+                                   Text="Chargement des citations favoris..."/>
                         <!--<ProgressBar IsIndeterminate="True"/>-->
                     </StackPanel>
                 </Grid>
@@ -204,7 +209,7 @@
 
             <PivotItem x:Name="SearchPivot">
                 <PivotItem.Header>
-                    <TextBlock Text="recherche" Margin="12,0,0,0"
+                    <TextBlock x:Uid="SearchHeader" Text="recherche" Margin="12,0,0,0"
                                Tapped="SearchPivotHeader_Tapped"/>
                 </PivotItem.Header>
                 
@@ -285,7 +290,7 @@
                         <TextBlock FontSize="20"
                                    TextWrapping="Wrap"
                                    FontWeight="SemiLight"
-                                   Text="Recherche de citations par mots-clés"/>
+                                   Text="Recherche de citations..."/>
                         <ProgressBar IsIndeterminate="True"/>
                     </StackPanel>
                 </Grid>
@@ -294,8 +299,8 @@
 
         <CommandBar x:Name="AppBar" ClosedDisplayMode="Minimal" VerticalAlignment="Bottom">
             <CommandBar.SecondaryCommands>
-                <AppBarButton x:Name="SettingsButton" Label="settings" Tapped="SettingsButton_Tapped"/>
-                <AppBarButton x:Name="AuthorsButton" Label="auteurs" Tapped="AuthorsButton_Tapped"/>
+                <AppBarButton x:Name="SettingsButton" x:Uid="CmdSettings" Label="settings" Tapped="SettingsButton_Tapped"/>
+                <AppBarButton x:Name="AuthorsButton" x:Uid="CmdAuthors" Label="authors" Tapped="AuthorsButton_Tapped"/>
             </CommandBar.SecondaryCommands>
         </CommandBar>
     </Grid>

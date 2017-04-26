@@ -17,7 +17,7 @@ namespace citations365.Controllers {
         /// <summary>
         /// For some requests, the url is re-written, so we save it to fetch next pages
         /// </summary>
-        private string _redirectedURL = "";
+        private string _redirectedURL { get; set; }
 
         /// <summary>
         /// Pagination of the search result

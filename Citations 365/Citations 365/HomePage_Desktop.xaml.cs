@@ -211,10 +211,10 @@ namespace citations365 {
 
         private void ShowNoQuotesView() {
             var ListQuotes = (ListView)UI.FindChildControl<ListView>(RecentSection, "ListQuotes");
-            var ListQuotesEmpty = (ListView)UI.FindChildControl<StackPanel>(RecentSection, "NoContentView");
+            var EmptyView = (StackPanel)UI.FindChildControl<StackPanel>(RecentSection, "EmptyView");
 
             ListQuotes.Visibility = Visibility.Collapsed;
-            ListQuotesEmpty.Visibility = Visibility.Visible;
+            EmptyView.Visibility = Visibility.Visible;
         }
         
         #endregion ComponentsLoad

@@ -1,6 +1,5 @@
-﻿using citations365.Controllers;
+﻿using citations365.Data;
 using citations365.Services;
-using citations365.Views;
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
@@ -13,10 +12,9 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
 namespace citations365 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
     sealed partial class App : Application {
+        public static SourceModel DataSource { get; set; }
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -40,14 +38,11 @@ namespace citations365 {
 #endif
             Frame rootFrame = Window.Current.Content as Frame;
 
-            //var shell = Window.Current.Content as Shell;
-
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
             if (rootFrame == null) {
                 // Create a Frame to act as the navigation context and navigate to the first page
                 rootFrame = new Frame();
-
                 rootFrame.NavigationFailed += OnNavigationFailed;
                 rootFrame.Navigated += OnNavigated;
 
@@ -70,8 +65,7 @@ namespace citations365 {
             if (e.PrelaunchActivated == false) {
                 if (rootFrame.Content == null) {
                     // When the navigation stack isn't restored navigate to the first page,
-                    // configuring the new page by passing required information as a navigation
-                    // parameter
+                    // configuring the new page by passing required information as a navigation parameter
                     if (Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily == "Windows.Mobile") {
                         rootFrame.Navigate(typeof(HomePage_Mobile), e.Arguments);
                     } else {
@@ -79,8 +73,9 @@ namespace citations365 {
                     }
                     
                 }
+
                 // Ensure the current window is active
-                Window.Current.Activate();
+                //Window.Current.Activate();
             }
 
             UpdateAppTheme();

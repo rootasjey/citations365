@@ -31,7 +31,7 @@ namespace citations365.Controllers {
         
         public static async Task<bool> Initialize() {
             if (!IsDataLoaded()) {
-                _favoritesCollection = await Settings.LoadFavoritesAsync();
+                _favoritesCollection = await Settings.LoadFavoritesAsync("Evene");
                 if (_favoritesCollection == null) _favoritesCollection = new ObservableKeyedCollection();
 
                 _favoritesCollection.CollectionChanged += CollectionChanged;
@@ -76,7 +76,7 @@ namespace citations365.Controllers {
                 quote.IsFavorite = true;
                 FavoritesCollection.Add(quote);
 
-                await Settings.SaveFavoritesAsync(FavoritesCollection);
+                await Settings.SaveFavoritesAsync(FavoritesCollection, "Evene");
                 return true;
             }
             return false;
@@ -96,7 +96,7 @@ namespace citations365.Controllers {
                 FavoritesCollection.Remove(quote.Link);
                 SyncAllFavorites(quote.Link, CollectionType.favorites);
 
-                await Settings.SaveFavoritesAsync(FavoritesCollection);
+                await Settings.SaveFavoritesAsync(FavoritesCollection, "Evene");
                 return true;
             }
             return false;
@@ -112,7 +112,7 @@ namespace citations365.Controllers {
                 FavoritesCollection.Remove(key);
                 SyncAllFavorites(key, collectionType);
 
-                await Settings.SaveFavoritesAsync(FavoritesCollection);
+                await Settings.SaveFavoritesAsync(FavoritesCollection, "Evene");
                 return true;
             }
             return false;

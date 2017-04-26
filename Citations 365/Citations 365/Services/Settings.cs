@@ -48,14 +48,19 @@ namespace citations365.Services {
             App.UpdateAppTheme();
         }
 
-        public static async Task SaveFavoritesAsync(ObservableKeyedCollection favorites) {
+        public static async Task SaveFavoritesAsync(ObservableKeyedCollection favorites, string source) {
             string json = JsonConvert.SerializeObject(favorites);
-            StorageFile file = await ApplicationData.Current.LocalFolder.CreateFileAsync("favorites.json", CreationCollisionOption.ReplaceExisting);
+            StorageFile file = 
+                await ApplicationData
+                        .Current
+                        .LocalFolder
+                        .CreateFileAsync("favorites-" + source + ".json", CreationCollisionOption.ReplaceExisting);
+
             await FileIO.WriteTextAsync(file, json);
         }
 
-        public static async Task<ObservableKeyedCollection> LoadFavoritesAsync() {
-            StorageFile file = (StorageFile)await ApplicationData.Current.LocalFolder.TryGetItemAsync("favorites.json");
+        public static async Task<ObservableKeyedCollection> LoadFavoritesAsync(string source) {
+            StorageFile file = (StorageFile)await ApplicationData.Current.LocalFolder.TryGetItemAsync("favorites-" + source + ".json");
             if (file == null) return null;
 
             string json = await FileIO.ReadTextAsync(file);

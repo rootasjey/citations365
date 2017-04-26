@@ -37,7 +37,7 @@
                             <StackPanel x:Name="CustomHeader"
                                         Margin="40,20,0,0"
                                         Orientation="Horizontal">
-                                <TextBlock Text="today"
+                                <TextBlock x:Uid="Today"
                                            VerticalAlignment="Center"
                                            Typography.Capitals="SmallCaps"/>
                             </StackPanel>
@@ -76,12 +76,12 @@
                                             <FontIcon Glyph="&#xE706;" 
                                                           FontSize="46" 
                                                           FontFamily="Segoe MDL2 Assets"/>
-                                            <TextBlock x:Name="Text" 
-                                                           Margin="40,0,40,0"
-                                                           FontSize="24"
-                                                           FontWeight="Light"
-                                                           TextWrapping="Wrap"
-                                                           Text="Il n'y a pas de contenu pour le moment. Essayez de recharger la page et vérifiez votre connexion internet"/>
+                                            <TextBlock x:Name="Text"
+                                                       x:Uid="NoContent.Text"
+                                                        Margin="40,0,40,0"
+                                                        FontSize="24"
+                                                        FontWeight="Light"
+                                                        TextWrapping="Wrap"/>
                                         </StackPanel>
                                     </Grid>
                                 </ScrollViewer>
@@ -109,7 +109,7 @@
                                     Tag="RecentSection"
                                     Margin="10,0,0,0"
                                     Tapped="BackToTop_Tapped">
-                            <TextBlock Text="récent"
+                            <TextBlock x:Uid="Recent"
                                        VerticalAlignment="Center"
                                        Typography.Capitals="SmallCaps"/>
                             <FontIcon Glyph="&#xE010;" 
@@ -119,7 +119,7 @@
                                       FontFamily="Segoe MDL2 Assets"/>
                         </StackPanel>
 
-                        <Grid x:Name="HubSectionContent" Grid.Row="1">
+                        <Grid x:Name="HubSectionContent" Grid.Row="1" MinHeight="400">
                             <ListView x:Name="ListQuotes"
                                       Loaded="ListQuotes_Loaded"
                                       IncrementalLoadingTrigger="Edge"
@@ -176,20 +176,19 @@
                                 </ListView.ItemTemplate>
                             </ListView>
 
-                            <StackPanel x:Name="EmptyView" 
+                            <StackPanel x:Name="EmptyView"
+                                        Margin="0,60,0,0"
                                         Visibility="Collapsed"
-                                        VerticalAlignment="Center" 
-                                        Canvas.ZIndex="2">
+                                        VerticalAlignment="Center">
 
                                 <FontIcon Glyph="&#xE706;" 
                                           FontSize="46" 
                                           FontFamily="Segoe MDL2 Assets"/>
 
-                                <TextBlock Margin="40,0,40,0"
+                                <TextBlock x:Uid="NoContent" Margin="40,0,40,0"
                                             FontSize="24"
                                             FontWeight="Light"
-                                            TextWrapping="Wrap"
-                                            Text="Il n'y a pas de contenu pour le moment. Essayez de recharger la page et vérifiez votre connexion internet"/>
+                                            TextWrapping="Wrap"/>
                             </StackPanel>
                         </Grid>
                     </Grid>
@@ -212,7 +211,7 @@
                                     Tag="FavoritesSection"
                                     Margin="40,20,0,0"
                                     Tapped="BackToTop_Tapped">
-                            <TextBlock Text="favoris"
+                            <TextBlock x:Uid="Favorites"
                                        VerticalAlignment="Center"
                                        Typography.Capitals="SmallCaps"/>
                             <FontIcon Glyph="&#xE010;" 
@@ -281,12 +280,11 @@
                             <StackPanel x:Name="EmptyView"
                                         VerticalAlignment="Center">
                                 <FontIcon Glyph="&#xE006;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>
-                                <TextBlock Margin="40,0,40,0"
+                                <TextBlock x:Uid="NoFavorites" Margin="40,0,40,0"
                                         FontSize="24"
                                         FontWeight="Light"
                                         TextWrapping="Wrap"
-                                        HorizontalAlignment="Center"
-                                        Text="Vous n'avez aucun favoris pour le moment :("/>
+                                        HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Grid>
                     </Grid>
@@ -309,7 +307,7 @@
                                     Tag="SearchSection"
                                     Margin="40,20,0,0"
                                     Tapped="BackToTop_Tapped">
-                            <TextBlock Text="search"
+                            <TextBlock x:Uid="Search"
                                        VerticalAlignment="Center"
                                        Typography.Capitals="SmallCaps"/>
                             <FontIcon Glyph="&#xE010;"
@@ -376,7 +374,9 @@
                                 </ListView.ItemTemplate>
                             </ListView>
 
-                            <StackPanel x:Name="EmptyView" VerticalAlignment="Center">
+                            <StackPanel x:Name="EmptyView" 
+                                        Margin="0,40,0,0"
+                                        VerticalAlignment="Center">
                                 <FontIcon Glyph="&#xE11A;" 
                                               FontSize="46" 
                                               FontFamily="Segoe MDL2 Assets" 
@@ -386,14 +386,14 @@
                                              MinWidth="250"
                                              KeyDown="InputSearch_KeyDown"/>
                                 <TextBlock x:Name="TextInfos"
+                                           x:Uid="SearchQuotesGreetings"
                                                Width="240"
                                                Margin="18,6,26,0"
                                                FontSize="18"
                                                FontWeight="Light"
                                                TextWrapping="Wrap"
                                                HorizontalAlignment="Center"
-                                               Typography.Capitals="SmallCaps"
-                                               Text="recherchez des citations par mots-clé"/>
+                                               Typography.Capitals="SmallCaps"/>
                             </StackPanel>
 
                         </Grid>
@@ -415,7 +415,7 @@
                                     Tag="AuthorsSection"
                                     Margin="0,20,0,0"
                                     Tapped="BackToTop_Tapped">
-                            <TextBlock Text="auteurs"
+                            <TextBlock x:Uid="AuthorsSection"
                                        VerticalAlignment="Center"
                                        Typography.Capitals="SmallCaps"/>
                         </StackPanel>
@@ -510,12 +510,12 @@
                                         Margin="100"
                                         VerticalAlignment="Center">
                                 <FontIcon Glyph="&#xE2AD;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>
-                                <TextBlock Margin="40,0,40,0"
+                                <TextBlock x:Uid="LoadingAuthors" 
+                                           Margin="40,0,40,0"
                                            FontSize="24"
                                            FontWeight="Light"
                                            TextWrapping="Wrap"
-                                           HorizontalAlignment="Center"
-                                           Text="Patientez un instant, les auteurs sont en train d'arriver"/>
+                                           HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Grid>
                     </Grid>
@@ -526,8 +526,8 @@
 
         <CommandBar x:Name="AppBar" ClosedDisplayMode="Minimal">
             <CommandBar.SecondaryCommands>
-                <AppBarButton x:Name="SettingsButton" Label="settings" Tapped="SettingsButton_Tapped"/>
-                <AppBarButton x:Name="AuthorsButton" Label="auteurs" Tapped="AuthorsButton_Tapped"/>
+                <AppBarButton x:Name="SettingsButton" x:Uid="CmdSettings" Label="settings" Tapped="SettingsButton_Tapped"/>
+                <AppBarButton x:Name="AuthorsButton" x:Uid="CmdAuthors" Label="auteurs" Tapped="AuthorsButton_Tapped"/>
             </CommandBar.SecondaryCommands>
         </CommandBar>
 

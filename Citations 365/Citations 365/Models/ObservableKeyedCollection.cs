@@ -1,16 +1,12 @@
-﻿using citations365.Controllers;
-using citations365.Data;
-using citations365.Services;
+﻿using citations365.Services;
 using HtmlAgilityPack;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI.Xaml.Data;
@@ -36,7 +32,14 @@ namespace citations365.Models {
             }
         }
 
-        
+        private string _Query;
+
+        public virtual string Query {
+            get { return _Query; }
+            set { _Query = value; }
+        }
+
+
         private int _page = 3; // TODO: Set back to 1
         public virtual int Page {
             get {
@@ -107,7 +110,7 @@ namespace citations365.Models {
             return await Fetch(url);
         }
         
-        public async Task<int> Fetch(string url) {
+        public virtual async Task<int> Fetch(string url) {
             int quotesAdded = 0;
             string responseBodyAsText;
 
@@ -161,7 +164,7 @@ namespace citations365.Models {
                         Link = quoteLink
                     };
 
-                    quote               = Evene.Normalize(quote);
+                    quote               = Formatter.Normalize(quote);
                     quote.IsFavorite    = IsFavorite(quote);
 
                     if (!Contains(quote.Link)) {
@@ -186,7 +189,7 @@ namespace citations365.Models {
 
                 return quotesAdded;
 
-            } catch (HttpRequestException hre) {
+            } catch {
                 HasMoreItems = false;
                 return await HandleFailedFetch();
             }
@@ -200,26 +203,30 @@ namespace citations365.Models {
             return false;
         }
 
-        public bool IsDataLoaded() {
+        public virtual bool IsDataLoaded() {
             return Count > 0;
         }
         
-        public async Task<bool> SaveIO() {
+        public virtual async Task<bool> SaveIO() {
             if (Count == 0) return true;
             await Settings.SaveQuotesAsync(this);
             return false;
         }
 
-        public async Task<int> LoadIO() {
+        public virtual async Task<int> LoadIO() {
             try {
                 var savedQuotes = await Settings.LoadQuotesAsync(Name + ".json");
+                if (savedQuotes == null) return 0;
+
                 foreach (var q in savedQuotes) {
                     Add(q);
                 }
 
                 return Count;
             } 
-            catch { return Count; }
+            catch {
+                return Count;
+            }
         }
 
 
@@ -243,52 +250,9 @@ namespace citations365.Models {
             return LoadMoreItemsAsync(count).AsAsyncOperation();
         }
         
-        public async Task<LoadMoreItemsResult> LoadMoreItemsAsync(uint count) {
+        public virtual async Task<LoadMoreItemsResult> LoadMoreItemsAsync(uint count) {
             int itemsCount = await BuildAndFetch();
             return new LoadMoreItemsResult { Count = (uint)itemsCount };
-        }
-
-
-        /* ***************
-         * HELPERS METHODS
-         * ***************
-         */
-        public Quote Normalize(Quote quote) {
-            // Delete HTML
-            quote.Author = DeleteHTMLTags(quote.Author);
-            quote.Content = DeleteHTMLTags(quote.Content);
-            quote.Reference = DeleteHTMLTags(quote.Reference);
-
-            // Check values
-            if (quote.Author.Contains("Vos avis")) {
-                quote.Author = "Anonyme";
-            }
-            return quote;
-        }
-        
-        public string DeleteHTMLTags(string text) {
-            if (text == null) {
-                return null;
-            }
-
-            text = Regex.Replace(text, @"<(.|\n)*?>", string.Empty);
-
-            text = text
-                .Replace("&laquo;", "")
-                .Replace("&ldquo;", "")
-                .Replace("&rdquo;", "")
-                .Replace("&nbsp;", "")
-                .Replace("&raquo;", "")
-                .Replace("&#039;", "'")
-                .Replace("&quot;", "'")
-                .Replace("&amp;", "&")
-                .Replace("[+]", "")
-                .Replace("[", "")
-                .Replace("]", "")
-                .Replace("\n", "")
-                .Replace("  ", "");
-
-            return text;
         }
     }
 }

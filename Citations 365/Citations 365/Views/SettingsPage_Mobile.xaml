@@ -28,9 +28,10 @@
                         <StackPanel Margin="0,0,0,40">
                             <TextBlock Text="thème" Style="{StaticResource SettingsTitle}"/>
                             <ToggleSwitch x:Name="ThemeSwitch"
-                                        OnContent="Theme Clair"
-                                        OffContent="Thème Sombre"
-                                        Toggled="ThemeSwitch_Toggled"/>
+                                          Loaded="ThemeSwitch_Loaded"
+                                          OnContent="Theme Clair"
+                                          OffContent="Thème Sombre"
+                                          Toggled="ThemeSwitch_Toggled"/>
                         </StackPanel>
 
                         <StackPanel>
@@ -48,34 +49,32 @@
             </PivotItem>
 
             <PivotItem x:Name="TasksPivot" Header="tâches d'arrière-plan">
-                <ScrollViewer>
-                    <Grid x:Name="HubSectionContent"
-                              Grid.Row="1">
-                        <ScrollViewer Margin="0,20,0,0"
-                                      VerticalScrollBarVisibility="Hidden">
-                            <StackPanel>
-                                <StackPanel Margin="0,0,0,40">
-                                    <TextBlock Text="tuile dynamique" Style="{StaticResource SettingsTitle}"/>
-                                    <TextBlock Text="Mettre à jour la tuile de l'application périodiquement" 
-                                               Opacity=".5"
-                                               TextWrapping="Wrap"/>
-                                    <ToggleSwitch x:Name="QuotesTaskSwitch" Toggled="QuotesTaskSwitch_Toggled"/>
-                                </StackPanel>
+                <ScrollViewer Margin="0,20,0,0"
+                                    VerticalScrollBarVisibility="Hidden">
+                    <StackPanel>
+                        <StackPanel Margin="0,0,0,40">
+                            <TextBlock Text="tuile dynamique" Style="{StaticResource SettingsTitle}"/>
+                            <TextBlock Text="Mettre à jour la tuile de l'application périodiquement" 
+                                            Opacity=".5"
+                                            TextWrapping="Wrap"/>
+                            <ToggleSwitch x:Name="QuotesTaskSwitch"
+                                          Loaded="QuotesTaskSwitch_Loaded"
+                                          Toggled="QuotesTaskSwitch_Toggled"/>
+                        </StackPanel>
 
-                                <StackPanel Margin="0,0,0,40">
-                                    <TextBlock Text="écran de verrouillage" Style="{StaticResource SettingsTitle}"/>
-                                    <TextBlock Text="Mettre à jour l'image de l'écran de verrouillage du téléphone périodiquement" 
-                                               Opacity=".5"
-                                               TextWrapping="Wrap"/>
-                                    <ToggleSwitch x:Name="LockTaskSwitch"
-                                                      Toggled="LockTaskSwitch_Toggled"/>
-                                </StackPanel>
+                        <StackPanel Margin="0,0,0,40">
+                            <TextBlock Text="écran de verrouillage" Style="{StaticResource SettingsTitle}"/>
+                            <TextBlock Text="Mettre à jour l'image de l'écran de verrouillage du téléphone périodiquement" 
+                                            Opacity=".5"
+                                            TextWrapping="Wrap"/>
+                            <ToggleSwitch x:Name="LockTaskSwitch"
+                                          Loaded="LockTaskSwitch_Loaded"
+                                          Toggled="LockTaskSwitch_Toggled"/>
+                        </StackPanel>
 
-                                <!--<Button x:Name="LockscreenButton" Content="écran de verrouillage" 
-                                                Margin="0,34" Click="LockscreenButton_Click"/>-->
-                            </StackPanel>
-                        </ScrollViewer>
-                    </Grid>
+                        <!--<Button x:Name="LockscreenButton" Content="écran de verrouillage" 
+                                            Margin="0,34" Click="LockscreenButton_Click"/>-->
+                    </StackPanel>
                 </ScrollViewer>
             </PivotItem>
 

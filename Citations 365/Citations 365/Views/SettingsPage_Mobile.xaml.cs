@@ -1,5 +1,4 @@
-﻿using citations365.Controllers;
-using citations365.Services;
+﻿using citations365.Services;
 using System;
 using Windows.ApplicationModel.Email;
 using Windows.UI.Core;
@@ -26,15 +25,6 @@ namespace citations365.Views {
             if (Events.IsBackOrEscapeKey(args.VirtualKey) && Frame.CanGoBack) {
                 Frame.GoBack();
             }
-        }
-
-        private void TasksSection_Loaded(object sender, RoutedEventArgs e) {
-            UpdateQuoteTaskSwitcher();
-            UpdateWallTaskSwitcher();
-        }
-
-        private void PersonalizationSection_Loaded(object sender, RoutedEventArgs e) {
-            UpdateThemeSwitcher();
         }
 
         private void UpdateQuoteTaskSwitcher() {
@@ -80,7 +70,8 @@ namespace citations365.Views {
 
         private async void NoteButton_Click(object sender, RoutedEventArgs e) {
             string appID = "9wzdncrcwfqr";
-            var op = await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-windows-store://review/?ProductId=" + appID));
+            var op = await Windows.System.Launcher
+                .LaunchUriAsync(new Uri("ms-windows-store://review/?ProductId=" + appID));
         }
 
         private async void LockscreenButton_Click(object sender, RoutedEventArgs e) {
@@ -123,6 +114,18 @@ namespace citations365.Views {
             }
 
             selectedItem.IsChecked = true;
+        }
+
+        private void QuotesTaskSwitch_Loaded(object sender, RoutedEventArgs e) {
+            UpdateQuoteTaskSwitcher();
+        }
+
+        private void LockTaskSwitch_Loaded(object sender, RoutedEventArgs e) {
+            UpdateWallTaskSwitcher();
+        }
+
+        private void ThemeSwitch_Loaded(object sender, RoutedEventArgs e) {
+            UpdateThemeSwitcher();
         }
     }
 }

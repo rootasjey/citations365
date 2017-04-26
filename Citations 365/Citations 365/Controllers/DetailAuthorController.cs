@@ -1,5 +1,6 @@
 ﻿using citations365.Data;
 using citations365.Models;
+using citations365.Services;
 using HtmlAgilityPack;
 using System;
 using System.ComponentModel;
@@ -149,7 +150,7 @@ namespace citations365.Controllers {
                 _quotesLink = _quotesLink ?? "";
 
                 var author = new Author() {
-                    Biography = Evene.DeleteHTMLTags(bio),
+                    Biography = Formatter.DeleteHTMLTags(bio),
                     Birth = birth,
                     Death = death,
                     Picture = "ms-appx:///Assets/Icons/gray.png",

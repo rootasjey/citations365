@@ -8,19 +8,7 @@ namespace citations365.Models {
                 return "SearchCollection.xml";
             }
         }
-
-        private string _query = "";
-        public string Query {
-            get {
-                return _query;
-            }
-            set {
-                if (_query != value) {
-                    _query = value;
-                }
-            }
-        }
-
+        
         public SearchCollection() {
             HasMoreItems = true; // initially to false
         }
