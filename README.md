@@ -35,31 +35,52 @@ Steps to build and run this project:
 
 1. Clone or download this repository
 2. (Optional) Unzip the archive to your favorite location
-3. Navigate to the _/Citations 365/_ folder
-4. Open _'Citations 365.sln'_ in [Visual Studio](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15)
+3. Navigate to the ```Citations 365/``` folder
+4. Open ```Citations 365.sln``` in [Visual Studio](https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15)
 5. Choose your favorite platform and click on Run :)
 
-# languages
-This is app is only available in french for now
 
 # platforms
+
 * Windows Mobile 10
 * Windows 10
 
-# source
+# sources
 
-Quotes are from [Evene](http://evene.lefigaro.fr/)
+French
+
+* [Evene](http://evene.lefigaro.fr/)
+
+English
+
+* [QuotesOnDesign](https://quotesondesign.com/api-v4-0/)
+
+# architecture overview
+
+This section describes the way I've organized my files and directories
+to build this app in the clearest way possible.
+
+## Views
+
+All the views are localized inside the ```Views/``` folder, except for the ```App.xaml``` and ```App.xaml.cs``` which is the main app's view page.
+
+## Data
+
+All data are managed inside the ```Data/``` folder.
+
+For more information, visit the corresponding folders.
 
 # contributing
 
 You can contribute to improve this project by:
+
 * creating a pull request
 * submitting new ideas / features suggestions 
 * reporting a bug.
 
 # todo
 
-* Add english source
+* Mashup multi-sources for each language
 * Add option to apply generated images to wallpaper (currently only for locksreen)
 * Adapt generated images for desktop devices (good looking only on mobile devices currently)
 * Add a service to allow others apps to query quote data from _Citations 365_

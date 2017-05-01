@@ -7,6 +7,63 @@
     xmlns:data="using:citations365.Models"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <DataTemplate x:Key="QuoteTemplate" x:DataType="data:Quote">
+            <Grid x:Name="QuoteGrid"
+                    Margin="0,25,0,35"
+                    Loaded="Quote_Loaded">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="17"/>
+                    <RowDefinition Height="20"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0">
+                    <TextBlock Text="{x:Bind Content}" FontWeight="Light" FontSize="20" TextWrapping="WrapWholeWords"/>
+                    <TextBlock x:Name="AuthorName" 
+                                Text="{x:Bind Author, Converter={StaticResource UpperText}}" 
+                                FontWeight="Bold" 
+                                FontSize="14" 
+                                TextWrapping="Wrap"/>
+                    <TextBlock Text="{x:Bind Reference, Converter={StaticResource UpperText}}" 
+                                FontWeight="Normal" 
+                                FontSize="12" 
+                                TextWrapping="WrapWholeWords"
+                                Visibility="{x:Bind Reference, Converter={StaticResource TextVisibility}}"/>
+                </StackPanel>
+
+                <Rectangle Grid.Column="1" 
+                            Grid.Row="1" 
+                            Margin="0,7"
+                            Fill="{x:Bind IsFavorite, Mode=OneWay, Converter={StaticResource FavoriteColor}}"/>
+
+                <Button Grid.Row="2"
+                        Background="Transparent"
+                        HorizontalAlignment="Right">
+                    <Button.Content>
+                        <FontIcon Glyph="&#xE10C;"/>
+                    </Button.Content>
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem x:Name="ShareCommand" 
+                                            x:Uid="CmdShare"
+                                            Text="Partager" 
+                                            Tapped="ShareCommand_Tapped"/>
+                            <MenuFlyoutItem x:Name="FavCommand" 
+                                            x:Uid="CmdFavorite"
+                                            Text="Favori" 
+                                            Tapped="FavCommand_Tapped"/>
+                            <MenuFlyoutItem x:Name="CopyCommand" 
+                                            x:Uid="CmdCopy"
+                                            Text="Copier"
+                                            Tapped="CopyCommand_Tapped"/>
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+    
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
         <Hub x:Name="AuthorHub" Margin="0" Padding="0">
             <HubSection x:Name="HeroSection"
@@ -34,7 +91,8 @@
                             <StackPanel x:Name="CustomHeader"
                                         Margin="50,0"
                                         Orientation="Horizontal">
-                                <TextBlock Text="biographie"
+                                <TextBlock x:Uid="BiographyTitle" 
+                                           Text="biographie"
                                            VerticalAlignment="Center"
                                            Typography.Capitals="SmallCaps"/>
                             </StackPanel>
@@ -149,7 +207,8 @@
                                     Margin="50,0"
                                     Orientation="Horizontal"
                                     Tapped="BackToTop_Tapped">
-                            <TextBlock Text="citations"
+                            <TextBlock x:Uid="QuotesTitle" 
+                                       Text="citations"
                                        VerticalAlignment="Center"
                                        Typography.Capitals="SmallCaps"/>
                             <FontIcon Glyph="&#xE010;" 
@@ -163,7 +222,8 @@
                             <StackPanel x:Name="EmptyView"
                                         VerticalAlignment="Center" Margin="0,60,0,0">
                                 <FontIcon Glyph="&#xE90A;" FontSize="46" FontFamily="Segoe MDL2 Assets"/>
-                                <TextBlock Margin="40,90,40,0"
+                                <TextBlock x:Uid="NoAuthorQuotes" 
+                                           Margin="40,90,40,0"
                                            FontSize="24"
                                            FontWeight="Light"
                                            TextWrapping="Wrap"
@@ -180,62 +240,9 @@
                                       Loaded="ListQuotes_Loaded"
                                       IncrementalLoadingTrigger="Edge"
                                       SelectionMode="None"
+                                      ItemTemplate="{StaticResource QuoteTemplate}"
                                       IsItemClickEnabled="True"
                                       ItemContainerStyle="{StaticResource ListViewItemFill}">
-                                <ListView.ItemTemplate>
-                                    <DataTemplate x:DataType="data:Quote">
-                                        <Grid x:Name="QuoteGrid"
-                                      Opacity="1"
-                                      Margin="0,25,0,35"
-                                      Loaded="Quote_Loaded">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="*"/>
-                                                <RowDefinition Height="17"/>
-                                                <RowDefinition Height="20"/>
-                                            </Grid.RowDefinitions>
-
-                                            <StackPanel Grid.Row="0">
-                                                <TextBlock Text="{x:Bind Content}" FontWeight="Light" FontSize="20" TextWrapping="WrapWholeWords"/>
-                                                <TextBlock x:Name="QuoteAuthor" 
-                                                    Text="{x:Bind Author, Converter={StaticResource UpperText}}" 
-                                                    FontWeight="Bold" 
-                                                    FontSize="14" 
-                                                    TextWrapping="Wrap"/>
-                                                <TextBlock Text="{x:Bind Reference, Converter={StaticResource UpperText}}" 
-                                                    FontWeight="Normal" 
-                                                    FontSize="12" 
-                                                    TextWrapping="WrapWholeWords"
-                                                    Visibility="{x:Bind Reference, Converter={StaticResource TextVisibility}}"/>
-                                            </StackPanel>
-
-                                            <Rectangle Grid.Column="1" 
-                                                Grid.Row="1" 
-                                                Margin="0,7"
-                                                Fill="{x:Bind IsFavorite, Converter={StaticResource FavoriteColor}}"/>
-
-                                            <Button Grid.Row="2"
-                                                    Background="Transparent"
-                                                    HorizontalAlignment="Right">
-                                                <Button.Content>
-                                                    <FontIcon Glyph="&#xE10C;"/>
-                                                </Button.Content>
-                                                <Button.Flyout>
-                                                    <MenuFlyout>
-                                                        <MenuFlyoutItem x:Name="ShareCommand" 
-                                                                        Text="Partager" 
-                                                                        Tapped="ShareCommand_Tapped"/>
-                                                        <MenuFlyoutItem x:Name="FavCommand" 
-                                                                        Text="Favori" 
-                                                                        Tapped="FavCommand_Tapped"/>
-                                                        <MenuFlyoutItem x:Name="CopyCommand" 
-                                                                        Text="Copier"
-                                                                        Tapped="CopyCommand_Tapped"/>
-                                                    </MenuFlyout>
-                                                </Button.Flyout>
-                                            </Button>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
                             </ListView>
                         </Grid>
                     </Grid>

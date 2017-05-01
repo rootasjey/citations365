@@ -117,26 +117,58 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="About.Text" xml:space="preserve">
-    <value>À Propos</value>
+  <data name="AboutHeader.Text" xml:space="preserve">
+    <value>à Propos</value>
     <comment>About</comment>
   </data>
-  <data name="Authors.Text" xml:space="preserve">
-    <value>Auteurs</value>
-    <comment>Authors</comment>
-  </data>
   <data name="AuthorsSection.Text" xml:space="preserve">
-    <value>Auteurs</value>
+    <value>auteurs</value>
   </data>
-  <data name="Backgrounds Tasks.Text" xml:space="preserve">
-    <value>Tâches en arrière-plan</value>
+  <data name="BackgroundsTasksHeader.Text" xml:space="preserve">
+    <value>tâches en arrière-plan</value>
     <comment>Backgrounds Tasks</comment>
   </data>
+  <data name="BiographyTitle.Text" xml:space="preserve">
+    <value>biographie</value>
+  </data>
   <data name="CmdAuthors.Label" xml:space="preserve">
-    <value>Auteurs</value>
+    <value>auteurs</value>
+  </data>
+  <data name="CmdCopy.Text" xml:space="preserve">
+    <value>copier</value>
+  </data>
+  <data name="CmdFavorite.Text" xml:space="preserve">
+    <value>favori</value>
+  </data>
+  <data name="CmdResetSearch.Label" xml:space="preserve">
+    <value>nouvelle recherche</value>
   </data>
   <data name="CmdSettings.Label" xml:space="preserve">
-    <value>Paramètres</value>
+    <value>paramètres</value>
+  </data>
+  <data name="CmdShare.Text" xml:space="preserve">
+    <value>partager</value>
+  </data>
+  <data name="ContributeFifthLine.Text" xml:space="preserve">
+    <value>Visitez le lien suivant pour plus d'information</value>
+  </data>
+  <data name="ContributeFirstLine.Text" xml:space="preserve">
+    <value>Ce projet est open source et vous pouvez y contribuer de plusieurs manières:</value>
+  </data>
+  <data name="ContributeFourthLine.Text" xml:space="preserve">
+    <value>- éditer le code de l'applicatio</value>
+  </data>
+  <data name="ContributeSecondLine.Text" xml:space="preserve">
+    <value>- signaler un bug</value>
+  </data>
+  <data name="ContributeSixthLine.Text" xml:space="preserve">
+    <value>et venez participer à ce projet :)</value>
+  </data>
+  <data name="ContributeThirdLine.Text" xml:space="preserve">
+    <value>- suggérer une fonctionnalité</value>
+  </data>
+  <data name="ContributeTitle.Text" xml:space="preserve">
+    <value>Contribuer</value>
   </data>
   <data name="Copy.Text" xml:space="preserve">
     <value>Copier</value>
@@ -146,13 +178,49 @@
     <value>Sombre</value>
     <comment>Dark</comment>
   </data>
+  <data name="DataContent1.Text" xml:space="preserve">
+    <value>Les données des citations proviennent des sites</value>
+  </data>
+  <data name="DataContent2.Text" xml:space="preserve">
+    <value>et cette application n'est aucunement liée à ces sites.</value>
+  </data>
+  <data name="DataTitle.Text" xml:space="preserve">
+    <value>Données</value>
+  </data>
+  <data name="DynamicTileLabel.Text" xml:space="preserve">
+    <value>Mettre à jour la tuile de l'application périodiquement</value>
+  </data>
+  <data name="DynamicTileTitle.Text" xml:space="preserve">
+    <value>Tuile dynamique</value>
+  </data>
   <data name="Favorite.Text" xml:space="preserve">
     <value>Favori</value>
     <comment>Favorite</comment>
   </data>
   <data name="FavoritesHeader.Text" xml:space="preserve">
-    <value>Favoris</value>
+    <value>favoris</value>
     <comment>Favorites</comment>
+  </data>
+  <data name="FeedbackButton.Content" xml:space="preserve">
+    <value>Envoyer un avis</value>
+  </data>
+  <data name="FeedbackLabel.Text" xml:space="preserve">
+    <value>Suggérer une amélioration ou signaler un problème</value>
+  </data>
+  <data name="FeedbackTitle.Text" xml:space="preserve">
+    <value>Mon avis</value>
+  </data>
+  <data name="GithubRepository.Text" xml:space="preserve">
+    <value>répertoire GitHub</value>
+  </data>
+  <data name="ImagesSourceContent.Text" xml:space="preserve">
+    <value>Les images proviennent de</value>
+  </data>
+  <data name="ImagesSourceTitle.Text" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="LanguageButton.Content" xml:space="preserve">
+    <value>Langue</value>
   </data>
   <data name="Loading.Text" xml:space="preserve">
     <value>Chargement...</value>
@@ -174,6 +242,15 @@
   <data name="LoadingQuotes.Text" xml:space="preserve">
     <value>Chargement des citations...</value>
   </data>
+  <data name="LoadingTodayQuotes.Text" xml:space="preserve">
+    <value>Chargement des citations d'aujourd'hui...</value>
+  </data>
+  <data name="LockscreenLabel.Text" xml:space="preserve">
+    <value>Mettre à jour l'image de l'écran de verrouillage du téléphone périodiquement</value>
+  </data>
+  <data name="LockscreenTitle.Text" xml:space="preserve">
+    <value>Ecran de verrouillage</value>
+  </data>
   <data name="NoAuthorQuotes.Text" xml:space="preserve">
     <value>Aucune citation célèbre pour cet auteur :/</value>
   </data>
@@ -184,20 +261,41 @@
   <data name="NoContent.Text" xml:space="preserve">
     <value>Il n'y a pas de contenu pour le moment. Essayez de recharger la page et vérifiez votre connexion internet.</value>
   </data>
+  <data name="NoContentToday.Text" xml:space="preserve">
+    <value>Il semble ne pas y avoir de citations aujourd'hui. Verifiez votre connexion internet.</value>
+  </data>
   <data name="NoFavorites.Text" xml:space="preserve">
     <value>Vous n'avez aucun favoris pour le moment :(</value>
     <comment>No Favorites</comment>
   </data>
-  <data name="Personalization.Text" xml:space="preserve">
-    <value>Personalisation</value>
+  <data name="NoSearchResults" xml:space="preserve">
+    <value>il n'y a aucun résultat pour cette rechercher</value>
+  </data>
+  <data name="PersonalizationHeader.Text" xml:space="preserve">
+    <value>personalisation</value>
     <comment>Personalization</comment>
   </data>
+  <data name="QuotesHeader.Text" xml:space="preserve">
+    <value>citations</value>
+  </data>
+  <data name="RatingButton.Content" xml:space="preserve">
+    <value>Noter l'app</value>
+  </data>
+  <data name="RatingLabel.Text" xml:space="preserve">
+    <value>Notez l'application sur le Store</value>
+  </data>
+  <data name="RatingTitle.Text" xml:space="preserve">
+    <value>Notation</value>
+  </data>
   <data name="RecentHeader.Text" xml:space="preserve">
-    <value>Récent</value>
+    <value>récent</value>
     <comment>Recent</comment>
   </data>
+  <data name="SearchGreetings" xml:space="preserve">
+    <value>Recherchez des citations par mots-clé</value>
+  </data>
   <data name="SearchHeader.Text" xml:space="preserve">
-    <value>Recherche</value>
+    <value>recherche</value>
     <comment>Search</comment>
   </data>
   <data name="SearchQuotesGreetings.Text" xml:space="preserve">
@@ -205,7 +303,7 @@
     <comment>Search quotes greetings</comment>
   </data>
   <data name="Settings.Label" xml:space="preserve">
-    <value>Paramètres</value>
+    <value>paramètres</value>
     <comment>Settings</comment>
   </data>
   <data name="Share.Text" xml:space="preserve">
@@ -220,11 +318,13 @@
     <value>Thème</value>
     <comment>Theme</comment>
   </data>
-  <data name="Today.Text" xml:space="preserve">
-    <value>Aujourd'hui</value>
+  <data name="ThemeSwitch.OffContent" xml:space="preserve">
+    <value>Thème Sombre</value>
   </data>
-  <data name="White.Text" xml:space="preserve">
-    <value>Clair</value>
-    <comment>White</comment>
+  <data name="ThemeSwitch.OnContent" xml:space="preserve">
+    <value>Thème Clair</value>
+  </data>
+  <data name="TodayHeader.Text" xml:space="preserve">
+    <value>aujourd'hui</value>
   </data>
 </root>

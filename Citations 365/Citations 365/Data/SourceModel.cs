@@ -1,16 +1,23 @@
 ﻿using citations365.Models;
 using citations365.Services;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace citations365.Data {
-    public class SourceModel {
+    public class SourceModel : INotifyPropertyChanged {
         #region variables
         public virtual ObservableKeyedCollection RecentList { get; set; }
         public virtual ObservableKeyedCollection FavoritesList { get; set; }
         public virtual ObservableKeyedCollection ResultsList { get; set; }
         public virtual ObservableCollection<Author> AuthorsList { get; set; }
         public virtual ObservableKeyedCollection AuthorQuotesList { get; set; }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void NotifyPropertyChanged(string propertyName) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         public virtual bool IsLoadingAuthor { get; set; }
         public virtual bool AuthorLoaded { get; set; }
@@ -35,14 +42,23 @@ namespace citations365.Data {
             get { return _HasSearch; }
             set { _HasSearch = value; }
         }
+
+        public string LastSearchQuery { get; set; }
+
         #endregion variables
 
+        #region recent
         public virtual async Task LoadRecent() { }
+
+        public virtual void CheckHeroQuote() { }
+        #endregion recent
 
         #region search
 
-        public virtual async void Search(string query = "") {
-            int found = await ResultsList.BuildAndFetch(query);
+        public virtual async Task<int> Search(string query = "") {
+            //int found = await ResultsList.BuildAndFetch(query);
+            //return found;
+            return await ResultsList.Search();
         }
 
         #endregion search
@@ -55,9 +71,11 @@ namespace citations365.Data {
         // TODO: replace with LoadAuthors & FetchAuthors
         public virtual async Task GetAuthors() { }
 
-        public virtual async Task<Author> LoadAuthor(Author partialAuthor) { return new Author(); }
+        public virtual async Task<Author> LoadAuthor(Author partialAuthor) {
+            return new Author();
+        }
 
-        public virtual async void LoadAuthorQuotes() { }
+        public virtual async Task LoadAuthorQuotes() { }
 
         public bool AuthorHasQuotes() {
             return AuthorQuotesURL.Length > 0;
@@ -68,18 +86,19 @@ namespace citations365.Data {
         public virtual async Task InitializeFavorites() {
             if (FavoritesList != null && FavoritesList.Count > 0) return;
             await LoadFavorites();
+            NotifyPropertyChanged("FavoritesList");
         }
         
 
         public virtual async Task LoadFavorites() {
-            FavoritesList = await Settings.LoadFavoritesAsync(Name);
+            FavoritesList = await Settings.LoadFavoritesAsync(Language);
             if (FavoritesList == null) FavoritesList = new ObservableKeyedCollection();
 
             FavoritesList.CollectionChanged += FavoritesList_CollectionChanged;
         }
 
-        public virtual void SaveFavorites() {
-            Settings.SaveFavoritesAsync(FavoritesList, Name);
+        public virtual async Task SaveFavorites() {
+            await Settings.SaveFavoritesAsync(FavoritesList, Language);
         }
 
         public virtual async Task<bool> IsFavoritesEmpty() {
@@ -100,8 +119,9 @@ namespace citations365.Data {
             return false;
         }
 
-        public virtual bool IsFavorite(string key) {
-            if (string.IsNullOrEmpty(key) || FavoritesList == null) return false;
+        public async virtual Task<bool> IsFavorite(string key) {
+            await InitializeFavorites();
+            if (string.IsNullOrEmpty(key)/* || FavoritesList == null*/) return false;
             if (FavoritesList.Contains(key)) {
                 return true;
             }
@@ -109,24 +129,25 @@ namespace citations365.Data {
             return false;
         }
 
-        public virtual async void AddFavorites(Quote quote) {
+        public virtual async void AddToFavorites(Quote quote) {
             if (quote == null) return;
             if (FavoritesList.Contains(quote.Link)) return;
 
             quote.IsFavorite = true;
             FavoritesList.Add(quote);
-            await Settings.SaveFavoritesAsync(FavoritesList, Name);
+            //await Settings.SaveFavoritesAsync(FavoritesList, Name);
+            await SaveFavorites();
         }
 
-        public virtual async void RemoveFavorites(Quote quote) {
+        public virtual async void RemoveFromFavorites(Quote quote) {
             if (quote == null) return;
+            if (!FavoritesList.Contains(quote.Link)) return;
 
-            if (FavoritesList.Contains(quote.Link)) {
-                FavoritesList.Remove(quote.Link);
-                UpdateAllFavorites(quote);
+            FavoritesList.Remove(quote.Link);
+            UpdateAllFavorites(quote);
 
-                await Settings.SaveFavoritesAsync(FavoritesList, Name);
-            }
+            //await Settings.SaveFavoritesAsync(FavoritesList, Name);
+            await SaveFavorites();
         }
 
         public virtual void UpdateAllFavorites(Quote quote) {
@@ -137,24 +158,27 @@ namespace citations365.Data {
             UpdateAuthorFavorites(key);
         }
 
-        public virtual void UpdateRecentFavorites(string key) {
+        public async virtual void UpdateRecentFavorites(string key) {
+            if (RecentList == null) return;
             if (RecentList.Contains(key)) {
                 Quote quote = RecentList[key];
-                quote.IsFavorite = IsFavorite(key);
+                quote.IsFavorite = await IsFavorite(key);
             }
         }
 
-        public virtual void UpdateResultsFavorites(string key) {
+        public async virtual void UpdateResultsFavorites(string key) {
+            if (ResultsList == null) return;
             if (ResultsList.Contains(key)) {
                 Quote quote = ResultsList[key];
-                quote.IsFavorite = IsFavorite(key);
+                quote.IsFavorite = await IsFavorite(key);
             }
         }
 
-        public virtual void UpdateAuthorFavorites(string key) {
+        public async virtual void UpdateAuthorFavorites(string key) {
+            if (AuthorQuotesList == null) return;
             if (AuthorQuotesList.Contains(key)) {
                 Quote quote = AuthorQuotesList[key];
-                quote.IsFavorite = IsFavorite(key);
+                quote.IsFavorite = await IsFavorite(key);
             }
         }
         #endregion favorites

@@ -1,9 +1,12 @@
 ﻿using citations365.Data;
 using citations365.Services;
+using citations365.Views;
 using System;
+using System.Globalization;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation.Metadata;
+using Windows.Globalization;
 using Windows.Phone.UI.Input;
 using Windows.Storage;
 using Windows.UI.Core;
@@ -37,6 +40,8 @@ namespace citations365 {
             }
 #endif
             Frame rootFrame = Window.Current.Content as Frame;
+
+            if (DataSource == null) UpdateLanguage();
 
             // Do not repeat app initialization when the Window already has content,
             // just ensure that the window is active
@@ -151,6 +156,21 @@ namespace citations365 {
             }
 
             SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = visibility;
+        }
+
+        public static void UpdateLanguage() {
+            var lang = Settings.GetLanguage();
+            ApplicationLanguages.PrimaryLanguageOverride = lang;
+
+            var culture = new CultureInfo(lang);
+            if (culture.CompareInfo.IndexOf(lang, "fr", CompareOptions.IgnoreCase) >= 0) {
+                DataSource = new Evene();
+                return;
+            }
+            if (culture.CompareInfo.IndexOf(lang, "en", CompareOptions.IgnoreCase) >= 0) {
+                DataSource = new Quotesondesign();
+                return;
+            }
         }
     }
 }

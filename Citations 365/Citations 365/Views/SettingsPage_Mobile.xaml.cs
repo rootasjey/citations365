@@ -1,5 +1,6 @@
 ﻿using citations365.Services;
 using System;
+using System.Globalization;
 using Windows.ApplicationModel.Email;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -10,7 +11,9 @@ namespace citations365.Views {
     public sealed partial class SettingsPage_Mobile : Page {
         public SettingsPage_Mobile() {
             InitializeComponent();
+            UpdateSelectedLanguage();
         }
+
         protected override void OnNavigatedTo(NavigationEventArgs e) {
             base.OnNavigatedTo(e);
             CoreWindow.GetForCurrentThread().KeyDown += SettingsPage_KeyDown;
@@ -91,7 +94,17 @@ namespace citations365.Views {
         }
 
         void UpdateSelectedLanguage() {
-            FrenchLanguageItem.IsChecked = true;
+            var lang = Settings.GetLanguage();
+
+            var culture = new CultureInfo(lang);
+            if (culture.CompareInfo.IndexOf(lang, "fr", CompareOptions.IgnoreCase) >= 0) {
+                FrenchLanguageItem.IsChecked = true;
+                return;
+            }
+            if (culture.CompareInfo.IndexOf(lang, "en", CompareOptions.IgnoreCase) >= 0) {
+                EnglishLanguageItem.IsChecked = true;
+                return;
+            }
         }
 
         private void SetLockscreen_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e) {
@@ -99,13 +112,29 @@ namespace citations365.Views {
         }
 
         private void EnglishLanguage_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e) {
-            var item = (ToggleMenuFlyoutItem)sender;
-            UnselectOtherLanguages(item);
+            SaveAndUpdateLanguage((ToggleMenuFlyoutItem)sender);
         }
 
         private void FrenchLanguage_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e) {
-            var item = (ToggleMenuFlyoutItem)sender;
+            SaveAndUpdateLanguage((ToggleMenuFlyoutItem)sender);
+        }
+
+        private void SaveAndUpdateLanguage(ToggleMenuFlyoutItem item) {
+            var lang = (string)item.Tag;
+
+            if (lang == Settings.GetLanguage()) return;
+
+            Settings.SaveLanguage(lang);
+            App.UpdateLanguage();
             UnselectOtherLanguages(item);
+            ToastLanguageUpdated();
+
+            void ToastLanguageUpdated()
+            {
+                var fullLang = lang == "EN" ? "English" : "French";
+                var toastMessage = fullLang + " language selected!";
+                DataTransfer.ShowLocalToast(toastMessage);
+            }
         }
 
         void UnselectOtherLanguages(ToggleMenuFlyoutItem selectedItem) {

@@ -1,4 +1,4 @@
-﻿using citations365.Controllers;
+﻿using citations365.Data;
 using citations365.Helpers;
 using citations365.Models;
 using citations365.Services;
@@ -18,16 +18,6 @@ using Windows.UI.Xaml.Shapes;
 
 namespace citations365.Views {
     public sealed partial class AuthorPage_Desktop : Page {
-        private static DetailAuthorController _dAuthorController;
-        public static DetailAuthorController DAuthorController {
-            get {
-                if (_dAuthorController == null) {
-                    _dAuthorController = new DetailAuthorController();
-                }
-                return _dAuthorController;
-            }
-        }
-
         private bool _isQuotesLoaded { get; set; }
 
         private int _animationDelay = 500;
@@ -47,8 +37,11 @@ namespace citations365.Views {
             }
         }
 
+        private SourceModel PageDataSource { get; set; }
+
         public AuthorPage_Desktop() {
             InitializeComponent();
+            PageDataSource = App.DataSource;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
@@ -69,6 +62,7 @@ namespace citations365.Views {
                 };
             }
 
+            PageDataSource.AuthorLoaded = false;
             PopulatePage(author);
 
             base.OnNavigatedTo(e);
@@ -125,8 +119,8 @@ namespace citations365.Views {
         private void ListQuotes_Loaded(object sender, RoutedEventArgs ev) {
             var ListQuotes = (ListView)sender;
             AuthorQuotes = ListQuotes;
-
-            if (DetailAuthorController.IsLoaded) {
+            
+            if (PageDataSource.AuthorLoaded) {
                 GetQuotes(ListQuotes);
                 return;
             }
@@ -134,10 +128,10 @@ namespace citations365.Views {
             PropertyChangedEventHandler quotesLinkReady = null;
             quotesLinkReady = (s, e) => {
                 GetQuotes(ListQuotes);
-                DAuthorController.PropertyChanged -= quotesLinkReady;
+                PageDataSource.PropertyChanged -= quotesLinkReady;
             };
 
-            DAuthorController.PropertyChanged += quotesLinkReady;
+            PageDataSource.PropertyChanged += quotesLinkReady;
         }
 
         #endregion LoadEvents
@@ -146,15 +140,14 @@ namespace citations365.Views {
             var EmptyView = (StackPanel)UI.FindChildControl<StackPanel>(QuotesSection, "EmptyView");
             var ProgressQuotes = (ProgressBar)UI.FindChildControl<ProgressBar>(QuotesSection, "ProgressQuotes");
 
-            if (!DAuthorController.HasQuotes()) return;
-
             var resAsync = Dispatcher.RunAsync(CoreDispatcherPriority.Low, async () => {
-                await DAuthorController.FetchQuotes();
+                await PageDataSource.LoadAuthorQuotes();
 
                 HideQuotesLoadingIndicator(ProgressQuotes);
 
-                if (DAuthorController.AuthorQuotesCollection.Count > 0)
+                if (PageDataSource.AuthorQuotesList.Count > 0) {
                     BindCollectionToView(ListQuotes, EmptyView);
+                }                    
                 else ShowEmptyViewQuotes(ListQuotes, EmptyView);
             });
         }
@@ -168,7 +161,7 @@ namespace citations365.Views {
             FetchOtherInformationAsync();
 
             async void FetchOtherInformationAsync() {
-                Author authorFilled = await DAuthorController.LoadData(author.Link);
+                Author authorFilled = await PageDataSource.LoadAuthor(author);
                 authorFilled.IsLoading = false;
 
                 author.Biography = authorFilled.Biography;
@@ -201,7 +194,7 @@ namespace citations365.Views {
 
             EmptyView.Visibility = Visibility.Collapsed;
             ListQuotes.Visibility = Visibility.Visible;
-            ListQuotes.ItemsSource = DAuthorController.AuthorQuotesCollection;
+            ListQuotes.ItemsSource = PageDataSource.AuthorQuotesList;
         }
         
 
@@ -212,7 +205,6 @@ namespace citations365.Views {
         }
 
         private void HideQuotesLoadingIndicator(ProgressBar ProgressQuotes) {
-            ProgressQuotes.Visibility = Visibility.Collapsed;
             ProgressQuotes.Visibility = Visibility.Collapsed;
         }
 
@@ -228,25 +220,25 @@ namespace citations365.Views {
         private void HeroBackground_Loaded(object sender, RoutedEventArgs ev) {
             var image = (Image)sender;
 
-            if (DetailAuthorController.IsLoaded) {
+            if (PageDataSource.AuthorLoaded) {
                 SetWallpaper();
                 return;
             }
 
             PropertyChangedEventHandler biographyReady = null;
             biographyReady = (s, e) => {
-                DAuthorController.PropertyChanged -= biographyReady;
+                PageDataSource.PropertyChanged -= biographyReady;
                 SetWallpaper();
             };
 
-            DAuthorController.PropertyChanged += biographyReady;
+            PageDataSource.PropertyChanged += biographyReady;
 
             async void SetWallpaper()
             {
                 await image.Scale(1.1f, 1.1f, 0, 0, 0).StartAsync();
 
                 var womanPath = "ms-appx:///Assets/Backgrounds/woman.jpg";
-                var IsAWoman = DetailAuthorController.IsAWoman(DAuthorController._lastAuthor);
+                var IsAWoman = false;
 
                 if (IsAWoman) image.Source = new BitmapImage(new Uri(womanPath));
 
@@ -273,13 +265,13 @@ namespace citations365.Views {
         #endregion Commands
 
         async void ToggleFavorite(Quote quote) {
-            if (FavoritesController.IsFavorite(quote.Link)) {
-                bool result = await FavoritesController.RemoveFavorite(quote);
-                if (result) quote.IsFavorite = false;
+            if (await PageDataSource.IsFavorite(quote.Link)) {
+                PageDataSource.RemoveFromFavorites(quote);
+                quote.IsFavorite = false;
 
             } else {
-                bool result = await FavoritesController.AddFavorite(quote);
-                if (result) quote.IsFavorite = true;
+                PageDataSource.AddToFavorites(quote);
+                quote.IsFavorite = true;
             }
         }
     }

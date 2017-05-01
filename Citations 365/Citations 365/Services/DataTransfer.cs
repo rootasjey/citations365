@@ -47,6 +47,10 @@ namespace citations365.Services {
         }
 
         public static void ShowShareCompleted() {
+            ShowLocalToast("Citation copiée!");
+        }
+
+        public static void ShowLocalToast(string message) {
             ToastContent content = new ToastContent() {
                 Visual = new ToastVisual() {
                     BindingGeneric = new ToastBindingGeneric() {
@@ -55,7 +59,7 @@ namespace citations365.Services {
                                 Text = "Citations 365"
                             },
                             new AdaptiveText() {
-                                Text = "Citation copiée!"
+                                Text = message
                             }
                         }
                     }

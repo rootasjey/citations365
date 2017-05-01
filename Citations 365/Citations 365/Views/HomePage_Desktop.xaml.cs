@@ -1,8 +1,7 @@
-﻿using citations365.Controllers;
+﻿using citations365.Data;
 using citations365.Helpers;
 using citations365.Models;
 using citations365.Services;
-using citations365.Views;
 using Microsoft.Toolkit.Uwp.UI.Animations;
 using System;
 using System.Linq;
@@ -18,24 +17,14 @@ using Windows.UI.Xaml.Hosting;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 using Windows.UI.Xaml.Shapes;
 
-namespace citations365 {
+namespace citations365.Views {
     public sealed partial class HomePage_Desktop : Page {
         #region variables
-        private static AuthorsController _authorController;
-
         private static Author _LastSelectedAuthor { get; set; }
-
-        public static AuthorsController AuthorsController {
-            get {
-                if (_authorController == null) {
-                    _authorController = new AuthorsController();
-                }
-                return _authorController;
-            }
-        }
 
         float _animationDelayAuthors { get; set; }
 
@@ -65,12 +54,19 @@ namespace citations365 {
         static Quote _LastSelectedFavorite { get; set; }
         static Quote _LastSelectedSearch { get; set; }
 
+        private SourceModel PageDataSource { get; set; }
+
+        /// <summary>
+        /// Get a random wallpaper every app new launch
+        /// </summary>
+        static string TodayWallpaperPath { get; set; }
         #endregion variables
 
         public HomePage_Desktop() {
             InitializeComponent();
             InitializeLocalVariables();
-            
+            PageDataSource = App.DataSource;
+
             var animation = ConnectedAnimationService.GetForCurrentView().GetAnimation("EllipseAuthor");
             if (animation != null && _LastSelectedSection != "AuthorsSection") {
                 animation.Cancel();
@@ -85,10 +81,14 @@ namespace citations365 {
             _OverrideFocusedSection = false;
         }
 
-        //////////////
-        // HUB LOAD //
-        //////////////
-        #region ComponentsLoad
+        private async void WindowsStates_CurrentStateChanged(object sender, VisualStateChangedEventArgs e) {
+            if (e.NewState.Name == "WideState") {
+                LoadHeroSection();
+            }
+        }
+
+
+        #region loading
 
         private void RecentSection_Loaded(object sender, RoutedEventArgs e) {
             LoadRecentView();
@@ -99,21 +99,18 @@ namespace citations365 {
         }
 
         async void LoadRecentView() {
-            //ShowLoadingQuotesIndicator();
-            //RefreshBackground();
-            //HideLoadingQuotesIndicator();
-            await TodayController.LoadData();
+            await App.DataSource.LoadRecent();
 
-            if (!TodayController.IsDataLoaded()) { ShowNoQuotesView(); return; }
+            if (App.DataSource.RecentList.Count == 0) { ShowNoQuotesView(); return; }
 
             var ListQuotes = (ListView)UI.FindChildControl<ListView>(RecentSection, "ListQuotes");
-            ListQuotes.ItemsSource = TodayController.TodayCollection;
+            ListQuotes.ItemsSource = App.DataSource.RecentList;
 
             LoadHeroSection();
         }
 
         async void LoadHeroSection() {
-            if (TodayController.TodayCollection.Count == 0) return;
+            if (App.DataSource.RecentList.Count == 0) return;
 
             var heroContent = (StackPanel)UI.FindChildControl<StackPanel>(HeroSection, "HeroContent");
 
@@ -123,7 +120,7 @@ namespace citations365 {
             var author = (TextBlock)heroContent.Children[1];
             var reference = (TextBlock)heroContent.Children[2];
 
-            var firstQuote = TodayController.TodayCollection[0];
+            var firstQuote = App.DataSource.RecentList[0];
 
             await InitializeAnimation();
             StartAnimation();
@@ -143,34 +140,19 @@ namespace citations365 {
             }
         }
 
-        private async void HeroBackground_Loaded(object sender, RoutedEventArgs e) {
-            var img = (Image)sender;
-            await img.Fade(0, 0).Scale(1.1f, 1.1f, 0, 0, 0).StartAsync();
-
-            var bounds = ApplicationView.GetForCurrentView().VisibleBounds;
-            var scaleFactor = DisplayInformation.GetForCurrentView().RawPixelsPerViewPixel;
-            var size = new Size(bounds.Width * scaleFactor, bounds.Height * scaleFactor);
-
-            img.Fade(.5f, 1000, 500)
-               .Scale(1f, 1f, (float)size.Width/2, (float)size.Height/2, 1000, 500)
-               .Blur(10, 1000, 500)
-               .Start();
-        }
-
         async void LoadFavoritesView() {
-            await FavoritesController.Initialize();
+            await PageDataSource.InitializeFavorites();
 
             var ListQuotes = (ListView)UI.FindChildControl<ListView>(FavoritesSection, "ListQuotes");
             var NoContentView = (StackPanel)UI.FindChildControl<StackPanel>(FavoritesSection, "EmptyView");
 
-            if (FavoritesController.IsDataLoaded()) {
-                ListQuotes.ItemsSource = FavoritesController.FavoritesCollection;
+            if (await PageDataSource.IsFavoritesEmpty()) {
+                return;
             }
 
-            if (FavoritesController.HasItems()) {
-                NoContentView.Visibility = Visibility.Collapsed;
-                ListQuotes.Visibility = Visibility.Visible;
-            }
+            NoContentView.Visibility = Visibility.Collapsed;
+            ListQuotes.Visibility = Visibility.Visible;
+            ListQuotes.ItemsSource = PageDataSource.FavoritesList;
         }
 
         private async void Quote_Loaded(object sender, RoutedEventArgs e) {
@@ -199,7 +181,7 @@ namespace citations365 {
             _animationDelayFavorites += 200;
         }
 
-        private async void ListQuotes_Loaded(object sender, RoutedEventArgs ev) {
+        private void ListQuotes_Loaded(object sender, RoutedEventArgs ev) {
             //_ListQuotesScrollViewer = ListQuotes.GetChildOfType<ScrollViewer>();
             //_ListQuotesScrollerPropertySet = ElementCompositionPreview.
             //        GetScrollViewerManipulationPropertySet(_ListQuotesScrollViewer);
@@ -216,8 +198,8 @@ namespace citations365 {
             ListQuotes.Visibility = Visibility.Collapsed;
             EmptyView.Visibility = Visibility.Visible;
         }
-        
-        #endregion ComponentsLoad
+
+        #endregion loading
 
         #region navigation
 
@@ -247,12 +229,11 @@ namespace citations365 {
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        static void WindowVisibilityChangedEventHandler(object sender, Windows.UI.Core.VisibilityChangedEventArgs e) {
+        void WindowVisibilityChangedEventHandler(object sender, Windows.UI.Core.VisibilityChangedEventArgs e) {
             if (!e.Visible) { // app losing focus
                 return;
             }
-
-            TodayController.CheckHeroQuote();
+            App.DataSource.CheckHeroQuote();
         }
 
         private void HubPage_KeyDown(CoreWindow sender, KeyEventArgs args) {
@@ -261,16 +242,6 @@ namespace citations365 {
 
             if (Events.IsBackOrEscapeKey(args.VirtualKey) && Frame.CanGoBack) {
                 Frame.GoBack();
-            }
-        }
-
-        private void ListQuotes_ItemClick(object sender, ItemClickEventArgs e) {
-            Quote quote = (Quote)e.ClickedItem;
-
-            if (quote.AuthorLink != null && quote.AuthorLink.Length > 0) {
-                UpdateLastSelectedRecent(quote);
-                ForceUpdateLastSelectedSection(RecentSection.Name);
-                Frame.Navigate(typeof(AuthorPage_Desktop), quote);
             }
         }
         
@@ -284,8 +255,8 @@ namespace citations365 {
         }
 
         private void InitializeFirstQuote(ContainerContentChangingEventArgs visual) {
-            if (Application.Current.Resources.ContainsKey("HeroQuoteTemplate")) {
-                DataTemplate heroTemplate = (DataTemplate)Application.Current.Resources["HeroQuoteTemplate"];
+            if (Resources.ContainsKey("HeroQuoteTemplate")) {
+                DataTemplate heroTemplate = (DataTemplate)Resources["HeroQuoteTemplate"];
                 visual.ItemContainer.ContentTemplate = heroTemplate;
             }
         }
@@ -298,6 +269,39 @@ namespace citations365 {
             if (list == null) return;
 
             VisualTreeExtensions.ScrollToIndex(list, 0);
+        }
+
+        #endregion Events
+
+        #region background
+        private async void HeroBackground_Loaded(object sender, RoutedEventArgs e) {
+            var img = (Image)sender;
+            img.ImageOpened += Img_ImageOpened;
+
+            string path = null;
+            if (string.IsNullOrEmpty(TodayWallpaperPath)) {
+                path = await Wallpaper.GetNew();
+                if (string.IsNullOrEmpty(path)) return;
+            }
+
+            TodayWallpaperPath = path ?? TodayWallpaperPath;
+
+            var bmp = new BitmapImage(new Uri(TodayWallpaperPath));
+            img.Source = bmp;
+
+            async void Img_ImageOpened(object _s, RoutedEventArgs _e)
+            {
+                await img.Scale(1.1f, 1.1f, 0, 0, 0).StartAsync();
+
+                var bounds = ApplicationView.GetForCurrentView().VisibleBounds;
+                var scaleFactor = DisplayInformation.GetForCurrentView().RawPixelsPerViewPixel;
+                var size = new Size(bounds.Width * scaleFactor, bounds.Height * scaleFactor);
+
+                img.Fade(.2f, 1000, 500)
+                   .Scale(1f, 1f, (float)size.Width / 2, (float)size.Height / 2, 1000, 500)
+                   .Blur(30, 1000, 500)
+                   .Start();
+            }
         }
 
         private void BorderBackground_Loaded(object sender, RoutedEventArgs e) {
@@ -317,6 +321,7 @@ namespace citations365 {
 
             image.Scale(1.1f, 1.1f, 0, 0)
                 .Blur(0)
+                .Fade(.4f)
                 .Start();
         }
 
@@ -326,56 +331,55 @@ namespace citations365 {
             var image = (Image)border.Child;
 
             image.Scale(1f, 1f, 0, 0)
-                .Blur(10)
+                .Blur(30)
+                .Fade(.2f)
                 .Start();
         }
 
-        private void HeroSectionContent_Tapped(object sender, TappedRoutedEventArgs e) {
-            var quote = (Quote)HeroSection.DataContext;
-            Frame.Navigate(typeof(AuthorPage_Desktop), quote);
-        }
+        #endregion background
 
-        #endregion Events
-        
-        private void CheckFavoritesEmptyView() {
+        #region favorites
+        private async void CheckFavoritesEmptyView() {
             var ListQuotes = (ListView)UI.FindChildControl<ListView>(FavoritesSection, "ListQuotes");
             var EmptyView = (StackPanel)UI.FindChildControl<StackPanel>(FavoritesSection, "EmptyView");
-
-            if (FavoritesController.HasItems()) {
-                EmptyView.Visibility = Visibility.Collapsed;
-                ListQuotes.Visibility = Visibility.Visible;
+            
+            if (await PageDataSource.IsFavoritesEmpty()) {
+                EmptyView.Visibility = Visibility.Visible;
+                ListQuotes.Visibility = Visibility.Collapsed;
                 return;
-
             }
 
-            EmptyView.Visibility = Visibility.Visible;
-            ListQuotes.Visibility = Visibility.Collapsed;
+            EmptyView.Visibility = Visibility.Collapsed;
+            ListQuotes.Visibility = Visibility.Visible;
+
+            if (PageDataSource.FavoritesList.Count == 1) {
+                ListQuotes.ItemsSource = PageDataSource.FavoritesList;
+            }
         }
 
         async void ToggleFavorite(Quote quote) {
-            if (FavoritesController.IsFavorite(quote.Link)) {
-                bool result = await FavoritesController.RemoveFavorite(quote);
-                if (result) {
-                    quote.IsFavorite = false;
-                }
-
+            if (await PageDataSource.IsFavorite(quote.Link)) {
+                PageDataSource.RemoveFromFavorites(quote);
+                quote.IsFavorite = false;
                 CheckFavoritesEmptyView();
 
             } else {
-                bool result = await FavoritesController.AddFavorite(quote);
-                if (result) {
-                    quote.IsFavorite = true;
-                }
-
+                PageDataSource.AddToFavorites(quote);
+                quote.IsFavorite = true;
                 CheckFavoritesEmptyView();
             }
         }
-        
+        #endregion favorites
+
         #region search
         private void SearchSection_Loaded(object sender, RoutedEventArgs e) {
-            var ListQuotes = (ListView)UI.FindChildControl<ListView>(SearchSection, "ListQuotes");
-            ListQuotes.ItemsSource = SearchController.SearchCollection;
+            if (!App.DataSource.HasSearch) {
+                SearchSection.Visibility = Visibility.Collapsed;
+                return;
+            }
 
+            var ListQuotes = (ListView)UI.FindChildControl<ListView>(SearchSection, "ListQuotes");
+            ListQuotes.ItemsSource = PageDataSource.ResultsList;
             ShowSearchResults();
         }
 
@@ -421,12 +425,12 @@ namespace citations365 {
 
         private async void RunSearch(string query) {
             //ShowLoadingSearchScreen();
-            bool result = await SearchController.Search(query);
+            var result = await PageDataSource.Search(query);
 
             var ListQuotes = (ListView)UI.FindChildControl<ListView>(SearchSection, "ListQuotes");
             var EmptyView = (StackPanel)UI.FindChildControl<StackPanel>(SearchSection, "EmptyView");
 
-            if (result) ShowSearchResults();
+            if (result > 0) { ShowSearchResults(); } 
             else {
                 EmptyView.Visibility = Visibility.Visible;
                 ListQuotes.Visibility = Visibility.Collapsed;
@@ -442,8 +446,10 @@ namespace citations365 {
             bool alreadyVisible =
                 (EmptyView.Visibility == Visibility.Collapsed) &&
                 (ListQuotes.Visibility == Visibility.Visible);
-
-            bool noResults = SearchController.SearchCollection.Count < 1;
+            
+            bool noResults = (
+                PageDataSource.ResultsList == null ||
+                PageDataSource.ResultsList.Count < 1);
 
             if (alreadyVisible || noResults) {
                 return;
@@ -472,10 +478,18 @@ namespace citations365 {
         }
 
         async Task CheckAuthorsDataLoaded() {
-            if (!AuthorsController.IsDataLoaded()) await AuthorsController.LoadData();
+            if (PageDataSource.AuthorsList == null || 
+                PageDataSource.AuthorsList.Count == 0) {
+                await PageDataSource.LoadAuthors();
+            }
         }
 
         private async void AuthorsGrid_Loaded(object sender, RoutedEventArgs e) {
+            if (!App.DataSource.HasAuthors) {
+                AuthorsSection.Visibility = Visibility.Collapsed;
+                return;
+            }
+
             await CheckAuthorsDataLoaded();
 
             var AuthorsGrid = (GridView)sender;
@@ -484,23 +498,25 @@ namespace citations365 {
         }
 
         private void AuthorsKeys_Loaded(object sender, RoutedEventArgs ev) {
+            if (!App.DataSource.HasAuthors) { return; }
+
             var AuthorsGrid = (GridView)UI.FindChildControl<GridView>(AuthorsSection, "AuthorsGrid");
 
-            if (AuthorsController.AuthorsCollection.Count > 0) {
+            if (PageDataSource.AuthorsList.Count > 0) {
                 BindAuthorsKeyData((GridView)sender);
                 RestorAuthorsListPosition(AuthorsGrid);
                 return;
             }
 
-            AuthorsController.PropertyChanged += (s, e) => {
-                if (e.PropertyName != "Loaded") return;
+            PageDataSource.PropertyChanged += (s, e) => {
+                if (e.PropertyName != "AuthorsListLoaded") return;
                 BindAuthorsKeyData((GridView)sender);
                 RestorAuthorsListPosition(AuthorsGrid);
             };
         }
 
         void BindAuthorsKeyData(GridView AuthorsKeys) {
-            var groupedAuthors = from author in AuthorsController.AuthorsCollection
+            var groupedAuthors = from author in PageDataSource.AuthorsList
                                  group author by author.Name.First() into firstLetter
                                  orderby firstLetter.Key
                                  select firstLetter;
@@ -560,15 +576,8 @@ namespace citations365 {
 
         #endregion authors
 
-        void UpdateLastSelectedAuthor(Author author) {
-            _LastSelectedAuthor = author;
-        }
 
-        void ForceUpdateLastSelectedSection(string name) {
-            _LastSelectedSection = name;
-            _OverrideFocusedSection = true;
-        }
-
+        #region List Position
         void RestoreHubSectionPosition() {
             if (_LastSelectedSection == null) return;
 
@@ -602,15 +611,20 @@ namespace citations365 {
             animation.TryStart(textAnimation);
         }
 
-        private async void WindowsStates_CurrentStateChanged(object sender, VisualStateChangedEventArgs e) {
-            if (e.NewState.Name == "WideState") {
-                LoadHeroSection();
-            }
+        void UpdateLastSelectedAuthor(Author author) {
+            _LastSelectedAuthor = author;
         }
 
-        private void QuoteGrid_Tapped(object sender, TappedRoutedEventArgs e) {
-            var grid = (StackPanel)sender;
-            var quote = (Quote)grid.DataContext;
+        void ForceUpdateLastSelectedSection(string name) {
+            _LastSelectedSection = name;
+            _OverrideFocusedSection = true;
+        }
+        #endregion List Position
+
+        #region Quote Events
+        private void Quote_Tapped(object sender, TappedRoutedEventArgs e) {
+            var panel = (StackPanel)sender;
+            var quote = (Quote)panel.DataContext;
 
             if (quote.AuthorLink != null && quote.AuthorLink.Length > 0) {
                 UpdateLastSelectedRecent(quote);
@@ -619,6 +633,15 @@ namespace citations365 {
             }
         }
 
+        private void HeroContent_Tapped(object sender, TappedRoutedEventArgs e) {
+            var quote = (Quote)HeroSection.DataContext;
+            if (string.IsNullOrEmpty(quote.AuthorLink)) return;
+            Frame.Navigate(typeof(AuthorPage_Desktop), quote);
+        }
+
+        #endregion Quote Events
+
+        #region appbar
         private void AuthorsButton_Tapped(object sender, TappedRoutedEventArgs e) {
             Frame.Navigate(typeof(ListAuthorsPage));
         }
@@ -626,9 +649,9 @@ namespace citations365 {
         private void SettingsButton_Tapped(object sender, TappedRoutedEventArgs e) {
             Frame.Navigate(typeof(SettingsPage));
         }
+        #endregion appbar
 
-
-        #region Commands
+        #region Quote Actions
         private void ShareCommand_Tapped(object sender, TappedRoutedEventArgs e) {
             DataTransfer.Share((Quote)((MenuFlyoutItem)sender).DataContext);
         }
@@ -641,6 +664,7 @@ namespace citations365 {
         private void CopyCommand_Tapped(object sender, TappedRoutedEventArgs e) {
             DataTransfer.Copy((Quote)((MenuFlyoutItem)sender).DataContext);
         }
-        #endregion Commands
+        #endregion QuoteActions
+        
     }
 }

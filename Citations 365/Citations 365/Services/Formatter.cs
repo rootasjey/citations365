@@ -18,12 +18,18 @@ namespace citations365.Services {
 
         public static string DeleteHTMLTags(string text) {
             if (text == null) {
-                return null;
+                return "";
             }
 
             text = Regex.Replace(text, @"<(.|\n)*?>", string.Empty);
 
             text = text
+                .Replace("&#8230;", "...")
+                .Replace("&#8211;", "-")
+                .Replace("&#8220;", "\"")
+                .Replace("&#8221;", "\"")
+                .Replace("&#8217;", "'")
+                .Replace("&#8216;", "'")
                 .Replace("&laquo;", "")
                 .Replace("&ldquo;", "")
                 .Replace("&rdquo;", "")
@@ -32,6 +38,7 @@ namespace citations365.Services {
                 .Replace("&#039;", "'")
                 .Replace("&quot;", "'")
                 .Replace("&amp;", "&")
+                .Replace("&#038;", "&")
                 .Replace("[+]", "")
                 .Replace("[", "")
                 .Replace("]", "")

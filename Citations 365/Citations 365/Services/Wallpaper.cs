@@ -21,11 +21,19 @@ namespace citations365.Services {
             localSettings.Values[LockscreenPath] = path;
         }
 
+        /// <summary>
+        /// Get the last downladed image's path
+        /// </summary>
+        /// <returns></returns>
         public static string GetPath() {
             var settingsValues = ApplicationData.Current.LocalSettings.Values;
             return settingsValues.ContainsKey(LockscreenPath) ? (string)settingsValues[LockscreenPath] : null;
         }
 
+        /// <summary>
+        /// Return a new image from Unsplash
+        /// </summary>
+        /// <returns>image path from Isolated Storage</returns>
         public static async Task<string> GetNew() {
             string name = GenerateName();
             var wallpaper = await Download(UnsplashURL, name);
@@ -35,6 +43,10 @@ namespace citations365.Services {
             return wallpaper.Path;
         }
 
+        /// <summary>
+        /// Get a random name beggining with "wall-"
+        /// </summary>
+        /// <returns></returns>
         public static string GenerateName() {
             var random = new Random();
             return "wall-" + random.Next();
@@ -56,6 +68,10 @@ namespace citations365.Services {
             }
         }
 
+        /// <summary>
+        /// Set the last download image as device's wallpaper
+        /// </summary>
+        /// <returns>Tell if the wallpaper has been correctly setted</returns>
         public static async Task<bool> SetWallpaperAsync() {
             bool success = false;
 

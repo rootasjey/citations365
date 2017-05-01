@@ -1,4 +1,4 @@
-﻿using citations365.Controllers;
+﻿using citations365.Data;
 using citations365.Models;
 using citations365.Services;
 using System;
@@ -14,23 +14,16 @@ using Windows.UI.Xaml.Shapes;
 
 namespace citations365.Views {
     public sealed partial class ListAuthorsPage : Page {
-        private static AuthorsController _authorController;
-
         private static Author _LastSelectedAuthor { get; set; }
+        
 
-        public static AuthorsController AuthorsController {
-            get {
-                if (_authorController == null) {
-                    _authorController = new AuthorsController();
-                }
-                return _authorController;
-            }
-        }
+        private SourceModel PageDataSource { get; set; }
 
         private float _animationDelay = 0.5f;
 
         public ListAuthorsPage() {
             InitializeComponent();
+            PageDataSource = App.DataSource;
             Populate();
         }
 
@@ -55,7 +48,7 @@ namespace citations365.Views {
                 RestorViewPosition();
             };
 
-            await AuthorsController.LoadData();
+            await PageDataSource.LoadAuthors();
 
             HideLoading();
             BindCollectionToView();
@@ -72,7 +65,7 @@ namespace citations365.Views {
         }
 
         private void BindCollectionToView() {
-            var groupedAuthors = from author in AuthorsController.AuthorsCollection
+            var groupedAuthors = from author in PageDataSource.AuthorsList
                                  group author by author.Name.First() into firstLetter
                                  orderby firstLetter.Key
                                  select firstLetter;
@@ -89,9 +82,10 @@ namespace citations365.Views {
             AuthorsGrid.UpdateLayout();
 
             var container = (GridViewItem)AuthorsGrid.ContainerFromItem(_LastSelectedAuthor);
-            var root = (StackPanel)container.ContentTemplateRoot;
-            var ellipse = (Ellipse)root.FindName("EllipseAuthor");
+            var root = (StackPanel)container?.ContentTemplateRoot;
+            var ellipse = (Ellipse)root?.FindName("EllipseAuthor");
 
+            if (ellipse == null) return;
             animation.TryStart(ellipse);
         }
 
@@ -105,7 +99,7 @@ namespace citations365.Views {
 
             ConnectedAnimationService.GetForCurrentView().PrepareToAnimate("EllipseAuthor", EllipseAuthor);
 
-            Frame.Navigate(typeof(AuthorPage_Desktop), author);
+            Frame.Navigate(typeof(AuthorPage_Mobile), author);
         }
 
         private void Author_Loaded(object sender, RoutedEventArgs e) {

@@ -105,37 +105,30 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controllers\AuthorsController.cs" />
-    <Compile Include="Controllers\DetailAuthorController.cs" />
-    <Compile Include="Controllers\FavoritesController.cs" />
-    <Compile Include="Controllers\SearchController.cs" />
-    <Compile Include="Controllers\TodayController.cs" />
     <Compile Include="Converters\EmptyViewVisibility.cs" />
     <Compile Include="Converters\FavoriteColor.cs" />
     <Compile Include="Converters\FavoriteColorIcon.cs" />
     <Compile Include="Converters\FavoriteIcon.cs" />
     <Compile Include="Converters\FavoriteSwypeColor.cs" />
     <Compile Include="Converters\LoadingVisibility.cs" />
+    <Compile Include="Converters\LowerText.cs" />
     <Compile Include="Converters\ShareSwypeColor.cs" />
     <Compile Include="Converters\TextVisibility.cs" />
     <Compile Include="Converters\UpperText.cs" />
     <Compile Include="Data\Evene.cs" />
+    <Compile Include="Data\Quotesondesign.cs" />
     <Compile Include="Data\SourceModel.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
     <Compile Include="Helpers\VisualTreeExtensions.cs" />
-    <Compile Include="HomePage_Mobile.xaml.cs">
+    <Compile Include="Views\HomePage_Mobile.xaml.cs">
       <DependentUpon>HomePage_Mobile.xaml</DependentUpon>
     </Compile>
-    <Compile Include="HomePage_Desktop.xaml.cs">
+    <Compile Include="Views\HomePage_Desktop.xaml.cs">
       <DependentUpon>HomePage_Desktop.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\Author.cs" />
-    <Compile Include="Models\AuthorQuotesCollection.cs" />
     <Compile Include="Models\ObservableKeyedCollection.cs" />
     <Compile Include="Models\Quote.cs" />
-    <Compile Include="Models\SearchCollection.cs" />
-    <Compile Include="Models\TodayCollection.cs" />
-    <Compile Include="Models\UserSettings.cs" />
     <Compile Include="Services\Events.cs" />
     <Compile Include="Services\Formatter.cs" />
     <Compile Include="Services\Wallpaper.cs" />
@@ -169,7 +162,6 @@
     <Content Include="Assets\acorn.png" />
     <Content Include="Assets\Backgrounds\colored_moutains.jpg" />
     <Content Include="Assets\Backgrounds\man.jpg" />
-    <Content Include="Assets\Backgrounds\nasa.jpg" />
     <Content Include="Assets\Backgrounds\woman.jpg" />
     <Content Include="Assets\BadgeLogo.scale-100.png" />
     <Content Include="Assets\BadgeLogo.scale-125.png" />
@@ -230,11 +222,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="HomePage_Mobile.xaml">
+    <Page Include="Views\HomePage_Mobile.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="HomePage_Desktop.xaml">
+    <Page Include="Views\HomePage_Desktop.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

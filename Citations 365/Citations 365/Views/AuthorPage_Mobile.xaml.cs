@@ -1,4 +1,4 @@
-﻿using citations365.Controllers;
+﻿using citations365.Data;
 using citations365.Helpers;
 using citations365.Models;
 using citations365.Services;
@@ -13,25 +13,18 @@ using Windows.UI.Xaml.Shapes;
 
 namespace citations365.Views {
     public sealed partial class AuthorPage_Mobile : Page {
-        private static DetailAuthorController _dAuthorController;
-        public static DetailAuthorController DAuthorController {
-            get {
-                if (_dAuthorController == null) {
-                    _dAuthorController = new DetailAuthorController();
-                }
-                return _dAuthorController;
-            }
-        }
-
         private Author _Author { get; set; }
 
         private bool _isQuotesLoaded { get; set; }
 
         private int _animationDelay = 500;
 
+        private SourceModel PageDataSource { get; set; }
+
 
         public AuthorPage_Mobile() {
             InitializeComponent();
+            PageDataSource = App.DataSource;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e) {
@@ -52,7 +45,7 @@ namespace citations365.Views {
             }
 
             _Author = author;
-            //PopulatePage(author);
+            PageDataSource.AuthorLoaded = false;
 
             base.OnNavigatedTo(e);
         }
@@ -107,17 +100,15 @@ namespace citations365.Views {
         }
 
         void LoadAuthorQuotes() {
-            if (!DAuthorController.HasQuotes()) return;
-
             var resAsync = Dispatcher.RunAsync(CoreDispatcherPriority.Low, async () => {
-                await DAuthorController.FetchQuotes();
+                await PageDataSource.LoadAuthorQuotes();
 
                 HideLoadingView();
-
-                if (DAuthorController.AuthorQuotesCollection.Count > 0) {
+                
+                if (PageDataSource.AuthorQuotesList.Count > 0) {
                     _isQuotesLoaded = true;
-                    ListAuthorQuotes.ItemsSource = DAuthorController.AuthorQuotesCollection;
-                } 
+                    ListAuthorQuotes.ItemsSource = PageDataSource.AuthorQuotesList;
+                }
                 else { ShowEmptyView(); }
             });
 
@@ -142,7 +133,7 @@ namespace citations365.Views {
 
             async void FetchOtherInformationAsync()
             {
-                Author authorFilled = await DAuthorController.LoadData(author.Link);
+                var authorFilled = await PageDataSource.LoadAuthor(author);
                 authorFilled.IsLoading = false;
 
                 author.Biography = authorFilled.Biography;
@@ -237,17 +228,13 @@ namespace citations365.Views {
 
 
         async void ToggleFavorite(Quote quote) {
-            if (FavoritesController.IsFavorite(quote.Link)) {
-                bool result = await FavoritesController.RemoveFavorite(quote);
-                if (result) {
-                    quote.IsFavorite = false;
-                }
+            if (await PageDataSource.IsFavorite(quote.Link)) {
+                PageDataSource.RemoveFromFavorites(quote);
+                quote.IsFavorite = false;
 
             } else {
-                bool result = await FavoritesController.AddFavorite(quote);
-                if (result) {
-                    quote.IsFavorite = true;
-                }
+                PageDataSource.AddToFavorites(quote);
+                quote.IsFavorite = true;
             }
         }
 

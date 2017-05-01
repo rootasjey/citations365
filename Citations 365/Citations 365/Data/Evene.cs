@@ -6,58 +6,41 @@ using System.Net.NetworkInformation;
 using System.Net.Http;
 using HtmlAgilityPack;
 using System.Linq;
-using System.ComponentModel;
+using System.Collections.Generic;
+using Windows.UI.Xaml.Data;
+using System;
 
 namespace citations365.Data {
-    public class Evene : SourceModel, INotifyPropertyChanged {
+    public class Evene : SourceModel {
         public override string Name => "Evene";
+
         public override string Language => "FR";
+
         public override bool HasAuthors { get => true; set => base.HasAuthors = value; }
+
         public override bool HasSearch { get => true; set => base.HasSearch = value; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void NotifyPropertyChanged(string propertyName) {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
 
         #region recent
         public override async Task LoadRecent() {
             await InitializeFavorites();
 
-            if (RecentList.Count > 0) return;
+            if (RecentList != null && RecentList.Count > 0) return;
 
-            await RecoveryFetchRecent();
+            RecentList = new EveneRecentList() {
+                Favorites = FavoritesList
+            };
+
+            await RecentList.LoadQuotes();
 
             SetLockscreenQuoteAsHero();
         }
         
-        public async Task RecoveryFetchRecent() {
-            int added = 0;
-
-            await BuildAndFetchRecent(); // Initial fetch
-            if (added > 0) return;
-
-            RecentList.Page++;
-            await BuildAndFetchRecent(); // If failed, fetch from page 2
-            if (added > 0) return;
-
-            // If failed, fetch a random category
-            await BuildAndFetchRecent("http://evene.lefigaro.fr/citations/mot.php?mot=absurde");
-        }
-
-        private async Task BuildAndFetchRecent(string query = "") {
-            if (query.Length > 0) await RecentList.Fetch(query);
-
-            string url = "http://evene.lefigaro.fr/citations/citation-jour.php?page=";
-
-            if (RecentList.Page < 2) {
-                url = url.Substring(0, (url.Length - 6));
-            } else {
-                url = url + RecentList.Page;
+        void SetFavoritesQuotes(ObservableKeyedCollection collection) {
+            foreach (var favQuote in FavoritesList) {
+                if (collection.Contains(favQuote.Link)) {
+                    collection[favQuote.Link].IsFavorite = true;
+                }
             }
-
-            await RecentList.Fetch(url);
         }
 
         public Quote GetLockScreenQuote() {
@@ -89,7 +72,7 @@ namespace citations365.Data {
             RecentList.Insert(0, hero);
         }
 
-        public void CheckHeroQuote() {
+        public override void CheckHeroQuote() {
             if (RecentList.Count == 0) {
                 return;
             }
@@ -118,50 +101,58 @@ namespace citations365.Data {
         #endregion recent
 
         #region search
-        public async Task BuildAndFetchSearch(string query = "") {
-            string url = "http://evene.lefigaro.fr/citations/mot.php?mot=";
-            string _pageQuery = "&p=";
-
-            // Checks if this is a new search
-            if (query != string.Empty && query != ResultsList.Query) {
-                ResultsList.Page = 1;
-                ResultsList.HasMoreItems = true;
-                ResultsList.RedirectedURL = "";
-                ResultsList.Clear();
+        public override async Task<int> Search(string query = "") {
+            if (ResultsList == null) {
+                ResultsList = new EveneResultsList() {
+                    Favorites = FavoritesList
+                };
             }
 
-            // Save the last query (if it's not an empty string)
-            ResultsList.Query = query.Length > 0 ? query : ResultsList.Query;
-
-            if (ResultsList.RedirectedURL.Length > 0) {
-                if (ResultsList.RedirectedURL.Contains(_pageQuery)) {
-                    ResultsList.RedirectedURL = 
-                        ResultsList.RedirectedURL.Substring(0, ResultsList.RedirectedURL.IndexOf(_pageQuery));
-                }
-
-                url = ResultsList.RedirectedURL + _pageQuery + ResultsList.Page;
-
-            } else {
-                url = url + query + _pageQuery + ResultsList.Page;
+            if (!NetworkInterface.GetIsNetworkAvailable()) {
+                return 0;
             }
 
-            await ResultsList.Fetch(url);
+            if (LastSearchQuery == query) {
+                NotifyPropertyChanged("ResultsLoaded");
+                return ResultsList.Count;
+            }
+
+            LastSearchQuery = query;
+
+            var added = await ResultsList.Search(query);
+            NotifyPropertyChanged("ResultsLoaded");
+            return added;
         }
         #endregion search
 
         #region authors
-        public override async Task GetAuthors() {
-            AuthorsList = await Settings.LoadAuthorsAsync();
-
-            if (AuthorsList.Count > 0) {
+        public override async Task LoadAuthors() {
+            if (IsAuthorListFilled()) {
                 NotifyPropertyChanged("AuthorsListLoaded");
                 return;
             }
 
-            await LoadAuthors();
+            AuthorsList = await Settings.LoadAuthorsAsync();
+
+            if (IsAuthorListFilled()) {
+                NotifyPropertyChanged("AuthorsListLoaded");
+                return;
+            }
+
+            await FetchAuthorsList();
+            NotifyPropertyChanged("AuthorsListLoaded");
+
+            bool IsAuthorListFilled()
+            {
+                return AuthorsList != null && AuthorsList.Count > 0;
+            }
         }
 
-        public override async Task LoadAuthors() {
+        async Task FetchAuthorsList() {
+            if (AuthorsList == null) {
+                AuthorsList = new System.Collections.ObjectModel.ObservableCollection<Author>();
+            }
+
             if (NetworkInterface.GetIsNetworkAvailable()) {
                 HttpClient http = new HttpClient();
 
@@ -193,16 +184,13 @@ namespace citations365.Data {
                     }
 
                     Settings.SaveAuthorsAsync(AuthorsList);
-
-                    NotifyPropertyChanged("AuthorsListLoaded");
                     return;
 
                 } catch {
-                    NotifyPropertyChanged("AuthorsListLoaded");
                     return;
                 }
-
             }
+
         }
 
         public override async Task<Author> LoadAuthor(Author partialAuthor) {
@@ -310,25 +298,301 @@ namespace citations365.Data {
             } catch { return null; }
         }
 
-        public override async void LoadAuthorQuotes() {
-            await BuildAndFetchAuthorQuotes("http://evene.lefigaro.fr" + AuthorQuotesURL);
-        }
-
-        public async Task BuildAndFetchAuthorQuotes(string query = "") {
-            // Checks if this is a new search
-            if ((!string.IsNullOrEmpty(query)) && query != LastAuthorRequest) {
-                AuthorQuotesList.Page = 1;
-                AuthorQuotesList.HasMoreItems = true;
-                AuthorQuotesList.RedirectedURL = "";
-                AuthorQuotesList.Clear();
+        public override async Task LoadAuthorQuotes() {
+            if (AuthorQuotesList == null) {
+                AuthorQuotesList = new EveneAuthorQuotesList() {
+                    Favorites = FavoritesList
+                };
             }
 
-            AuthorQuotesList.Query = query.Length > 0 ? query : AuthorQuotesList.Query;
+            if (string.IsNullOrEmpty(AuthorQuotesURL) || 
+                AuthorQuotesURL == AuthorQuotesList.URL) {
+                return; // same last author
+            }
 
-            var url = AuthorQuotesList.Query + "?page=" + AuthorQuotesList.Page;
-            await AuthorQuotesList.Fetch(url);
+            AuthorQuotesList.Page = 1;
+            AuthorQuotesList.HasMoreItems = true;
+            AuthorQuotesList.RedirectedURL = "";
+            AuthorQuotesList.Clear();
+
+            AuthorQuotesList.URL = AuthorQuotesURL;
+            await AuthorQuotesList.LoadQuotes();
+        }
+
+        // NOTE: Unused
+        public void IsAWoman(Author author) {
+            //if (author == null) return true;
+
+            //var woman = CountWomanPronums(author.Biography);
+            //var man = CountManPronums(author.Biography);
+
+            //return woman > man;
+
+            //int CountWomanPronums(string biography)
+            //{
+            //    var womanRegex = new Regex(@"(\s+)(elle)(\s+)");
+            //    var womanCount = womanRegex.Matches(biography);
+
+            //    return womanCount.Count;
+            //}
+
+            //int CountManPronums(string biography)
+            //{
+            //    var manRegex = new Regex(@"(\s+)(il)(\s+)");
+            //    var manCount = manRegex.Matches(biography);
+
+            //    return manCount.Count;
+            //}
         }
 
         #endregion authors
+
+        public static List<Quote> FindEveneQuotes(string response) {
+            var results = new List<Quote>();
+
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(response);
+
+            // Loop
+            var quotes = doc.DocumentNode.Descendants("article");
+            foreach (HtmlNode q in quotes) {
+                var content = q.Descendants("div").Where(x => x.GetAttributeValue("class", "") == "figsco__quote__text").FirstOrDefault();
+                var authorAndReference = q.Descendants("div").Where(x => x.GetAttributeValue("class", "") == "figsco__fake__col-9").FirstOrDefault();
+
+                if (content == null) continue; // check if this is a valid quote
+                if (authorAndReference == null) continue;
+
+                var authorNode = authorAndReference.Descendants("a").FirstOrDefault();
+                string authorName = "Anonyme";
+                string authorLink = "";
+
+                if (authorNode != null) { // if the quote as an author
+                    authorName = authorNode.InnerText.Contains("Vos avis") ? authorName : authorNode.InnerText;
+                    authorLink = "http://www.evene.fr" + authorNode.GetAttributeValue("href", "");
+                }
+
+                string quoteLink = content.ChildNodes.FirstOrDefault().GetAttributeValue("href", "");
+
+                string referenceName = "";
+                int separator = authorAndReference.InnerText.IndexOf('/');
+
+                if (separator > -1) {
+                    referenceName = authorAndReference.InnerText.Substring(separator + 2);
+                }
+
+                Quote quote = new Quote() {
+                    Content = content.InnerText,
+                    Author = authorName,
+                    AuthorLink = authorLink,
+                    Reference = referenceName,
+                    Link = quoteLink
+                };
+
+                quote = Formatter.Normalize(quote);
+                quote.IsFavorite = false;
+
+                results.Add(quote);
+            }
+
+            return results;
+        }
+
+        public static int AddQuotesToCollection(ObservableKeyedCollection coll, List<Quote> list) {
+            int added = 0;
+            foreach (var quote in list) {
+                if (!coll.Contains(quote.Link)) {
+                    quote.IsFavorite = coll.Favorites != null ? 
+                        coll.Favorites.Contains(quote.Link) : false;
+
+                    coll.Add(quote);
+                    added++;
+                }
+            }
+
+            return added;
+        }
+    }
+
+    public class EveneRecentList : ObservableKeyedCollection {
+        public override string Name => "Evene";
+
+        public EveneRecentList() { HasMoreItems = true; }
+        
+        string GetRandomCategory() {
+            string[] categories = {
+                "absurde",
+                "réussite",
+                "courage",
+                "voyage",
+                "sagesse",
+                "art",
+                "Espoir",
+                "tendresse",
+                "aimer"
+            };
+
+            var rand = new Random();
+            var index = rand.Next(0, categories.Length - 1);
+            return categories[index];
+        }
+
+        public override async Task LoadQuotes() {
+            string[] endpoints = {
+                "",
+                "http://evene.lefigaro.fr/citations/citation-jour.php?page=3",
+                "http://evene.lefigaro.fr/citations/citation-jour.php?page=20",
+                "http://evene.lefigaro.fr/citations/mot.php?mot=" + GetRandomCategory()
+            };
+
+            List<Quote> results = null;
+
+            foreach (string point in endpoints) {
+                var url = BuildQuery(point);
+                var response = await FetchAsync(url);
+
+                var responseOK = await EnsureResponseOK(response);
+                if (!responseOK) return;
+
+                results = Evene.FindEveneQuotes(response);
+
+                if (results != null && results.Count > 0) break;
+                Page++;
+            }
+
+            if (results == null || results.Count == 0) 
+                { HasMoreItems = false; return; }
+            
+            Evene.AddQuotesToCollection(this, results);
+            SaveQuotesToIO();
+        }
+
+        async Task<bool> EnsureResponseOK(string response) {
+            if (response != null) return true;
+            int added = await HandleFailedFetch();
+            HasMoreItems = false;
+            return false;
+        }
+
+        void SaveQuotesToIO() {
+            if (Count == 0 || Count > 70) return;
+            SaveIO();
+        }
+
+        private string BuildQuery(string query = "") {
+            if (query.Length > 0) return query;
+            return "http://evene.lefigaro.fr/citations/citation-jour.php?page=" + Page;
+        }
+
+        public override async Task LoadMoreQuotes() {
+            Page++;
+            var url = BuildQuery();
+            var response = await FetchAsync(url);
+
+            var responseOK = await EnsureResponseOK(response);
+            if (!responseOK) return;
+
+            var results = Evene.FindEveneQuotes(response);
+
+            if (results == null || results.Count == 0) 
+                { HasMoreItems = false; return; }
+            
+            Evene.AddQuotesToCollection(this, results);
+            SaveQuotesToIO();
+        }
+
+        public override async Task<LoadMoreItemsResult> LoadMoreItemsAsync(uint count) {
+            await LoadMoreQuotes();
+            return new LoadMoreItemsResult { Count = count };
+        }
+    }
+
+    public class EveneAuthorQuotesList : ObservableKeyedCollection {
+        public EveneAuthorQuotesList() { HasMoreItems = true; }
+
+        private string BuildQuery() {
+            return "http://evene.lefigaro.fr" + URL;
+        }
+
+        public override async Task LoadQuotes() {
+            var added = 0;
+            var query = BuildQuery();
+
+            Query = query.Length > 0 ? query : Query;
+
+            var url = Query + "?page=" + Page;
+            var response = await FetchAsync(url);
+            var results = Evene.FindEveneQuotes(response);
+
+            if (results == null || results.Count == 0) {
+                HasMoreItems = false;
+                return;
+            }
+
+            added = Evene.AddQuotesToCollection(this, results);
+            if (added == 0) HasMoreItems = false;
+        }
+
+        public override async Task LoadMoreQuotes() {
+            Page++;
+            await LoadQuotes();
+        }
+
+        public override async Task<LoadMoreItemsResult> LoadMoreItemsAsync(uint count) {
+            await LoadMoreQuotes();
+            return new LoadMoreItemsResult { Count = count };
+        }
+    }
+
+    public class EveneResultsList: ObservableKeyedCollection {
+        public override string Name => "ResultsList";
+
+        public override async Task<int> Search(string query="") {
+            var url = BuildQuery(query);
+            var response = await FetchAsync(url);
+            var results = Evene.FindEveneQuotes(response);
+            int added = Evene.AddQuotesToCollection(this, results);
+
+            return added;
+        }
+
+        public override async Task<int> SearchMore(string query = "") {
+            Page++;
+            int added = await Search(query);
+            if (added == 0) { HasMoreItems = false; }
+            return added;
+        }
+
+        string BuildQuery(string query) {
+            string url = "http://evene.lefigaro.fr/citations/mot.php?mot=";
+
+            string _pageQuery = "&p=";
+
+            // Checks if this is a new search
+            if (!string.IsNullOrEmpty(query) && query != Query) {
+                Page = 1;
+                HasMoreItems = true;
+                RedirectedURL = "";
+                Clear();
+            }
+
+            // Save the last query (if it's not an empty string)
+            Query = query.Length > 0 ? query : Query;
+
+            if (RedirectedURL.Length > 0) {
+                if (RedirectedURL.Contains(_pageQuery)) {
+                    RedirectedURL = RedirectedURL.Substring(0, RedirectedURL.IndexOf(_pageQuery));
+                }
+                url = RedirectedURL + _pageQuery + Page;
+
+            } else {
+                url = url + query + _pageQuery + Page;
+            }
+            return url;
+        }
+
+        public override async Task<LoadMoreItemsResult> LoadMoreItemsAsync(uint count) {
+            int added = await SearchMore();
+            return new LoadMoreItemsResult { Count = count };
+        }
     }
 }

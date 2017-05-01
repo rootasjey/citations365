@@ -14,7 +14,8 @@ using Windows.UI.Xaml.Data;
 namespace citations365.Models {
     public class ObservableKeyedCollection : KeyedCollection<string, Quote>,
         INotifyCollectionChanged, INotifyPropertyChanged, ISupportIncrementalLoading {
-        
+
+        #region variables
         public event NotifyCollectionChangedEventHandler CollectionChanged;
         public event PropertyChangedEventHandler PropertyChanged;
         
@@ -39,8 +40,7 @@ namespace citations365.Models {
             set { _Query = value; }
         }
 
-
-        private int _page = 3; // TODO: Set back to 1
+        private int _page = 1; // TODO: Set back to 1
         public virtual int Page {
             get {
                 return _page;
@@ -53,6 +53,15 @@ namespace citations365.Models {
         }
 
         private string _redirectedURL;
+
+        private string _URL;
+
+        public string URL {
+            get { return _URL; }
+            set { _URL = value; }
+        }
+
+
         /// <summary>
         /// For some requests, the url is re-written, so we save it to fetch next pages
         /// </summary>
@@ -66,7 +75,6 @@ namespace citations365.Models {
                 }
             }
         }
-
         
         private bool _hasMoreItems = false;
         public virtual bool HasMoreItems {
@@ -80,6 +88,11 @@ namespace citations365.Models {
             }
         }
 
+        public ObservableKeyedCollection Favorites { get; set; }
+
+        #endregion variables
+
+        #region key operations
         protected override string GetKeyForItem(Quote item) {
             return item.Link;
         }
@@ -104,109 +117,80 @@ namespace citations365.Models {
             base.SetItem(index, item);
             NotifyCollectionChanged(NotifyCollectionChangedAction.Replace, item, index);
         }
-        
-        public virtual async Task<int> BuildAndFetch(string query = "") {
-            string url = "";
-            return await Fetch(url);
-        }
-        
-        public virtual async Task<int> Fetch(string url) {
-            int quotesAdded = 0;
-            string responseBodyAsText;
+        #endregion key operations
 
+        #region data fetch
+
+        /// <summary>
+        /// Fetch an url and send back the body response as a string
+        /// </summary>
+        /// <param name="url">URL to fetch</param>
+        /// <returns></returns>
+        public virtual async Task<string> FetchAsync(string url) {
             if (!NetworkInterface.GetIsNetworkAvailable()) {
-                return await HandleFailedFetch();
+                return null;
             }
 
             HttpClient http = new HttpClient();
+            string responseBodyAsText;
 
             try {
                 HttpResponseMessage message = await http.GetAsync(url);
                 RedirectedURL = message.RequestMessage.RequestUri.ToString();
                 responseBodyAsText = await message.Content.ReadAsStringAsync();
-
-                // HTML Document building
-                HtmlDocument doc = new HtmlDocument();
-                doc.LoadHtml(responseBodyAsText);
-
-                // Loop
-                var quotes = doc.DocumentNode.Descendants("article");
-                foreach (HtmlNode q in quotes) {
-                    var content = q.Descendants("div").Where(x => x.GetAttributeValue("class", "") == "figsco__quote__text").FirstOrDefault();
-                    var authorAndReference = q.Descendants("div").Where(x => x.GetAttributeValue("class", "") == "figsco__fake__col-9").FirstOrDefault();
-
-                    if (content == null) continue; // check if this is a valid quote
-                    if (authorAndReference == null) continue;
-
-                    var authorNode = authorAndReference.Descendants("a").FirstOrDefault();
-                    string authorName = "Anonyme";
-                    string authorLink = "";
-
-                    if (authorNode != null) { // if the quote as an author
-                        authorName = authorNode.InnerText.Contains("Vos avis") ? authorName : authorNode.InnerText;
-                        authorLink = "http://www.evene.fr" + authorNode.GetAttributeValue("href", "");
-                    }
-
-                    string quoteLink = content.ChildNodes.FirstOrDefault().GetAttributeValue("href", "");
-
-                    string referenceName = "";
-                    int separator = authorAndReference.InnerText.IndexOf('/');
-                    
-                    if (separator > -1) {
-                        referenceName = authorAndReference.InnerText.Substring(separator + 2);
-                    }
-
-                    Quote quote = new Quote() {
-                        Content = content.InnerText,
-                        Author = authorName,
-                        AuthorLink = authorLink,
-                        Reference = referenceName,
-                        Link = quoteLink
-                    };
-
-                    quote               = Formatter.Normalize(quote);
-                    quote.IsFavorite    = IsFavorite(quote);
-
-                    if (!Contains(quote.Link)) {
-                        Add(quote);
-                        quotesAdded++;
-                    }
-                }
-
-                if (quotesAdded == 0) {
-                    HasMoreItems = false;
-                    Page = 0;
-
-                } else {
-                    HasMoreItems = true;
-                }
-
-                if (AllowOffline && Count > 0 && Count < 100) {
-                    SaveIO();
-                }
-
-                Page++;
-
-                return quotesAdded;
+                return responseBodyAsText;
 
             } catch {
-                HasMoreItems = false;
-                return await HandleFailedFetch();
+                return null;
             }
         }
         
+        /// <summary>
+        /// Use this method to load quotes into the collection the 1st time
+        /// </summary>
+        /// <returns></returns>
+        public virtual async Task LoadQuotes() {
+
+        }
+
+        /// <summary>
+        /// When the collection has already quotes loaded, 
+        /// use this method to load more quotes
+        /// </summary>
+        /// <returns></returns>
+        public virtual async Task LoadMoreQuotes() {
+
+        }
+
+        #endregion data fetch
+
+        #region search
+        /// <summary>
+        /// Use this method to search for quotes from a specified url
+        /// </summary>
+        /// <param name="query">quotes query (ex.: eyes, chocolate)</param>
+        /// <returns></returns>
+        public virtual async Task<int> Search(string query="") {
+            return 0;
+        }
+
+        /// <summary>
+        /// When a 1st search has already been done.
+        /// Use this method for incremental loading
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        public virtual async Task<int> SearchMore(string query="") {
+            return 0;
+        }
+
+        #endregion search
+
+        #region io
         public virtual async Task<int> HandleFailedFetch() {
             return await LoadIO();
         }
-        
-        public virtual bool IsFavorite(Quote quote) {
-            return false;
-        }
 
-        public virtual bool IsDataLoaded() {
-            return Count > 0;
-        }
-        
         public virtual async Task<bool> SaveIO() {
             if (Count == 0) return true;
             await Settings.SaveQuotesAsync(this);
@@ -228,12 +212,13 @@ namespace citations365.Models {
                 return Count;
             }
         }
-
+        #endregion io
 
         /* ***************
          * EVENTS HANDLERS
          * ***************
          */
+        #region events
         private void NotifyPropertyChanged(String propertyName) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -251,8 +236,8 @@ namespace citations365.Models {
         }
         
         public virtual async Task<LoadMoreItemsResult> LoadMoreItemsAsync(uint count) {
-            int itemsCount = await BuildAndFetch();
-            return new LoadMoreItemsResult { Count = (uint)itemsCount };
+            return new LoadMoreItemsResult { Count = count };
         }
+        #endregion events
     }
 }

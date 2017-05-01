@@ -34,7 +34,8 @@
 
                         <StackPanel x:Name="CustomHeader"
                                     Orientation="Horizontal">
-                            <TextBlock Text="personalisation"
+                            <TextBlock x:Uid="PersonalizationHeader" 
+                                       Text="personalisation"
                                        VerticalAlignment="Center"
                                        Typography.Capitals="SmallCaps"/>
                         </StackPanel>
@@ -43,20 +44,27 @@
                               Grid.Row="1">
                             <ScrollViewer VerticalScrollBarVisibility="Hidden">
                                 <StackPanel>
-                                    <StackPanel Margin="0,0,0,40">
-                                        <TextBlock Text="thème" Style="{StaticResource SettingsTitle}"/>
-                                        <ToggleSwitch x:Name="ThemeSwitch"
+                                    <StackPanel Margin="0,20,0,0">
+                                        <TextBlock x:Uid="Theme" Text="thème" Style="{StaticResource SettingsTitle}"/>
+                                        <ToggleSwitch x:Uid="ThemeSwitch" x:Name="ThemeSwitch"
                                                       OnContent="Theme Clair"
                                                       OffContent="Thème Sombre"
                                                       Toggled="ThemeSwitch_Toggled"/>
                                     </StackPanel>
 
                                     <StackPanel>
-                                        <Button x:Name="LanguageButton" Content="Language">
+                                        <Button x:Name="LanguageButton" x:Uid="LanguageButton" Content="Language">
                                             <Button.Flyout>
-                                                <MenuFlyout x:Name="LanguageFlyout">
-                                                    <!--<ToggleMenuFlyoutItem x:Name="EnglishLanguageItem" Text="English" Tapped="EnglishLanguage_Tapped"/>-->
-                                                    <ToggleMenuFlyoutItem x:Name="FrenchLanguageItem" Text="Français" Tapped="FrenchLanguage_Tapped"/>
+                                                <MenuFlyout x:Name="LanguageFlyout"
+                                                            Opened="LanguageFlyout_Opened">
+                                                    <ToggleMenuFlyoutItem x:Name="EnglishLanguageItem" 
+                                                                          Text="English"
+                                                                          Tag="EN"
+                                                                          Tapped="EnglishLanguage_Tapped"/>
+                                                    <ToggleMenuFlyoutItem x:Name="FrenchLanguageItem" 
+                                                                          Text="Français"
+                                                                          Tag="FR"
+                                                                          Tapped="FrenchLanguage_Tapped"/>
                                                 </MenuFlyout>
                                             </Button.Flyout>
                                         </Button>
@@ -65,7 +73,6 @@
                             </ScrollViewer>
                         </Grid>
                     </Grid>
-
                 </DataTemplate>
             </HubSection>
 
@@ -80,7 +87,8 @@
 
                         <StackPanel x:Name="CustomHeader"
                                     Orientation="Horizontal">
-                            <TextBlock Text="tâches en arrière plan"
+                            <TextBlock x:Uid="BackgroundsTasksHeader"
+                                       Text="tâches en arrière plan"
                                        VerticalAlignment="Center"
                                        Typography.Capitals="SmallCaps"/>
                         </StackPanel>
@@ -91,15 +99,25 @@
                                           VerticalScrollBarVisibility="Hidden">
                                 <StackPanel>
                                     <StackPanel Margin="0,0,0,40">
-                                        <TextBlock Text="tuile dynamique" Style="{StaticResource SettingsTitle}"/>
-                                        <TextBlock Text="Mettre à jour la tuile de l'application périodiquement" TextWrapping="Wrap"/>
+                                        <TextBlock x:Uid="DynamicTileTitle" 
+                                                   Text="tuile dynamique" Style="{StaticResource SettingsTitle}"/>
+                                        <TextBlock x:Uid="DynamicTileLabel"
+                                                   Opacity=".5"
+                                                   FontSize="18"
+                                                   Text="Mettre à jour la tuile de l'application périodiquement" 
+                                                   TextWrapping="Wrap"/>
                                         <ToggleSwitch x:Name="TaskSwitch" Toggled="TaskSwitch_Toggled"/>
                                     </StackPanel>
 
                                     <StackPanel Margin="0,0,0,40">
-                                        <TextBlock Text="écran de verrouillage" Style="{StaticResource SettingsTitle}"/>
-                                        <TextBlock Text="Mettre à jour l'image de l'écran de verrouillage du téléphone périodiquement" 
-                                       TextWrapping="Wrap"/>
+                                        <TextBlock x:Uid="LockscreenTitle" 
+                                                   Text="écran de verrouillage" 
+                                                   Style="{StaticResource SettingsTitle}"/>
+                                        <TextBlock x:Uid="LockscreenLabel"
+                                                   Opacity=".5"
+                                                   FontSize="18"
+                                                   Text="Mettre à jour l'image de l'écran de verrouillage du téléphone périodiquement" 
+                                                   TextWrapping="Wrap"/>
                                         <ToggleSwitch x:Name="LockscreenSwitch"
                                                       Toggled="LockscreenSwitch_Toggled"/>
                                     </StackPanel>
@@ -124,7 +142,8 @@
 
                         <StackPanel x:Name="CustomHeader"
                                     Orientation="Horizontal">
-                            <TextBlock Text="à propos"
+                            <TextBlock x:Uid="AboutHeader" 
+                                       Text="à propos"
                                        VerticalAlignment="Center"
                                        Typography.Capitals="SmallCaps"/>
                         </StackPanel>
@@ -133,59 +152,73 @@
                             <ScrollViewer Margin="0,20,0,0" 
                                           VerticalScrollBarVisibility="Hidden">
                                 <StackPanel>
-                                    <RichTextBlock x:Name="FeedbackBox">
-                                        <Paragraph FontSize="22">feedback</Paragraph>
-                                        <Paragraph Margin="0,0,0,0">
-                                            Envoyez un mail si vous rencontrez des problèmes ou si vous avez des remarques
-                                        </Paragraph>
-                                    </RichTextBlock>
-                                    <Button x:Name="FeedbackButton" 
+                                    <TextBlock x:Uid="FeedbackTitle" Text="mon avis" FontSize="24"/>
+                                    <TextBlock x:Uid="FeedbackLabel" 
+                                               Text="Suggérer une amélioration ou signaler un problème"
+                                               Opacity=".5"
+                                               FontSize="18"
+                                               TextWrapping="Wrap"/>
+                                    <Button x:Uid="FeedbackButton"
+                                            x:Name="FeedbackButton" 
                                             Content="envoyer un avis" 
                                             Margin="0,12,0,40" 
                                             Click="FeedbackButton_Click"/>
 
-                                    <RichTextBlock x:Name="NoteBox" Margin="0,0,0,0">
-                                        <Paragraph FontSize="22">notation</Paragraph>
-                                        <Paragraph>
-                                            N'hésitez pas à noter l'app sur le store si l'application vous plaît
-                                        </Paragraph>
-                                    </RichTextBlock>
-                                    <Button x:Name="NoteButton" 
+                                    <TextBlock x:Uid="RatingTitle" Text="notation" FontSize="24"/>
+                                    <TextBlock x:Uid="RatingLabel" Text="Notez l'application sur le Store"
+                                               Opacity=".5"
+                                               FontSize="18"
+                                               TextWrapping="Wrap"/>
+                                    <Button x:Uid="RatingButton" 
+                                            x:Name="NoteButton" 
                                             Content="noter l'app" 
                                             Margin="0,12,0,40" 
                                             Click="NoteButton_Click"/>
 
-                                    <RichTextBlock x:Name="ContributeBox" Margin="0,0,0,40">
-                                        <Paragraph FontSize="22">contribuer</Paragraph>
+                                    <TextBlock x:Uid="ContributeTitle" Text="contribuer" FontSize="24"/>
+                                    <RichTextBlock x:Name="ContributeBox" 
+                                       Margin="0,0,0,40"
+                                       FontSize="18"
+                                       Opacity=".5">
                                         <Paragraph>
-                                            Ce projet est open source vous pouvez contribuer de plusieurs manières:
+                                            <Run x:Uid="ContributeFirstLine" 
+                                     Text="Ce projet est open source et vous pouvez y contribuer de plusieurs manières:"/>
                                             <LineBreak/>
-                                            - signaler un bug
+                                            <Run x:Uid="ContributeSecondLine" Text="- signaler un bug"/>
                                             <LineBreak/>
-                                            - suggérer une fonctionnalité
+                                            <Run x:Uid="ContributeThirdLine" Text="- suggérer une fonctionnalité"/>
                                             <LineBreak/>
-                                            - éditer le code de l'application
+                                            <Run x:Uid="ContributeFourthLine" Text="- éditer le code de l'application"/>
                                             <LineBreak/>
-                                            Visitez le lien suivant pour plus d'informations
-                                            <Hyperlink NavigateUri="https://github.com/rootasjey/citations365">répertoire GitHub</Hyperlink>
-                                            et venez participer à ce projet :)
+                                            <LineBreak/>
+                                            <Run x:Uid="ContributeFifthLine" Text="Visitez le lien suivant pour plus d'informations"/>
+                                            <Hyperlink NavigateUri="https://github.com/rootasjey/citations365">
+                                                <Run x:Uid="GithubRepository" Text="répertoire GitHub"/>
+                                            </Hyperlink>
+                                            <Run x:Uid="ContributeSixthLine" Text="et venez participer à ce projet :)"/>
                                         </Paragraph>
                                     </RichTextBlock>
 
-                                    <RichTextBlock x:Name="DataBox" Margin="0,0,0,40">
-                                        <Paragraph FontSize="22">données</Paragraph>
+                                    <TextBlock x:Uid="DataTitle" Text="données" FontSize="24"/>
+                                    <RichTextBlock x:Name="DataBox"
+                                       FontSize="18"
+                                       Opacity=".5"
+                                       Margin="0,0,0,40">
                                         <Paragraph>
-                                            Les données des citations proviennent du site
+                                            <Run x:Uid="DataContent1" Text="Les données des citations proviennent du site"/>
                                             <Hyperlink NavigateUri="http://evene.lefigaro.fr/">Evene</Hyperlink>
-                                            et cette application n'est aucunement liée au site.
+                                            <Run x:Uid="DataContent2" Text="et cette application n'est aucunement liée au site."/>
                                         </Paragraph>
                                     </RichTextBlock>
 
-                                    <RichTextBlock x:Name="ImagesBox" Margin="0,0,0,40">
-                                        <Paragraph FontSize="22">images</Paragraph>
+                                    <TextBlock x:Uid="ImagesSourceTitle" Text="images" FontSize="24"/>
+                                    <RichTextBlock x:Name="ImagesBox"
+                                                   FontSize="18"
+                                                   Opacity=".5"
+                                                   Margin="0,0,0,40">
                                         <Paragraph>
-                                            Les images proviennent des sources suivantes:
-                                            <Hyperlink NavigateUri="https://unsplash.com/">Unsplash</Hyperlink> et
+                                            <Run x:Uid="ImagesSourceContent" Text="Les images proviennent de"/>
+                                            <Hyperlink NavigateUri="https://unsplash.com/">Unsplash</Hyperlink>
                                         </Paragraph>
                                     </RichTextBlock>
                                 </StackPanel>

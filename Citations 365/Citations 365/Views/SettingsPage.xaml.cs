@@ -1,5 +1,8 @@
 ﻿using citations365.Services;
 using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Numerics;
 using Windows.ApplicationModel.Email;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -35,6 +38,7 @@ namespace citations365.Views {
 
         private void PersonalizationSection_Loaded(object sender, RoutedEventArgs e) {
             UpdateThemeSwitcher();
+            //UpdateSelectedLanguage();
         }
 
         private void UpdateQuoteTaskSwitcher() {
@@ -111,10 +115,21 @@ namespace citations365.Views {
             //Scontroller.UpdateAppBackground(background);
         }
 
-        void UpdateSelectedLanguage() {
-            var FrenchLanguageItem = 
-                (ToggleMenuFlyoutItem)UI.FindChildControl<ToggleMenuFlyoutItem>(PersonalizationSection, "FrenchLanguageItem");
-            FrenchLanguageItem.IsChecked = true;
+        void UpdateSelectedLanguage(IList<MenuFlyoutItemBase> FlyoutItems) {
+            var EnglishLanguageItem = (ToggleMenuFlyoutItem)FlyoutItems[0];
+            var FrenchLanguageItem = (ToggleMenuFlyoutItem)FlyoutItems[1];
+
+            var lang = Settings.GetLanguage();
+
+            var culture = new CultureInfo(lang);
+            if (culture.CompareInfo.IndexOf(lang, "fr", CompareOptions.IgnoreCase) >= 0) {
+                FrenchLanguageItem.IsChecked = true;
+                return;
+            }
+            if (culture.CompareInfo.IndexOf(lang, "en", CompareOptions.IgnoreCase) >= 0) {
+                EnglishLanguageItem.IsChecked = true;
+                return;
+            }
         }
 
         private void SetLockscreen_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e) {
@@ -122,13 +137,29 @@ namespace citations365.Views {
         }
 
         private void EnglishLanguage_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e) {
-            var item = (ToggleMenuFlyoutItem)sender;
-            UnselectOtherLanguages(item);
+            SaveAndUpdateLanguage((ToggleMenuFlyoutItem)sender);
         }
 
         private void FrenchLanguage_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e) {
-            var item = (ToggleMenuFlyoutItem)sender;
+            SaveAndUpdateLanguage((ToggleMenuFlyoutItem)sender);
+        }
+
+        private void SaveAndUpdateLanguage(ToggleMenuFlyoutItem item) {
+            var lang = (string)item.Tag;
+
+            if (lang == Settings.GetLanguage()) return;
+
+            Settings.SaveLanguage(lang);
+            App.UpdateLanguage();
             UnselectOtherLanguages(item);
+            ToastLanguageUpdated();
+
+            void ToastLanguageUpdated()
+            {
+                var fullLang = lang == "EN" ? "English" : "French";
+                var toastMessage = fullLang + " language selected!";
+                DataTransfer.ShowLocalToast(toastMessage);
+            }
         }
 
         void UnselectOtherLanguages(ToggleMenuFlyoutItem selectedItem) {
@@ -140,6 +171,12 @@ namespace citations365.Views {
             }
 
             selectedItem.IsChecked = true;
+        }
+
+        private void LanguageFlyout_Opened(object sender, object e) {
+            var LanguageFlyout = (MenuFlyout)sender;
+            var FlyoutItems = (IList<MenuFlyoutItemBase>)LanguageFlyout.Items;
+            UpdateSelectedLanguage(FlyoutItems);
         }
     }
 }

@@ -27,15 +27,16 @@
                 <GridView x:Name="AuthorsKeys"
                           SelectionMode="None"
                           HorizontalAlignment="Center"
-                          Padding="30">
+                          Padding="10">
                     <GridView.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Group.Key}" Width="50" FontSize="46" Margin="20" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"/>
+                            <TextBlock Text="{Binding Group.Key}" Width="40" FontSize="36" Margin="10" 
+                                       Foreground="{ThemeResource SystemControlHighlightAccentBrush}"/>
                         </DataTemplate>
                     </GridView.ItemTemplate>
                     <GridView.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <VariableSizedWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="4"/>
+                            <VariableSizedWrapGrid Orientation="Horizontal" />
                         </ItemsPanelTemplate>
                     </GridView.ItemsPanel>
                 </GridView>

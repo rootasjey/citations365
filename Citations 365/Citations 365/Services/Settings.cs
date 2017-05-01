@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using System.Collections.ObjectModel;
 using Windows.UI.Xaml;
+using Windows.System.UserProfile;
 
 namespace citations365.Services {
     public class Settings {
+        //private const string _bingSearchKey = "pCzCBMoEJtZ76ni+ge9sbAYr5PXDfe2ksLPW63wxcVs= ";
         private static string ThemeKey {
             get {
                 return "Theme";
@@ -26,8 +28,8 @@ namespace citations365.Services {
         }
 
         public static string GetLanguage() {
-            string defaultLanguage = "FR";
-
+            string defaultLanguage = GlobalizationPreferences.Languages[0];
+            
             var settingsValues = ApplicationData.Current.LocalSettings.Values;
             return settingsValues.ContainsKey(LangKey) ? (string)settingsValues[LangKey] : defaultLanguage;
         }
@@ -97,5 +99,6 @@ namespace citations365.Services {
             ObservableKeyedCollection quotes = JsonConvert.DeserializeObject<ObservableKeyedCollection>(json);
             return quotes;
         }
+
     }
 }

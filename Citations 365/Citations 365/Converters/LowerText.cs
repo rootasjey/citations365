@@ -2,10 +2,10 @@
 using Windows.UI.Xaml.Data;
 
 namespace citations365.Converters {
-    public class UpperText : IValueConverter {
+    public class LowerText: IValueConverter {
         public object Convert(object value, Type targetType, object parameter, string language) {
             if (value == null) return "";
-            return ((string)value).ToUpper();
+            return ((string)value).ToLower();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language) {
