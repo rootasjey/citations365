@@ -273,6 +273,13 @@ namespace citations365.Views {
             }
         }
 
+        private void Quote_Holding(object sender, HoldingRoutedEventArgs e) {
+            var container = (Grid)sender;
+            var moreButton = (Button)container.FindName("MoreButton");
+            var flyout = moreButton.Flyout;
+            flyout.ShowAt(moreButton);
+        }
+
         private void ListRecent_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args) {
             if (args.ItemIndex == 0) {
                 InitializeHeroQuote(args);
@@ -551,5 +558,6 @@ namespace citations365.Views {
             //blurSprite.Brush.Properties.StartAnimation("Blur.BlurAmount", backgroundBlurAnimation);
         }
         #endregion background
+        
     }
 }

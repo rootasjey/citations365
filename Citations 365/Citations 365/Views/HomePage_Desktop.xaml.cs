@@ -639,6 +639,12 @@ namespace citations365.Views {
             Frame.Navigate(typeof(AuthorPage_Desktop), quote);
         }
 
+        private void Quote_RightTapped(object sender, RightTappedRoutedEventArgs e) {
+            var container = (Grid)sender;
+            var MoreButton = (Button)container.FindName("MoreButton");
+            var flyout = MoreButton.Flyout;
+            flyout.ShowAt(MoreButton);
+        }
         #endregion Quote Events
 
         #region appbar

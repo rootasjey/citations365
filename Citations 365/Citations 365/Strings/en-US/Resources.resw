@@ -191,7 +191,7 @@
     <value>Update app tile periodically</value>
   </data>
   <data name="DynamicTileTitle.Text" xml:space="preserve">
-    <value>Tuile dynamique</value>
+    <value>Dynamic tile</value>
   </data>
   <data name="Favorite.Text" xml:space="preserve">
     <value>Favorite</value>

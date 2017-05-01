@@ -12,6 +12,7 @@
             <Grid x:Name="QuoteGrid"
                   Opacity="0"
                   Margin="0,25,0,35"
+                   Holding="Quote_Holding"
                   Loaded="Quote_Loaded">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
@@ -38,7 +39,7 @@
                             Margin="0,7"
                             Fill="{x:Bind IsFavorite, Mode=OneWay, Converter={StaticResource FavoriteColor}}"/>
 
-                <Button Grid.Row="2"
+                <Button x:Name="MoreButton" Grid.Row="2"
                         Background="Transparent"
                         HorizontalAlignment="Right">
                     <Button.Content>
@@ -65,7 +66,9 @@
         </DataTemplate>
 
         <DataTemplate x:Key="HeroQuoteTemplate" x:DataType="data:Quote">
-            <Grid x:Name="QuoteGrid" Margin="0,25,0,25" Loaded="Quote_Loaded">
+            <Grid x:Name="QuoteGrid" Margin="0,25,0,25" 
+                  Holding="Quote_Holding"
+                  Loaded="Quote_Loaded">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="17"/>
@@ -89,7 +92,7 @@
                            Margin="0,7"
                            Fill="{x:Bind IsFavorite, Mode=OneWay, Converter={StaticResource FavoriteColor}}"/>
 
-                <Button Grid.Row="2"
+                <Button x:Name="MoreButton" Grid.Row="2"
                         Background="Transparent"
                         HorizontalAlignment="Right">
                     <Button.Content>
