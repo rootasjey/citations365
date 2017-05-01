@@ -113,7 +113,7 @@ namespace Tasks.Factory {
                     readStream.Dispose();
                 }
                 return results;
-            } catch (Exception e) {
+            } catch {
                 await file.DeleteAsync();
                 return null;
             }
@@ -125,7 +125,7 @@ namespace Tasks.Factory {
         private static async Task<StorageFile> RestoreQuotesFromStorage() {
             try {
                 return await ApplicationData.Current.LocalFolder.GetFileAsync(DAILY_LIST_FILENAME);
-            } catch (Exception e) {
+            } catch {
                 return null;
             }
         }

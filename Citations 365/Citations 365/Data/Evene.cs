@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using Windows.UI.Xaml.Data;
 using System;
 
+// http://evene.lefigaro.fr/citations/citation-jour.php
 namespace citations365.Data {
     public class Evene : SourceModel {
         public override string Name => "Evene";

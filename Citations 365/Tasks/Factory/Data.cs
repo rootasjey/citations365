@@ -1,6 +1,8 @@
 ﻿using HtmlAgilityPack;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.NetworkInformation;
@@ -9,22 +11,90 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Tasks.Models;
 using Windows.Foundation;
+using Windows.Storage;
+using Windows.System.UserProfile;
 
 namespace Tasks.Factory {
     public sealed class Data {
+        private static string LangKey {
+            get {
+                return "Language";
+            }
+        }
+
         private static string[] _links = {
             "http://evene.lefigaro.fr/citations/citation-jour.php?page=",
             "http://evene.lefigaro.fr/citations/citation-jour.php",
             "http://evene.lefigaro.fr/citations/theme/proverbes-francais-france.php"
         };
 
+        public static string GetLanguage() {
+            string defaultLanguage = GlobalizationPreferences.Languages[0];
+
+            var settingsValues = ApplicationData.Current.LocalSettings.Values;
+            return settingsValues.ContainsKey(LangKey) ? (string)settingsValues[LangKey] : defaultLanguage;
+        }
+
         public static IAsyncOperation<IList<Quote>> FetchNewQuotesAsync() {
             return FetchNewQuotes().AsAsyncOperation();
         }
 
         private static async Task<IList<Quote>> FetchNewQuotes() {
+            var lang = GetLanguage();
+
+            var culture = new CultureInfo(lang);
+            if (culture.CompareInfo.IndexOf(lang, "fr", CompareOptions.IgnoreCase) >= 0) {
+                return await FetchFrenchSource();
+            }
+            if (culture.CompareInfo.IndexOf(lang, "en", CompareOptions.IgnoreCase) >= 0) {
+                return await FetchEnglishSource();
+            }
+
+            return null;
+        }
+
+        private static async Task<IList<Quote>> FetchFrenchSource() {
             var randomLinks = PickRandomLink(_links);
             return await FetchAndRetry(randomLinks);
+        }
+
+        private static async Task<IList<Quote>> FetchEnglishSource() {
+            IList<Quote> quotesList = new List<Quote>();
+
+            string url = "http://quotesondesign.com/wp-json/posts?filter[orderby]=rand&filter[posts_per_page]=15";
+            var response = await FetchAsync(url);
+
+            var array = JArray.Parse(response);
+
+            foreach (JObject item in array) {
+                var quote = new Quote() {
+                    Author = (string)item["title"],
+                    Content = (string)item["content"],
+                    Link = (string)item["link"]
+                };
+                quote = Normalize(quote);
+                quotesList.Add(quote);
+            }
+
+            return quotesList;
+        }
+
+        private static async Task<string> FetchAsync(string url) {
+            if (!NetworkInterface.GetIsNetworkAvailable()) {
+                return null;
+            }
+
+            HttpClient http = new HttpClient();
+            string responseBodyAsText;
+
+            try {
+                HttpResponseMessage message = await http.GetAsync(url);
+                responseBodyAsText = await message.Content.ReadAsStringAsync();
+                return responseBodyAsText;
+
+            } catch {
+                return null;
+            }
         }
 
         private static string[] PickRandomLink(string[] links) {
@@ -128,7 +198,9 @@ namespace Tasks.Factory {
             quote.Content = DeleteHTMLTags(quote.Content);
             quote.Reference = DeleteHTMLTags(quote.Reference);
 
-            if (quote.Reference.Contains("Vos avis")) {
+            if (!string.IsNullOrEmpty(quote.Reference) && 
+                quote.Reference.Contains("Vos avis")) {
+
                 int index = quote.Reference.IndexOf("Vos avis");
                 quote.Reference = quote.Reference.Substring(0, index);
             }
@@ -148,6 +220,12 @@ namespace Tasks.Factory {
             text = Regex.Replace(text, @"<(.|\n)*?>", string.Empty);
 
             text = text
+                .Replace("&#8230;", "...")
+                .Replace("&#8211;", "-")
+                .Replace("&#8220;", "\"")
+                .Replace("&#8221;", "\"")
+                .Replace("&#8217;", "'")
+                .Replace("&#8216;", "'")
                 .Replace("&laquo;", "")
                 .Replace("&ldquo;", "")
                 .Replace("&rdquo;", "")
@@ -156,6 +234,7 @@ namespace Tasks.Factory {
                 .Replace("&#039;", "'")
                 .Replace("&quot;", "'")
                 .Replace("&amp;", "&")
+                .Replace("&#038;", "&")
                 .Replace("[+]", "")
                 .Replace("[", "")
                 .Replace("]", "")

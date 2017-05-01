@@ -46,7 +46,7 @@ namespace Tasks {
         private bool CheckTime() {
             DateTimeOffset lastTime = Settings.GetLastTimeFetch();
             var timelapse = DateTimeOffset.Now.Subtract(lastTime);
-            return timelapse.Hours > 6;
+            return timelapse.Hours > 2;
         }
 
         /// <summary>

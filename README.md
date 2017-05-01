@@ -8,7 +8,7 @@ Read meaningful quotes everyday.
 # screenshots
 ## on mobile
 ### home
-<img src="screenshot_mobile.png" alt="citations365" height="400" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);" />
+<img src="home_mobile.png" alt="citations365" height="400" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);" />
 
 ### lockscreen
 <img src="lockscreen.png" alt="lockscreen" height="400" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);" />
@@ -16,10 +16,10 @@ Read meaningful quotes everyday.
 
 ## on desktop
 ### home
-<img src="screenshot_desktop.png" alt="citations365" height="400" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);" />
+<img src="home_desktop.png" alt="citations365" height="400" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);" />
 
 ### author page
-<img src="screenshot_author_desktop.png" alt="citations365" height="400" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);" />
+<img src="author_desktop.png" alt="citations365" height="400" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);" />
 
 ## tile animation
 <img src="./livetile.gif" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);"/>
