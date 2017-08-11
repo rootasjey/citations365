@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AboutHeader.Text" xml:space="preserve">
-    <value>à Propos</value>
+    <value>à propos</value>
     <comment>About</comment>
   </data>
   <data name="AuthorsSection.Text" xml:space="preserve">
@@ -156,7 +156,7 @@
     <value>Ce projet est open source et vous pouvez y contribuer de plusieurs manières:</value>
   </data>
   <data name="ContributeFourthLine.Text" xml:space="preserve">
-    <value>- éditer le code de l'applicatio</value>
+    <value>- éditer le code de l'application</value>
   </data>
   <data name="ContributeSecondLine.Text" xml:space="preserve">
     <value>- signaler un bug</value>

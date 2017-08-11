@@ -69,7 +69,8 @@ namespace citations365.Data {
 
         public void SetLockscreenQuoteAsHero() {
             var hero = GetLockScreenQuote();
-            if (hero == null) return;
+            if (hero == null || RecentList.Contains(hero.Link)) return;
+
             RecentList.Insert(0, hero);
         }
 
