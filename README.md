@@ -1,3 +1,5 @@
+[![Build status](https://build.mobile.azure.com/v0.1/apps/f0829485-e415-425f-b9ee-9f78d933bdde/branches/master/badge)](https://mobile.azure.com)
+
 # Citations 365
 A quotes app written for Windows 10.
 
